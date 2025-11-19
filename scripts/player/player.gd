@@ -22,7 +22,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		mouse_input.x += -event.screen_relative.x * mouse_sensitivity
 		mouse_input.y += -event.screen_relative.y * mouse_sensitivity
 		camera_controller.update_camera_rotation(mouse_input)
-		print(mouse_input)
 
 func _process(_delta: float) -> void:
 	mouse_input = Vector2.ZERO
