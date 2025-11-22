@@ -3,7 +3,7 @@ class_name Player extends CharacterBody3D
 @export var camera_controller: CameraController
 
 var current_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_CAPTURED
-var mouse_sensitivity: float = 0.0025
+var mouse_sensitivity: float = 0.0015
 var capture_mouse: bool
 var mouse_input: Vector2
 
