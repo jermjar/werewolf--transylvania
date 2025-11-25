@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3 uid="uid://dlgk7ywyn41us"]
+
+[ext_resource type="Script" uid="uid://bvuq245igqp4l" path="res://scripts/main_menu.gd" id="1_0ettg"]
+[ext_resource type="Theme" uid="uid://8qhlaspdedvq" path="res://assets/themes/main_menu.tres" id="2_duh7t"]
+
+[node name="MainMenu" type="CanvasLayer"]
+script = ExtResource("1_0ettg")
+
+[node name="Button_VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -135.0
+offset_right = 240.0
+offset_bottom = 135.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="JoinLobby" type="Button" parent="Button_VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Join Lobby"
+
+[node name="CreateLobby" type="Button" parent="Button_VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Create Lobby"
+
+[node name="Options" type="Button" parent="Button_VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+disabled = true
+text = "Options
+"
+
+[node name="Quit" type="Button" parent="Button_VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Quit Game"
+
+[node name="Lobby_ScrollContainer" type="ScrollContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Lobby_VBoxContainer" type="VBoxContainer" parent="Lobby_ScrollContainer"]
+layout_mode = 2
