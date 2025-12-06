@@ -1,9 +1,22 @@
-[gd_scene load_steps=7 format=3 uid="uid://cy05oxvdhtff6"]
+[gd_scene load_steps=12 format=3 uid="uid://cy05oxvdhtff6"]
 
-[ext_resource type="PackedScene" uid="uid://ooue76wmbbjy" path="res://scenes/player/player.tscn" id="1_46lwt"]
+[ext_resource type="Texture2D" uid="uid://cmlc2xjh3q3ys" path="res://assets/textures/Grass01_DIFF.png" id="1_ur00s"]
+[ext_resource type="Texture2D" uid="uid://bmgxuc50smwuj" path="res://assets/textures/Grass01_AO.png" id="2_wndkh"]
 [ext_resource type="PackedScene" uid="uid://c8sk0iwitje52" path="res://scenes/world_environment.tscn" id="2_x25rp"]
+[ext_resource type="Texture2D" uid="uid://bqsrx6dabjk41" path="res://assets/textures/Grass01_HEIGHT.png" id="3_ly3hx"]
+[ext_resource type="Texture2D" uid="uid://elbe1afg53ck" path="res://assets/textures/Grass01_NOR_GL.png" id="4_4n8tn"]
+[ext_resource type="Texture2D" uid="uid://1wte0nyciji5" path="res://assets/textures/Grass01_ROUGH.png" id="5_wkb0e"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_paa45"]
+albedo_texture = ExtResource("1_ur00s")
+roughness_texture = ExtResource("5_wkb0e")
+normal_texture = ExtResource("4_4n8tn")
+ao_enabled = true
+ao_texture = ExtResource("2_wndkh")
+heightmap_texture = ExtResource("3_ly3hx")
 
 [sub_resource type="BoxMesh" id="BoxMesh_x25rp"]
+material = SubResource("StandardMaterial3D_paa45")
 size = Vector3(20, 0.25, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_x25rp"]
@@ -35,6 +48,11 @@ mesh = SubResource("BoxMesh_gmgay")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Box"]
 shape = SubResource("BoxShape3D_w7r7j")
 
-[node name="Player" parent="." instance=ExtResource("1_46lwt")]
+[node name="Players" type="Node3D" parent="."]
 
 [node name="WorldEnvironment" parent="." instance=ExtResource("2_x25rp")]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://ooue76wmbbjy")
+spawn_path = NodePath("../Players")
+spawn_limit = 8
