@@ -16,8 +16,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Global="*res://scripts/global.gd"
-Steamworks="*res://scripts/steamworks.gd"
+Global="*res://scripts/global/global.gd"
+SteamInit="*res://scripts/global/steam_initialization.gd"
+Networking="*res://scripts/global/networking.gd"
 
 [debug]
 

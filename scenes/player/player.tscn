@@ -1,16 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://ooue76wmbbjy"]
+[gd_scene load_steps=5 format=3 uid="uid://ooue76wmbbjy"]
 
 [ext_resource type="Script" uid="uid://dpwm7kp3qhfax" path="res://scripts/player/player.gd" id="1_8afob"]
 [ext_resource type="Script" uid="uid://cd44p07bqbffd" path="res://scripts/player/camera_controller.gd" id="2_dovo2"]
-[ext_resource type="Script" uid="uid://vtmmoot30ibp" path="res://scripts/player/player_input.gd" id="3_gmlin"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lvxji"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_p47bc"]
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera_controller")]
 script = ExtResource("1_8afob")
@@ -29,11 +24,3 @@ script = ExtResource("2_dovo2")
 player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController"]
-
-[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
-root_path = NodePath(".")
-replication_config = SubResource("SceneReplicationConfig_lvxji")
-script = ExtResource("3_gmlin")
-
-[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_p47bc")
