@@ -164,7 +164,6 @@ func _on_create_lobby_button_up(button_id: int) -> void:
 			join_lobby_container.visible = false
 			create_lobby_container.visible = true
 		1:
-			pass
 			Networking.create_lobby()
 			create_lobby_container.visible = false
 			lobby_container.visible = true

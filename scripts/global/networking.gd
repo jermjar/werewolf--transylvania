@@ -1,5 +1,11 @@
 extends Node
 
+signal player_list_changed()
+signal connection_failed()
+signal connection_success()
+#signal game_ended()
+#signal game_error(err)
+
 const DEFAULT_PORT: int = 8080
 
 enum LobbyType {
@@ -29,17 +35,20 @@ func join_lobby(this_lobby_id: int) -> void:
 	Steam.joinLobby(this_lobby_id)
 
 func create_lobby() -> void:
-	Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
+	if lobby_id == 0:
+		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
 
 func create_socket():
 	peer = SteamMultiplayerPeer.new()
 	peer.create_host(DEFAULT_PORT)
 	multiplayer.set_multiplayer_peer(peer)
+	print("create_socket")
 
 func connect_socket(steam_id : int):
 	peer = SteamMultiplayerPeer.new()
 	peer.create_client(steam_id, DEFAULT_PORT)
 	multiplayer.set_multiplayer_peer(peer)
+	print("connect_socket")
 
 func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
 	# Get the lobby owner's name
@@ -51,7 +60,11 @@ func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
 
 func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
 	if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
-		print("Joined successfully?")
+		var id = Steam.getLobbyOwner(this_lobby_id)
+		if id != Steam.getSteamID():
+			lobby_id = this_lobby_id
+			lobby_name = Steam.getLobbyData(lobby_id, "name")
+			connect_socket(id)
 	else:
 		# Get the failure reason
 		var fail_reason: String
