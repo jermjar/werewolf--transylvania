@@ -3,8 +3,6 @@ extends Node
 signal player_list_changed()
 signal connection_failed()
 signal connection_success()
-#signal game_ended()
-#signal game_error(err)
 
 const DEFAULT_PORT: int = 8080
 
@@ -13,18 +11,18 @@ enum LobbyType {
 	FRIENDS_ONLY = Steam.LOBBY_TYPE_FRIENDS_ONLY,
 	PUBLIC = Steam.LOBBY_TYPE_PUBLIC
 }
-
 var lobby_id: int = 0
 var lobby_type: int = LobbyType.PUBLIC
 var lobby_name: String = "[WEREWOLF] - Placeholder"
+var lobby_members := {}
 
 var peer: SteamMultiplayerPeer = null
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_player_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
-	multiplayer.connected_to_server.connect(_connected_ok)
-	multiplayer.connection_failed.connect(_connected_fail)
+	multiplayer.connected_to_server.connect(_connected_to_server)
+	multiplayer.connection_failed.connect(_connection_failed)
 	multiplayer.server_disconnected.connect(_server_disconnected)
 	
 	Steam.join_requested.connect(_on_lobby_join_requested)
@@ -43,6 +41,9 @@ func create_socket():
 	peer.create_host(DEFAULT_PORT)
 	multiplayer.set_multiplayer_peer(peer)
 	print("create_socket")
+	
+	_player_connected(1)
+	connection_success.emit()
 
 func connect_socket(steam_id : int):
 	peer = SteamMultiplayerPeer.new()
@@ -97,23 +98,41 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		## Allow P2P connections to fallback to being relayed through Steam if needed
 		var set_relay: bool = Steam.allowP2PPacketRelay(true)
 		print("Allowing Steam to be a relay backup: %s" % set_relay)
+		
+		create_socket()
 	else:
 		print("Error creating lobby")
+		connection_failed.emit()
 
+#region Peer Signals
+# Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
-	pass
+	lobby_members[id] = peer.get_steam64_from_peer_id(id)
+	player_list_changed.emit()
+	print("Player Connected: %s" % id)
 
+# Ran when peers disconnect from the lobby
 func _player_disconnected(id):
-	pass
+	lobby_members.erase(id)
+	player_list_changed.emit()
+	print("Player Disconnected: %s" % id)
 
-func _connected_ok():
-	pass
+# Ran when peer connects to a host (doesn't trigger on host)
+func _connected_to_server():
+	connection_success.emit()
 
+func _connection_failed():
+	connection_failed.emit()
+
+# Ran when peer disconnects from a host
 func _server_disconnected():
-	pass
+	reset_network()
+#endregion
 
-func _connected_fail():
-	pass
-	
 func reset_network():
-	pass
+	multiplayer.multiplayer_peer.close()
+	Steam.leaveLobby(lobby_id)
+	lobby_members = {}
+	peer = null
+	lobby_id = 0
+	#lobby_type = 0

@@ -6,7 +6,7 @@ offset_bottom = 35.0
 
 [node name="Kick" type="Button" parent="."]
 layout_mode = 2
-text = "Kick"
+text = "Kick?"
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 2

@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 # Main Menu references
-@onready var button_container: VBoxContainer = $MainMenuButtons
+@onready var main_menu_container: VBoxContainer = $MainMenuButtons
 @onready var multiplayer_button: Button = %Multiplayer
 @onready var options_button: Button = %Options
 @onready var quit_button: Button = %Quit
@@ -22,6 +22,7 @@ extends CanvasLayer
 
 # Lobby Container references
 @onready var lobby_container: VBoxContainer = $LobbyContainer
+@onready var lobby_name_label: Label = %LobbyName
 @onready var player_list_container: VBoxContainer = %PlayerList_VBoxContainer
 @onready var lobby_chat_container: ScrollContainer = %LobbyChat_ScrollContainer
 @onready var input: LineEdit = %Input
@@ -29,6 +30,7 @@ extends CanvasLayer
 @onready var leave_lobby_button: Button = %LeaveLobby
 @onready var start_game_button: Button = %StartGame
 
+# Scenes for displaying server list / players in a lobby
 @onready var lobby_server = load("res://scenes/lobby/lobby_server.tscn")
 @onready var lobby_player = load("res://scenes/lobby/lobby_player.tscn")
 
@@ -61,47 +63,21 @@ func _ready() -> void:
 	Steam.lobby_chat_update.connect(_on_lobby_chat_update)
 	Steam.lobby_message.connect(_on_lobby_message)
 	
+	# Don't think I need this... yet at least
 	#Steam.persona_state_change.connect(_on_persona_state_change)
+	
+	## Networking Signals
+	Networking.player_list_changed.connect(_on_player_list_changed)
+	Networking.connection_success.connect(_on_connection_success)
+	Networking.connection_failed.connect(_on_connection_failed)
 	
 	_check_command_line()
 
-func _update_lobby_player_list() -> void:
-	pass
-
-func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id: int, chat_state: int) -> void:
-	# Get the user who has made the lobby change
-	var changer_name: String = Steam.getFriendPersonaName(change_id)
-
-	# If a player has joined the lobby
-	if chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_ENTERED:
-		print("%s has joined the lobby." % changer_name)
-
-	# Else if a player has left the lobby
-	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_LEFT:
-		print("%s has left the lobby." % changer_name)
-
-	# Else if a player has been kicked
-	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_KICKED:
-		print("%s has been kicked from the lobby." % changer_name)
-
-	# Else if a player has been banned
-	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_BANNED:
-		print("%s has been banned from the lobby." % changer_name)
-
-	# Else there was some unknown change
-	else:
-		print("%s did... something." % changer_name)
-
-	# Update the lobby now that a change has occurred
-	_update_lobby_player_list()
 
 func _on_lobby_data_update(success: int, this_lobby_id: int, member_id: int) -> void:
 	pass
 
 func _on_lobby_invite(inviter: int, lobby: int, game: int) -> void:
-	pass
-
-func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
 	pass
 
 #func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
@@ -143,7 +119,7 @@ func _on_lobby_selected(_this_lobby_id: int) -> void:
 
 #region MAIN MENU BUTTONS
 func _on_multiplayer_button_up() -> void:
-	button_container.visible = false
+	main_menu_container.visible = false
 	join_lobby_container.visible = true
 	_refresh_lobbies()
 
@@ -158,6 +134,8 @@ func _on_quit_button_up() -> void:
 func _on_join_lobby_button_up() -> void:
 	Networking.join_lobby(join_id)
 
+# There are two create lobby buttons, so I'm binding an ID to
+# them so I don't have to use two separate functions
 func _on_create_lobby_button_up(button_id: int) -> void:
 	match button_id:
 		0:
@@ -165,23 +143,30 @@ func _on_create_lobby_button_up(button_id: int) -> void:
 			create_lobby_container.visible = true
 		1:
 			Networking.create_lobby()
+			lobby_name_label.text = Networking.lobby_name
 			create_lobby_container.visible = false
 			lobby_container.visible = true
 
 func _on_refresh_button_up() -> void:
 	_refresh_lobbies()
 
+# There are two back buttons, so I'm binding an ID to them
+# so I don't have to use two separate functions
 func _on_back_button_up(button_id: int) -> void:
 	match button_id:
 		0:
 			join_lobby_container.visible = false
-			button_container.visible = true
+			main_menu_container.visible = true
 		1:
 			lobby_name_input.clear()
 			create_lobby_container.visible = false
 			join_lobby_container.visible = true
 
+# NOTE - Might need to be an RPC?
 func _on_leave_lobby_button_up() -> void:
+	Networking.reset_network()
+	for player in player_list_container.get_children():
+		queue_free()
 	lobby_container.visible = false
 	join_lobby_container.visible = true
 
@@ -189,7 +174,29 @@ func _on_start_game_button_up() -> void:
 	pass
 #endregion
 
-#region LOBBY CHAT
+#region LOBBY FUNCTIONALITY
+@rpc("call_local", "reliable")
+func _update_lobby_player_list() -> void:
+	var players = Networking.lobby_members
+	for player in player_list_container.get_children():
+		player.queue_free()
+	
+	for player in players:
+		var steam_id: int = players[player]
+		var steam_name: String = Steam.getFriendPersonaName(steam_id)
+		var player_scene = lobby_player.instantiate()
+		
+		player_scene.name = str(player)
+		player_scene.get_node("Label").text = steam_name
+		#TODO - Almost done with this
+		#player_scene.get_node("Kick").button_up.connect(_on_kick_pressed.bind(player))
+		#player_scene.get_node("Ready").button_up.connect(_on_ready_pressed)
+		player_list_container.add_child(player_scene, true)
+		if SteamInit.steam_id != steam_id:
+			player_scene.get_node("Ready").disabled = true
+		if SteamInit.steam_id == Steam.getLobbyOwner(Networking.lobby_id):
+			player_scene.get_node("Kick").show()
+
 func _on_send_chat(message: String = "") -> void:
 	if message.length() == 0:
 		message = input.get_text()
@@ -198,6 +205,58 @@ func _on_send_chat(message: String = "") -> void:
 		if not is_sent:
 			print("Failed to send message")
 		input.clear()
+
+func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id: int, chat_state: int) -> void:
+	# Get the user who has made the lobby change
+	var changer_name: String = Steam.getFriendPersonaName(change_id)
+
+	# If a player has joined the lobby
+	if chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_ENTERED:
+		print("%s has joined the lobby." % changer_name)
+
+	# Else if a player has left the lobby
+	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_LEFT:
+		print("%s has left the lobby." % changer_name)
+
+	# Else if a player has been kicked
+	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_KICKED:
+		print("%s has been kicked from the lobby." % changer_name)
+
+	# Else if a player has been banned
+	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_BANNED:
+		print("%s has been banned from the lobby." % changer_name)
+
+	# Else there was some unknown change
+	else:
+		print("%s did... something." % changer_name)
+
+	# Update the lobby now that a change has occurred
+	_update_lobby_player_list.rpc()
+
+func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
+	pass
+#endregion
+
+#region NETWORKING SIGNALS
+# Host sends out RPC to everyone (including host) to update the player list
+func _on_player_list_changed() -> void:
+	if multiplayer.is_server():
+		_update_lobby_player_list.rpc()
+
+func _on_connection_success() -> void:
+	lobby_name_label.text = Steam.getLobbyData(Networking.lobby_id, "name")
+	join_lobby_container.visible = false
+	lobby_container.visible = true
+	print("Connection Success!")
+
+func _on_connection_failed() -> void:
+	Networking.reset_network()
+	create_lobby_container.visible = false
+	lobby_container.visible = false
+	main_menu_container.visible = false
+	join_lobby_container.visible = true
+	print("Connection Failed!")
+	
 #endregion
 
 ## Handles joining off of Steam invite/friends list allegedly
