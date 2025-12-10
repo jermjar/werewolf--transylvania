@@ -35,6 +35,7 @@ func join_lobby(this_lobby_id: int) -> void:
 func create_lobby() -> void:
 	if lobby_id == 0:
 		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
+		print("Lobby Created!")
 
 func create_socket():
 	peer = SteamMultiplayerPeer.new()

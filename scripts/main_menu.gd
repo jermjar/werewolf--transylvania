@@ -166,9 +166,10 @@ func _on_back_button_up(button_id: int) -> void:
 func _on_leave_lobby_button_up() -> void:
 	Networking.reset_network()
 	for player in player_list_container.get_children():
-		queue_free()
+		player.queue_free()
 	lobby_container.visible = false
 	join_lobby_container.visible = true
+	_refresh_lobbies()
 
 func _on_start_game_button_up() -> void:
 	pass
@@ -229,9 +230,6 @@ func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id:
 	# Else there was some unknown change
 	else:
 		print("%s did... something." % changer_name)
-
-	# Update the lobby now that a change has occurred
-	_update_lobby_player_list.rpc()
 
 func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
 	pass
