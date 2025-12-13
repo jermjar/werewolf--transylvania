@@ -97,8 +97,8 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		Steam.setLobbyData(lobby_id, "mode", str(lobby_type))
 		
 		## Allow P2P connections to fallback to being relayed through Steam if needed
-		var set_relay: bool = Steam.allowP2PPacketRelay(true)
-		print("Allowing Steam to be a relay backup: %s" % set_relay)
+		#var set_relay: bool = Steam.allowP2PPacketRelay(true)
+		#print("Allowing Steam to be a relay backup: %s" % set_relay)
 		
 		create_socket()
 	else:
