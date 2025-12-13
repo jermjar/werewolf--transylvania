@@ -177,8 +177,7 @@ func _on_start_game_button_up() -> void:
 
 #region LOBBY FUNCTIONALITY
 @rpc("call_local", "reliable")
-func _update_lobby_player_list() -> void:
-	var players = Networking.lobby_members
+func _update_lobby_player_list(players) -> void:
 	for player in player_list_container.get_children():
 		player.queue_free()
 	
@@ -197,6 +196,7 @@ func _update_lobby_player_list() -> void:
 			player_scene.get_node("Ready").disabled = true
 		if SteamInit.steam_id == Steam.getLobbyOwner(Networking.lobby_id):
 			player_scene.get_node("Kick").show()
+		print("_update_lobby_player_list: " + str(player))
 
 func _on_send_chat(message: String = "") -> void:
 	if message.length() == 0:
@@ -239,7 +239,8 @@ func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type
 # Host sends out RPC to everyone (including host) to update the player list
 func _on_player_list_changed() -> void:
 	if multiplayer.is_server():
-		_update_lobby_player_list.rpc()
+		print("_on_player_list_changed")
+		_update_lobby_player_list.rpc(Networking.lobby_members)
 
 func _on_connection_success() -> void:
 	lobby_name_label.text = Steam.getLobbyData(Networking.lobby_id, "name")
