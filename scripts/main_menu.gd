@@ -186,7 +186,7 @@ func _update_lobby_player_list(players) -> void:
 		var steam_name: String = Steam.getFriendPersonaName(steam_id)
 		var player_scene = lobby_player.instantiate()
 		
-		player_scene.name = str(player)
+		player_scene.name = str(players[player])
 		player_scene.get_node("Label").text = steam_name
 		#TODO - Almost done with this
 		#player_scene.get_node("Kick").button_up.connect(_on_kick_pressed.bind(player))

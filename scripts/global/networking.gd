@@ -109,15 +109,15 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 #region Peer Signals
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
-	lobby_members[id] = peer.get_steam64_from_peer_id(id)
+	lobby_members[id] = SteamInit.steam_id
 	player_list_changed.emit()
-	print("Player Connected: %s" % id)
+	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 
 # Ran when peers disconnect from the lobby
 func _player_disconnected(id):
+	print("Player Disconnected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	lobby_members.erase(id)
 	player_list_changed.emit()
-	print("Player Disconnected: %s" % id)
 
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
