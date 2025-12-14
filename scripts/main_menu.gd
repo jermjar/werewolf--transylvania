@@ -25,6 +25,7 @@ extends CanvasLayer
 @onready var lobby_name_label: Label = %LobbyName
 @onready var player_list_container: VBoxContainer = %PlayerList_VBoxContainer
 @onready var lobby_chat_container: ScrollContainer = %LobbyChat_ScrollContainer
+@onready var chat: RichTextLabel = %Chat
 @onready var input: LineEdit = %Input
 @onready var send_button: Button = %Send
 @onready var leave_lobby_button: Button = %LeaveLobby
@@ -72,13 +73,6 @@ func _ready() -> void:
 	Networking.connection_failed.connect(_on_connection_failed)
 	
 	_check_command_line()
-
-
-func _on_lobby_data_update(success: int, this_lobby_id: int, member_id: int) -> void:
-	pass
-
-func _on_lobby_invite(inviter: int, lobby: int, game: int) -> void:
-	pass
 
 #func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
 	## Make sure you're in a lobby and this user is valid or Steam might spam your console log
@@ -232,7 +226,22 @@ func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id:
 		print("%s did... something." % changer_name)
 
 func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
-	pass
+	var sender = Steam.getFriendPersonaName(user)
+	if chat_type == 1:
+		chat.append_text(str(sender) + ":  " + str(message) + "\n")
+	else:
+		match chat_type:
+			2: print(str(sender)+" is typing...\n")
+			3: print(str(sender)+" sent an invite that won't work in this chat!\n")
+			4: print(str(sender)+" sent a text emote that is deprecated.\n")
+			6: print(str(sender)+" has left the chat.\n")
+			7: print(str(sender)+" has entered the chat.\n")
+			8: print(str(sender)+" was kicked!\n")
+			9: print(str(sender)+" was banned!\n")
+			10: print(str(sender)+" disconnected.\n")
+			11: print(str(sender)+" sent an old, offline message.\n")
+			12: print(str(sender)+" sent a link that was removed by the chat filter.\n")
+			
 #endregion
 
 #region NETWORKING SIGNALS

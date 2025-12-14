@@ -161,17 +161,39 @@ vertical_alignment = 1
 [node name="HSeparator" type="HSeparator" parent="LobbyContainer"]
 layout_mode = 2
 
-[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="LobbyContainer"]
-unique_name_in_owner = true
+[node name="HBoxContainer" type="HBoxContainer" parent="LobbyContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LobbyChat_ScrollContainer" type="ScrollContainer" parent="LobbyContainer"]
+[node name="VSeparator" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="LobbyContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
 
-[node name="Chat" type="Label" parent="LobbyContainer/LobbyChat_ScrollContainer"]
+[node name="VSeparator2" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="LobbyChat_ScrollContainer" type="ScrollContainer" parent="LobbyContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.75
+horizontal_scroll_mode = 0
+
+[node name="Chat" type="RichTextLabel" parent="LobbyContainer/HBoxContainer/LobbyChat_ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_following = true
+
+[node name="VSeparator3" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
 layout_mode = 2
 
 [node name="Input_HBoxContainer" type="HBoxContainer" parent="LobbyContainer"]
