@@ -13,8 +13,9 @@ enum LobbyType {
 }
 var lobby_id: int = 0
 var lobby_type: int = LobbyType.PUBLIC
-var lobby_name: String = "[WEREWOLF] - Placeholder"
+var lobby_name: String = "Lobby Name"
 var lobby_members := {}
+var lobby_members_ready := []
 
 var peer: SteamMultiplayerPeer = null
 

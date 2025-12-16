@@ -110,7 +110,8 @@ offset_bottom = 135.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="CreateLobbyContainer"]
+[node name="CreateLobbyNameLabel" type="Label" parent="CreateLobbyContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Lobby Name"
 horizontal_alignment = 1
@@ -119,6 +120,7 @@ vertical_alignment = 1
 [node name="LobbyNameInput" type="LineEdit" parent="CreateLobbyContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+placeholder_text = "Lobby Name"
 
 [node name="Buttons" type="HBoxContainer" parent="CreateLobbyContainer"]
 layout_mode = 2
@@ -221,7 +223,7 @@ text = "Leave Lobby"
 
 [node name="StartGame" type="Button" parent="LobbyContainer/Buttons"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
+disabled = true
 text = "Start Game"

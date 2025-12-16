@@ -16,6 +16,7 @@ extends CanvasLayer
 
 # Create Lobby Container references
 @onready var create_lobby_container: VBoxContainer = $CreateLobbyContainer
+@onready var create_lobby_name_label: Label = %CreateLobbyNameLabel
 @onready var lobby_name_input: LineEdit = %LobbyNameInput
 @onready var create_lobby_button_create: Button = %CreateLobby_Create
 @onready var back_button_create: Button = %Back_Create
@@ -50,6 +51,7 @@ func _ready() -> void:
 	back_button_join.button_up.connect(_on_back_button_up.bind(0))
 	
 	## Create Lobby Signals
+	lobby_name_input.text_changed.connect(_on_lobby_name_text_changed)
 	create_lobby_button_create.button_up.connect(_on_create_lobby_button_up.bind(1))
 	back_button_create.button_up.connect(_on_back_button_up.bind(1))
 	
@@ -156,7 +158,8 @@ func _on_back_button_up(button_id: int) -> void:
 			create_lobby_container.visible = false
 			join_lobby_container.visible = true
 
-# NOTE - Might need to be an RPC?
+# NOTE - This is an RPC so Host can kick others
+@rpc("call_local", "reliable")
 func _on_leave_lobby_button_up() -> void:
 	Networking.reset_network()
 	for player in player_list_container.get_children():
@@ -167,6 +170,26 @@ func _on_leave_lobby_button_up() -> void:
 
 func _on_start_game_button_up() -> void:
 	pass
+
+func _on_kick_button_pressed(id: int) -> void:
+	_on_leave_lobby_button_up.rpc_id(id)
+
+func _on_ready_button_pressed():
+	_on_ready_pressed.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func _on_ready_pressed() -> void:
+	var ready_button = player_list_container.get_node("%s/Ready" % str(SteamInit.steam_id))
+	if Networking.lobby_members_ready.has(SteamInit.steam_id):
+		Networking.lobby_members_ready.erase(SteamInit.steam_id)
+		ready_button.text = "Ready"
+	else:
+		Networking.lobby_members_ready.append(SteamInit.steam_id)
+		ready_button.text = "Unready"
+	
+	var start_game = multiplayer.is_server() and Networking.lobby_members_ready.size() == Steam.getNumLobbyMembers(Networking.lobby_id)
+	start_game_button.disabled = !start_game
+
 #endregion
 
 #region LOBBY FUNCTIONALITY
@@ -183,8 +206,8 @@ func _update_lobby_player_list(players) -> void:
 		player_scene.name = str(players[player])
 		player_scene.get_node("Label").text = steam_name
 		#TODO - Almost done with this
-		#player_scene.get_node("Kick").button_up.connect(_on_kick_pressed.bind(player))
-		#player_scene.get_node("Ready").button_up.connect(_on_ready_pressed)
+		player_scene.get_node("Kick").button_up.connect(_on_kick_button_pressed.bind(player))
+		player_scene.get_node("Ready").button_up.connect(_on_ready_button_pressed)
 		player_list_container.add_child(player_scene, true)
 		if SteamInit.steam_id != steam_id:
 			player_scene.get_node("Ready").disabled = true
@@ -241,7 +264,16 @@ func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type
 			10: print(str(sender)+" disconnected.\n")
 			11: print(str(sender)+" sent an old, offline message.\n")
 			12: print(str(sender)+" sent a link that was removed by the chat filter.\n")
-			
+
+# Triggers whenever you type in the Create Lobby text field
+func _on_lobby_name_text_changed(text):
+	if text:
+		Networking.lobby_name = text
+		create_lobby_name_label.text = text
+	else:
+		Networking.lobby_name = "Lobby Name"
+		create_lobby_name_label.text = "Lobby Name"
+
 #endregion
 
 #region NETWORKING SIGNALS
