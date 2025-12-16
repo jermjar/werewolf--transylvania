@@ -11,13 +11,15 @@ config_version=5
 [application]
 
 config/name="Werewolf: Transylvania"
+run/main_scene="uid://dlgk7ywyn41us"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Global="*res://scripts/global.gd"
-Steamworks="*res://scripts/steamworks.gd"
+Global="*res://scripts/global/global.gd"
+SteamInit="*res://scripts/global/steam_initialization.gd"
+Networking="*res://scripts/global/networking.gd"
 
 [debug]
 
