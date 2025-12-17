@@ -179,12 +179,13 @@ func _on_ready_button_pressed():
 
 @rpc("any_peer", "call_local", "reliable")
 func _on_ready_pressed() -> void:
-	var ready_button = player_list_container.get_node("%s/Ready" % str(SteamInit.steam_id))
-	if Networking.lobby_members_ready.has(SteamInit.steam_id):
-		Networking.lobby_members_ready.erase(SteamInit.steam_id)
+	var id = multiplayer.get_remote_sender_id()
+	var ready_button = player_list_container.get_node("%s/Ready" % str(id))
+	if Networking.lobby_members_ready.has(id):
+		Networking.lobby_members_ready.erase(id)
 		ready_button.text = "Ready"
 	else:
-		Networking.lobby_members_ready.append(SteamInit.steam_id)
+		Networking.lobby_members_ready.append(id)
 		ready_button.text = "Unready"
 	
 	var start_game = multiplayer.is_server() and Networking.lobby_members_ready.size() == Steam.getNumLobbyMembers(Networking.lobby_id)
@@ -205,7 +206,6 @@ func _update_lobby_player_list(players) -> void:
 		
 		player_scene.name = str(players[player])
 		player_scene.get_node("Label").text = steam_name
-		#TODO - Almost done with this
 		player_scene.get_node("Kick").button_up.connect(_on_kick_button_pressed.bind(player))
 		player_scene.get_node("Ready").button_up.connect(_on_ready_button_pressed)
 		player_list_container.add_child(player_scene, true)
