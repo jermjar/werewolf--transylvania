@@ -180,6 +180,7 @@ func _on_ready_button_pressed():
 @rpc("any_peer", "call_local", "reliable")
 func _on_ready_pressed() -> void:
 	var id = multiplayer.get_remote_sender_id()
+	# TODO - Fix this reference not working
 	var ready_button = player_list_container.get_node("%s/Ready" % str(id))
 	if Networking.lobby_members_ready.has(id):
 		Networking.lobby_members_ready.erase(id)
