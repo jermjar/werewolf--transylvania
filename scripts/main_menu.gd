@@ -89,6 +89,7 @@ func _refresh_lobbies() -> void:
 	
 	# Set filters
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
+	Steam.addRequestLobbyListStringFilter("unique_lobby_id", Networking.UNIQUE_LOBBY_ID, Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
 	
 	# Triggers _update_lobbies()
 	Steam.requestLobbyList()

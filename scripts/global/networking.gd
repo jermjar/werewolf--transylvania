@@ -5,6 +5,7 @@ signal connection_failed()
 signal connection_success()
 
 const DEFAULT_PORT: int = 8080
+const UNIQUE_LOBBY_ID: String = "54832791483712409738190"
 
 enum LobbyType {
 	PRIVATE = Steam.LOBBY_TYPE_PRIVATE,
@@ -96,6 +97,7 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		## Set some lobby data
 		Steam.setLobbyData(lobby_id, "name", lobby_name)
 		Steam.setLobbyData(lobby_id, "mode", str(lobby_type))
+		Steam.setLobbyData(lobby_id, "unique_lobby_id", UNIQUE_LOBBY_ID)
 		
 		## Allow P2P connections to fallback to being relayed through Steam if needed
 		## NOTE - Wasn't working for me, keeping code though just in case I figure it out
