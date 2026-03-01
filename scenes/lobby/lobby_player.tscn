@@ -5,6 +5,7 @@ offset_right = 196.0
 offset_bottom = 35.0
 
 [node name="Kick" type="Button" parent="." unique_id=1652588901]
+visible = false
 layout_mode = 2
 text = "Kick?"
 
