@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://dlgk7ywyn41us"]
+[gd_scene format=3 uid="uid://dlgk7ywyn41us"]
 
 [ext_resource type="Script" uid="uid://bvuq245igqp4l" path="res://scripts/main_menu.gd" id="1_0ettg"]
 [ext_resource type="Theme" uid="uid://8qhlaspdedvq" path="res://assets/themes/main_menu.tres" id="2_duh7t"]
 
-[node name="MainMenu" type="CanvasLayer"]
+[node name="MainMenu" type="CanvasLayer" unique_id=5244445]
 script = ExtResource("1_0ettg")
 
-[node name="MainMenuButtons" type="VBoxContainer" parent="."]
+[node name="MainMenuButtons" type="VBoxContainer" parent="." unique_id=1023629393]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -19,7 +19,7 @@ offset_bottom = 135.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Multiplayer" type="Button" parent="MainMenuButtons"]
+[node name="Multiplayer" type="Button" parent="MainMenuButtons" unique_id=1890322187]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -27,7 +27,7 @@ theme = ExtResource("2_duh7t")
 text = "Multiplayer
 "
 
-[node name="Options" type="Button" parent="MainMenuButtons"]
+[node name="Options" type="Button" parent="MainMenuButtons" unique_id=780092098]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -36,14 +36,14 @@ disabled = true
 text = "Options
 "
 
-[node name="Quit" type="Button" parent="MainMenuButtons"]
+[node name="Quit" type="Button" parent="MainMenuButtons" unique_id=1018836650]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme = ExtResource("2_duh7t")
 text = "Quit Game"
 
-[node name="JoinLobbyContainer" type="VBoxContainer" parent="."]
+[node name="JoinLobbyContainer" type="VBoxContainer" parent="." unique_id=880394928]
 visible = false
 custom_minimum_size = Vector2(960, 540)
 anchors_preset = 8
@@ -58,44 +58,44 @@ offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Lobby_ScrollContainer" type="ScrollContainer" parent="JoinLobbyContainer"]
+[node name="Lobby_ScrollContainer" type="ScrollContainer" parent="JoinLobbyContainer" unique_id=1983703762]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Lobby_VBoxContainer" type="VBoxContainer" parent="JoinLobbyContainer/Lobby_ScrollContainer"]
+[node name="Lobby_VBoxContainer" type="VBoxContainer" parent="JoinLobbyContainer/Lobby_ScrollContainer" unique_id=1006695247]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Buttons" type="HBoxContainer" parent="JoinLobbyContainer"]
+[node name="Buttons" type="HBoxContainer" parent="JoinLobbyContainer" unique_id=787423247]
 layout_mode = 2
 alignment = 1
 
-[node name="JoinLobby" type="Button" parent="JoinLobbyContainer/Buttons"]
+[node name="JoinLobby" type="Button" parent="JoinLobbyContainer/Buttons" unique_id=1298733660]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Join Lobby"
 
-[node name="CreateLobby_Join" type="Button" parent="JoinLobbyContainer/Buttons"]
+[node name="CreateLobby_Join" type="Button" parent="JoinLobbyContainer/Buttons" unique_id=1941462185]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Create Lobby"
 
-[node name="Refresh" type="Button" parent="JoinLobbyContainer/Buttons"]
+[node name="Refresh" type="Button" parent="JoinLobbyContainer/Buttons" unique_id=53157832]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Refresh"
 
-[node name="Back_Join" type="Button" parent="JoinLobbyContainer/Buttons"]
+[node name="Back_Join" type="Button" parent="JoinLobbyContainer/Buttons" unique_id=1643735532]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Back"
 
-[node name="CreateLobbyContainer" type="VBoxContainer" parent="."]
+[node name="CreateLobbyContainer" type="VBoxContainer" parent="." unique_id=533690751]
 visible = false
 custom_minimum_size = Vector2(480, 270)
 anchors_preset = 8
@@ -110,35 +110,35 @@ offset_bottom = 135.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CreateLobbyNameLabel" type="Label" parent="CreateLobbyContainer"]
+[node name="CreateLobbyNameLabel" type="Label" parent="CreateLobbyContainer" unique_id=1897383899]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Lobby Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LobbyNameInput" type="LineEdit" parent="CreateLobbyContainer"]
+[node name="LobbyNameInput" type="LineEdit" parent="CreateLobbyContainer" unique_id=1188425690]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Lobby Name"
 
-[node name="Buttons" type="HBoxContainer" parent="CreateLobbyContainer"]
+[node name="Buttons" type="HBoxContainer" parent="CreateLobbyContainer" unique_id=842661927]
 layout_mode = 2
 
-[node name="CreateLobby_Create" type="Button" parent="CreateLobbyContainer/Buttons"]
+[node name="CreateLobby_Create" type="Button" parent="CreateLobbyContainer/Buttons" unique_id=1064174521]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Create Lobby
 "
 
-[node name="Back_Create" type="Button" parent="CreateLobbyContainer/Buttons"]
+[node name="Back_Create" type="Button" parent="CreateLobbyContainer/Buttons" unique_id=819773452]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Back"
 
-[node name="LobbyContainer" type="VBoxContainer" parent="."]
+[node name="LobbyContainer" type="VBoxContainer" parent="." unique_id=511228592]
 visible = false
 custom_minimum_size = Vector2(960, 540)
 anchors_preset = 8
@@ -153,34 +153,34 @@ offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LobbyName" type="Label" parent="LobbyContainer"]
+[node name="LobbyName" type="Label" parent="LobbyContainer" unique_id=970626057]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Lobby Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="LobbyContainer"]
+[node name="HSeparator" type="HSeparator" parent="LobbyContainer" unique_id=889220140]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="LobbyContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="LobbyContainer" unique_id=1299727630]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VSeparator" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
+[node name="VSeparator" type="VSeparator" parent="LobbyContainer/HBoxContainer" unique_id=1864993896]
 layout_mode = 2
 
-[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="LobbyContainer/HBoxContainer"]
+[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="LobbyContainer/HBoxContainer" unique_id=1509744037]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.25
 
-[node name="VSeparator2" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
+[node name="VSeparator2" type="VSeparator" parent="LobbyContainer/HBoxContainer" unique_id=170513659]
 layout_mode = 2
 
-[node name="LobbyChat_ScrollContainer" type="ScrollContainer" parent="LobbyContainer/HBoxContainer"]
+[node name="LobbyChat_ScrollContainer" type="ScrollContainer" parent="LobbyContainer/HBoxContainer" unique_id=1730639522]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -188,40 +188,40 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 0.75
 horizontal_scroll_mode = 0
 
-[node name="Chat" type="RichTextLabel" parent="LobbyContainer/HBoxContainer/LobbyChat_ScrollContainer"]
+[node name="Chat" type="RichTextLabel" parent="LobbyContainer/HBoxContainer/LobbyChat_ScrollContainer" unique_id=767257833]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 scroll_following = true
 
-[node name="VSeparator3" type="VSeparator" parent="LobbyContainer/HBoxContainer"]
+[node name="VSeparator3" type="VSeparator" parent="LobbyContainer/HBoxContainer" unique_id=905863597]
 layout_mode = 2
 
-[node name="Input_HBoxContainer" type="HBoxContainer" parent="LobbyContainer"]
+[node name="Input_HBoxContainer" type="HBoxContainer" parent="LobbyContainer" unique_id=531418216]
 layout_mode = 2
 
-[node name="Input" type="LineEdit" parent="LobbyContainer/Input_HBoxContainer"]
+[node name="Input" type="LineEdit" parent="LobbyContainer/Input_HBoxContainer" unique_id=1828747835]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Send" type="Button" parent="LobbyContainer/Input_HBoxContainer"]
+[node name="Send" type="Button" parent="LobbyContainer/Input_HBoxContainer" unique_id=1557947436]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Send"
 
-[node name="Buttons" type="HBoxContainer" parent="LobbyContainer"]
+[node name="Buttons" type="HBoxContainer" parent="LobbyContainer" unique_id=1217016732]
 layout_mode = 2
 alignment = 1
 
-[node name="LeaveLobby" type="Button" parent="LobbyContainer/Buttons"]
+[node name="LeaveLobby" type="Button" parent="LobbyContainer/Buttons" unique_id=2920329]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Leave Lobby"
 
-[node name="StartGame" type="Button" parent="LobbyContainer/Buttons"]
+[node name="StartGame" type="Button" parent="LobbyContainer/Buttons" unique_id=1906537161]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

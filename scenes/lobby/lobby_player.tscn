@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://djeiebt5kx3vw"]
 
-[node name="LobbyPlayer" type="HBoxContainer"]
+[node name="LobbyPlayer" type="HBoxContainer" unique_id=1476964167]
 offset_right = 196.0
 offset_bottom = 35.0
 
-[node name="Kick" type="Button" parent="."]
+[node name="Kick" type="Button" parent="." unique_id=1652588901]
 layout_mode = 2
 text = "Kick?"
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=2103195210]
 layout_mode = 2
 text = "placeholder"
 
-[node name="Ready" type="Button" parent="."]
+[node name="Ready" type="Button" parent="." unique_id=1282415634]
 layout_mode = 2
 text = "Ready
 "

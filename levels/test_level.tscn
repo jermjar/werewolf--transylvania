@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cy05oxvdhtff6"]
+[gd_scene format=3 uid="uid://cy05oxvdhtff6"]
 
 [ext_resource type="Texture2D" uid="uid://cmlc2xjh3q3ys" path="res://assets/textures/Grass01_DIFF.png" id="1_ur00s"]
 [ext_resource type="Texture2D" uid="uid://bmgxuc50smwuj" path="res://assets/textures/Grass01_AO.png" id="2_wndkh"]
@@ -26,28 +26,28 @@ size = Vector3(20, 0.25, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_w7r7j"]
 
-[node name="TestLevel" type="Node3D"]
+[node name="TestLevel" type="Node3D" unique_id=1268389041]
 
-[node name="Geometry" type="Node3D" parent="."]
+[node name="Geometry" type="Node3D" parent="." unique_id=1427316424]
 
-[node name="Floor" type="StaticBody3D" parent="Geometry"]
+[node name="Floor" type="StaticBody3D" parent="Geometry" unique_id=738260861]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Floor"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Floor" unique_id=285874004]
 mesh = SubResource("BoxMesh_x25rp")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Floor"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Floor" unique_id=1943913890]
 shape = SubResource("BoxShape3D_x25rp")
 
-[node name="Box" type="StaticBody3D" parent="Geometry"]
+[node name="Box" type="StaticBody3D" parent="Geometry" unique_id=579075442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.400196)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Box"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Box" unique_id=1427371574]
 mesh = SubResource("BoxMesh_gmgay")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Box"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Box" unique_id=183376634]
 shape = SubResource("BoxShape3D_w7r7j")
 
-[node name="Players" type="Node3D" parent="."]
+[node name="Players" type="Node3D" parent="." unique_id=1364935372]
 
-[node name="WorldEnvironment" parent="." instance=ExtResource("2_x25rp")]
+[node name="WorldEnvironment" parent="." unique_id=1186333840 instance=ExtResource("2_x25rp")]

@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://5hlo1lcus3f3"]
 
-[node name="LobbyServer" type="HBoxContainer"]
+[node name="LobbyServer" type="HBoxContainer" unique_id=922062452]
 offset_right = 13.0
 offset_bottom = 35.0
 
-[node name="Button" type="Button" parent="."]
+[node name="Button" type="Button" parent="." unique_id=1256563204]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1799811037]
 layout_mode = 2
 vertical_alignment = 1
 
-[node name="Spacer" type="Control" parent="."]
+[node name="Spacer" type="Control" parent="." unique_id=1829521371]
 custom_minimum_size = Vector2(5, 0)
 layout_mode = 2
