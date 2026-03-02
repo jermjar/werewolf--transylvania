@@ -199,6 +199,7 @@ func _on_ready_pressed() -> void:
 #region LOBBY FUNCTIONALITY
 @rpc("call_local", "reliable")
 func _update_lobby_player_list(players) -> void:
+	Networking.lobby_members_ready = []
 	for player in player_list_container.get_children():
 		player.queue_free()
 	
@@ -207,7 +208,7 @@ func _update_lobby_player_list(players) -> void:
 		var steam_name: String = Steam.getFriendPersonaName(steam_id)
 		var player_scene = lobby_player.instantiate()
 		
-		player_scene.name = str(players[player])
+		player_scene.name = str(player)
 		player_scene.get_node("Label").text = steam_name
 		player_scene.get_node("Kick").button_up.connect(_on_kick_button_pressed.bind(player))
 		player_scene.get_node("Ready").button_up.connect(_on_ready_button_pressed)
