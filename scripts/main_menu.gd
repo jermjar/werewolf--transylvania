@@ -182,7 +182,6 @@ func _on_ready_button_pressed():
 @rpc("any_peer", "call_local", "reliable")
 func _on_ready_pressed() -> void:
 	var id = multiplayer.get_remote_sender_id()
-	# TODO - Fix this reference not working
 	var ready_button = player_list_container.get_node("%s/Ready" % str(id))
 	if Networking.lobby_members_ready.has(id):
 		Networking.lobby_members_ready.erase(id)
@@ -197,6 +196,9 @@ func _on_ready_pressed() -> void:
 #endregion
 
 #region LOBBY FUNCTIONALITY
+## `await get_tree().process_frame` is there because of a race condition for the host.
+## Without them, it will add another host before removing the old one fully, making the name
+## of the new host "2", which breaks functionality for things like readying up
 @rpc("call_local", "reliable")
 func _update_lobby_player_list(players) -> void:
 	await get_tree().process_frame
