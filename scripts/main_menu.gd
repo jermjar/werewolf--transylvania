@@ -171,7 +171,7 @@ func _on_leave_lobby_button_up() -> void:
 	_refresh_lobbies()
 
 func _on_start_game_button_up() -> void:
-	pass
+	Networking.start_game()
 
 func _on_kick_button_pressed(id: int) -> void:
 	_on_leave_lobby_button_up.rpc_id(id)

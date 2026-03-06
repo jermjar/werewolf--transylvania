@@ -24,6 +24,7 @@ config/icon="res://icon.svg"
 Global="*res://scripts/global/global.gd"
 SteamInit="*res://scripts/global/steam_initialization.gd"
 Networking="*res://scripts/global/networking.gd"
+SceneManager="*uid://c5jpiiselmjng"
 
 [debug]
 

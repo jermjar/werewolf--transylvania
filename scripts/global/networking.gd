@@ -39,6 +39,16 @@ func create_lobby() -> void:
 		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
 		print("Lobby Created!")
 
+func start_game() -> void:
+	assert(multiplayer.is_server())
+	print("start_game()")
+	load_world.rpc()
+
+@rpc("call_local", "reliable")
+func load_world() -> void:
+	print("load_world()")
+	SceneManager.change_scene("uid://cy05oxvdhtff6")
+
 func create_socket():
 	peer = SteamMultiplayerPeer.new()
 	peer.create_host(DEFAULT_PORT)
