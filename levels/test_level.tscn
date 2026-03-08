@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cy05oxvdhtff6"]
 
 [ext_resource type="Texture2D" uid="uid://cmlc2xjh3q3ys" path="res://assets/textures/Grass01_DIFF.png" id="1_ur00s"]
+[ext_resource type="Script" uid="uid://c4g0q6pb84w4x" path="res://scripts/levels/test_level.gd" id="1_wndkh"]
 [ext_resource type="Texture2D" uid="uid://bmgxuc50smwuj" path="res://assets/textures/Grass01_AO.png" id="2_wndkh"]
 [ext_resource type="PackedScene" uid="uid://c8sk0iwitje52" path="res://scenes/world_environment.tscn" id="2_x25rp"]
 [ext_resource type="Texture2D" uid="uid://bqsrx6dabjk41" path="res://assets/textures/Grass01_HEIGHT.png" id="3_ly3hx"]
@@ -26,7 +27,20 @@ size = Vector3(20, 0.25, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_w7r7j"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e7anx"]
+albedo_texture = ExtResource("1_ur00s")
+roughness_texture = ExtResource("5_wkb0e")
+ao_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_ur00s"]
+material = SubResource("StandardMaterial3D_e7anx")
+size = Vector3(1, 1, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wndkh"]
+size = Vector3(1, 1, 20)
+
 [node name="TestLevel" type="Node3D" unique_id=1268389041]
+script = ExtResource("1_wndkh")
 
 [node name="Geometry" type="Node3D" parent="." unique_id=1427316424]
 
@@ -48,7 +62,69 @@ mesh = SubResource("BoxMesh_gmgay")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Box" unique_id=183376634]
 shape = SubResource("BoxShape3D_w7r7j")
 
+[node name="Wall" type="StaticBody3D" parent="Geometry" unique_id=1500956251]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.494197, -0.88053113, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Wall" unique_id=1656660189]
+mesh = SubResource("BoxMesh_ur00s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Wall" unique_id=1862675484]
+shape = SubResource("BoxShape3D_wndkh")
+
+[node name="Wall2" type="StaticBody3D" parent="Geometry" unique_id=1398599532]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.494, -0.881, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Wall2" unique_id=1589046338]
+mesh = SubResource("BoxMesh_ur00s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Wall2" unique_id=1489419760]
+shape = SubResource("BoxShape3D_wndkh")
+
+[node name="Wall3" type="StaticBody3D" parent="Geometry" unique_id=1817266704]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, -0.881, 10.494)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Wall3" unique_id=1757852908]
+mesh = SubResource("BoxMesh_ur00s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Wall3" unique_id=1766330518]
+shape = SubResource("BoxShape3D_wndkh")
+
+[node name="Wall4" type="StaticBody3D" parent="Geometry" unique_id=1143697957]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, -0.881, -10.494)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Geometry/Wall4" unique_id=857775716]
+mesh = SubResource("BoxMesh_ur00s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Wall4" unique_id=1002102081]
+shape = SubResource("BoxShape3D_wndkh")
+
 [node name="Players" type="Node3D" parent="." unique_id=1364935372]
+
+[node name="SpawnPoints" type="Node3D" parent="." unique_id=1466903113]
+
+[node name="Spawn1" type="Marker3D" parent="SpawnPoints" unique_id=1162489980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 7.5)
+
+[node name="Spawn2" type="Marker3D" parent="SpawnPoints" unique_id=291064878]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 2.5)
+
+[node name="Spawn3" type="Marker3D" parent="SpawnPoints" unique_id=1987888205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -2.5)
+
+[node name="Spawn4" type="Marker3D" parent="SpawnPoints" unique_id=434803279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -7.5)
+
+[node name="Spawn5" type="Marker3D" parent="SpawnPoints" unique_id=964606272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 7.5)
+
+[node name="Spawn6" type="Marker3D" parent="SpawnPoints" unique_id=2049787451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 2.5)
+
+[node name="Spawn7" type="Marker3D" parent="SpawnPoints" unique_id=1760296452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -2.5)
+
+[node name="Spawn8" type="Marker3D" parent="SpawnPoints" unique_id=1194897295]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -7.5)
 
 [node name="WorldEnvironment" parent="." unique_id=1186333840 instance=ExtResource("2_x25rp")]
 

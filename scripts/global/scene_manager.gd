@@ -1,5 +1,7 @@
 extends Node
 
+signal finished_loading
+
 var changing_scenes: bool = false
 
 func _process(_delta: float) -> void:
