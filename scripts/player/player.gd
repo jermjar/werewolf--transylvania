@@ -1,6 +1,13 @@
 class_name Player extends CharacterBody3D
 
-@export var camera_controller: CameraController
+@onready var steam_name_label: Label3D = $SteamName
+@onready var camera_controller: CameraController = $CameraController
+@onready var camera: Camera3D = $CameraController/Camera3D
+@onready var head: MeshInstance3D = $HeadMesh
+@onready var body: MeshInstance3D = $BodyMesh
+
+@export var steam_id: int = 0
+@export var steam_name: String
 
 var current_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_CAPTURED
 var mouse_sensitivity: float = 0.0015
@@ -13,8 +20,20 @@ var speed: float = 5.0
 var acceleration: float = 0.2
 var deceleration: float = 0.5
 
+func _enter_tree():
+	set_multiplayer_authority(name.to_int())
+
 func _ready() -> void:
+	steam_name_label.text = steam_name
+	camera.current = is_multiplayer_authority()
+	#set_process_unhandled_input(is_multiplayer_authority())
+	#set_physics_process(is_multiplayer_authority())
 	Input.mouse_mode = current_mouse_mode
+	
+	if is_multiplayer_authority():
+		steam_name_label.hide()
+		head.hide()
+		body.hide()
 
 func _unhandled_input(event: InputEvent) -> void:
 	capture_mouse = event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED

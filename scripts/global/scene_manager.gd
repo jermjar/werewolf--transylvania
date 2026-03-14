@@ -26,7 +26,7 @@ func _load_progress(scene: String) -> void:
 				break
 				
 			ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-				print("- LOADING IN PROGRESS -")
+				changing_scenes = true
 				
 			ResourceLoader.THREAD_LOAD_FAILED:
 				print("- LOADING FAILED -")
