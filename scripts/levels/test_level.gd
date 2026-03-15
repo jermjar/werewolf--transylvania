@@ -26,6 +26,12 @@ func _ready() -> void:
 		await get_tree().process_frame
 		game_loaded.rpc()
 
+## HACK - Extremely quick way to test leaving games
+##        CHANGE THIS TO A MENU WHEN YOU HIT ESC
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_on_server_disconnected()
+
 @rpc("call_local", "reliable")
 func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
@@ -48,5 +54,6 @@ func delete_player(id: int):
 	players.get_node(str(id)).queue_free()
 
 func _on_server_disconnected() -> void:
-	SceneManager.change_scene("uid://bvuq245igqp4l")
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	SceneManager.change_scene("uid://dlgk7ywyn41us")
 	Networking.reset_network()
