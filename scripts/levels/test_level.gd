@@ -22,8 +22,9 @@ func _ready() -> void:
 	for id in Networking.lobby_members:
 		add_player(id, Networking.lobby_members[id])
 	
-	await get_tree().process_frame
-	game_loaded.rpc()
+	if multiplayer.is_server():
+		await get_tree().process_frame
+		game_loaded.rpc()
 
 @rpc("call_local", "reliable")
 func game_loaded() -> void:
