@@ -5,10 +5,10 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
-
 [sub_resource type="BoxMesh" id="BoxMesh_dovo2"]
 size = Vector3(0.5, 0.25, 0.5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
 
 [node name="Player" type="CharacterBody3D" unique_id=1592071486]
 script = ExtResource("1_8afob")
@@ -21,6 +21,10 @@ text = "NULL"
 [node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=62681335]
 mesh = SubResource("CapsuleMesh_8afob")
 
+[node name="HeadMesh" type="MeshInstance3D" parent="." unique_id=1892059129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48904562, -0.5133159)
+mesh = SubResource("BoxMesh_dovo2")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=188188067]
 shape = SubResource("CapsuleShape3D_8afob")
 debug_color = Color(0, 1, 1, 1)
@@ -31,7 +35,3 @@ script = ExtResource("2_dovo2")
 player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController" unique_id=1448004898]
-
-[node name="HeadMesh" type="MeshInstance3D" parent="." unique_id=1892059129]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48904562, -0.5133159)
-mesh = SubResource("BoxMesh_dovo2")

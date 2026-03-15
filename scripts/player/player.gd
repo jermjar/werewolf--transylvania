@@ -26,8 +26,8 @@ func _enter_tree():
 func _ready() -> void:
 	steam_name_label.text = steam_name
 	camera.current = is_multiplayer_authority()
-	#set_process_unhandled_input(is_multiplayer_authority())
-	#set_physics_process(is_multiplayer_authority())
+	set_process_unhandled_input(is_multiplayer_authority())
+	set_physics_process(is_multiplayer_authority())
 	Input.mouse_mode = current_mouse_mode
 	
 	if is_multiplayer_authority():

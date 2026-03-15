@@ -13,11 +13,24 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -240.0
-offset_top = -135.0
+offset_top = -165.0
 offset_right = 240.0
-offset_bottom = 135.0
+offset_bottom = 165.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="TitleLabel" type="RichTextLabel" parent="MainMenuButtons" unique_id=443895394]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+text = "Werewolf: Transylvania"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="MainMenuButtons" unique_id=348643020]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Multiplayer" type="Button" parent="MainMenuButtons" unique_id=1890322187]
 unique_name_in_owner = true
