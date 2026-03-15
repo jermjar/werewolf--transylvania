@@ -221,8 +221,7 @@ func _update_lobby_player_list(players) -> void:
 			player_scene.get_node("Ready").disabled = true
 		if SteamInit.steam_id == Steam.getLobbyOwner(Networking.lobby_id):
 			player_scene.get_node("Kick").show()
-		print("_update_lobby_player_list: " + str(player))
-		print("lobby_members: ", Networking.lobby_members)
+		print("_update_lobby_player_list: ", str(player), " lobby_members: ", Networking.lobby_members)
 
 func _on_send_chat(message: String = "") -> void:
 	if message.length() == 0:

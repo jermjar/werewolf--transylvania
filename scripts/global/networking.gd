@@ -32,9 +32,11 @@ func _ready() -> void:
 	Steam.lobby_created.connect(_on_lobby_created)
 
 func join_lobby(this_lobby_id: int) -> void:
+	print("join_lobby()")
 	Steam.joinLobby(this_lobby_id)
 
 func create_lobby() -> void:
+	print("create_lobby()")
 	if lobby_id == 0:
 		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
 		print("Lobby Created!")
@@ -73,6 +75,7 @@ func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
 	join_lobby(this_lobby_id)
 
 func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
+	print("_on_lobby_joined()")
 	if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
 		var id = Steam.getLobbyOwner(this_lobby_id)
 		if id != Steam.getSteamID():
@@ -96,6 +99,7 @@ func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, resp
 		print("Failed to join this chat room: %s" % fail_reason)
 
 func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
+	print("_on_lobby_created()")
 	if connect == 1:
 		## Set the lobby ID
 		lobby_id = this_lobby_id
@@ -121,6 +125,7 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 #region Peer Signals
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
+	print("_player_connected()")
 	print("lobby_members before: ", lobby_members)
 	lobby_members[id] = peer.get_steam64_from_peer_id(id)
 	print("lobby_members after : ", lobby_members)
@@ -129,6 +134,7 @@ func _player_connected(id):
 
 # Ran when peers disconnect from the lobby
 func _player_disconnected(id):
+	print("_player_disconnected()")
 	print("Player Disconnected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	lobby_members.erase(id)
 	lobby_members_ready.erase(id)
@@ -136,17 +142,21 @@ func _player_disconnected(id):
 
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
+	print("_connected_to_server()")
 	connection_success.emit()
 
 func _connection_failed():
+	print("_connection_failed()")
 	connection_failed.emit()
 
 # Ran when peer disconnects from a host
 func _server_disconnected():
+	print("_server_disconnected()")
 	reset_network()
 #endregion
 
 func reset_network():
+	print("reset_network()")
 	multiplayer.multiplayer_peer.close()
 	Steam.leaveLobby(lobby_id)
 	lobby_members = {}
