@@ -143,6 +143,7 @@ func _player_disconnected(id):
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
 	print("_connected_to_server()")
+	_player_connected(multiplayer.get_unique_id())
 	connection_success.emit()
 
 func _connection_failed():

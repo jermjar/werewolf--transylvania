@@ -13,9 +13,9 @@ func _ready() -> void:
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	# I don't understand the purpose for this yet
-	if not multiplayer.is_server(): 
-		print("if not multiplayer.is_server()")
-		return
+	#if not multiplayer.is_server(): 
+		#print("if not multiplayer.is_server()")
+		#return
 	
 	# for some reason an example used an await above this
 	await get_tree().create_timer(1.0).timeout
