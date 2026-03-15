@@ -17,11 +17,11 @@ func _ready() -> void:
 		return
 	
 	# for some reason an example used an await above this
-	# await get_tree().create_timer(1.0).timeout
+	#await get_tree().create_timer(1.0).timeout
 	for id in Networking.lobby_members:
 		add_player(id, Networking.lobby_members[id])
 	
-	# await get_tree().process_frame
+	#await get_tree().process_frame
 	game_loaded.rpc()
 
 @rpc("call_local", "reliable")
@@ -34,7 +34,8 @@ func add_player(id: int, steam_id: int) -> void:
 	player_controller.steam_id = steam_id
 	player_controller.steam_name = _name
 	player_controller.name = str(id)
-	players.call_deferred("add_child", player_controller)
+	player_controller.set_multiplayer_authority(name.to_int())
+	players.add_child(player_controller)
 	print("add_player -> spawned: %s, %s" % [id, _name])
 
 func _on_player_disconnected(id: int) -> void:

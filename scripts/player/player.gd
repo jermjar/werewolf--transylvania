@@ -21,9 +21,10 @@ var acceleration: float = 0.2
 var deceleration: float = 0.5
 
 func _enter_tree():
-	set_multiplayer_authority(name.to_int())
+	pass
 
 func _ready() -> void:
+	print("Authority: ", get_multiplayer_authority(), " Peer ID: ", multiplayer.get_unique_id())
 	steam_name_label.text = steam_name
 	camera.current = is_multiplayer_authority()
 	set_process_unhandled_input(is_multiplayer_authority())
