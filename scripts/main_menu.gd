@@ -39,7 +39,8 @@ extends CanvasLayer
 var join_id: int = 0
 
 func _ready() -> void:
-	## Main MenuSignals
+	SceneManager.changing_scenes = false
+	## Main Menu Signals
 	multiplayer_button.button_up.connect(_on_multiplayer_button_up)
 	options_button.button_up.connect(_on_options_button_up)
 	quit_button.button_up.connect(_on_quit_button_up)
