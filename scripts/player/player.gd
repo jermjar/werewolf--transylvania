@@ -21,7 +21,7 @@ var acceleration: float = 0.2
 var deceleration: float = 0.5
 
 func _enter_tree():
-	pass
+	set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
 	print("Authority: ", get_multiplayer_authority(), " Peer ID: ", multiplayer.get_unique_id())
