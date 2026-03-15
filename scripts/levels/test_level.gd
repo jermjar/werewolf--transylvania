@@ -6,6 +6,7 @@ extends Node3D
 # Not sure if this is needed, but I'm putting it here so I don't forget it exists
 func _enter_tree() -> void:
 	print("lobby_members: " + str(Networking.lobby_members))
+	get_tree().paused = true
 
 func _ready() -> void:
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
@@ -27,6 +28,7 @@ func _ready() -> void:
 @rpc("call_local", "reliable")
 func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
+	get_tree().paused = false
 
 func add_player(id: int, steam_id: int) -> void:
 	var _name = Steam.getFriendPersonaName(steam_id)
