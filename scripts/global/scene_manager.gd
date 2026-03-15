@@ -39,6 +39,7 @@ func _load_progress(scene: String) -> void:
 				get_tree().current_scene.queue_free()
 				get_tree().root.add_child(loaded_scene)
 				get_tree().current_scene = loaded_scene
+				await finished_loading
 				changing_scenes = false
 				break
 	return
