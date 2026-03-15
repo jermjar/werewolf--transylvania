@@ -35,8 +35,10 @@ func _load_progress(scene: String) -> void:
 				
 			ResourceLoader.THREAD_LOAD_LOADED:
 				print("- LOADING COMPLETE -")
-				var loaded_scene: PackedScene = ResourceLoader.load_threaded_get(scene)
-				get_tree().change_scene_to_packed(loaded_scene)
+				var loaded_scene = ResourceLoader.load_threaded_get(scene).instantiate()
+				get_tree().current_scene.queue_free()
+				get_tree().root.add_child(loaded_scene)
+				get_tree().current_scene = loaded_scene
 				changing_scenes = false
 				break
 	return

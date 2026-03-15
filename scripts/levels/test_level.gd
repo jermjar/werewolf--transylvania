@@ -17,11 +17,11 @@ func _ready() -> void:
 		return
 	
 	# for some reason an example used an await above this
-	await get_tree().create_timer(1.0).timeout
+	# await get_tree().create_timer(1.0).timeout
 	for id in Networking.lobby_members:
 		add_player(id, Networking.lobby_members[id])
 	
-	await get_tree().process_frame
+	# await get_tree().process_frame
 	game_loaded.rpc()
 
 @rpc("call_local", "reliable")
