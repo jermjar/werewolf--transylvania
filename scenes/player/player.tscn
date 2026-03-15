@@ -10,6 +10,17 @@ size = Vector3(0.5, 0.25, 0.5)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dovo2"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:steam_id")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
 [node name="Player" type="CharacterBody3D" unique_id=1592071486]
 script = ExtResource("1_8afob")
 
@@ -35,3 +46,6 @@ script = ExtResource("2_dovo2")
 player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController" unique_id=1448004898]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=240302807]
+replication_config = SubResource("SceneReplicationConfig_dovo2")
