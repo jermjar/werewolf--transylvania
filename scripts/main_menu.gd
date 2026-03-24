@@ -73,11 +73,11 @@ func _ready() -> void:
 	
 	_check_command_line()
 
-#func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
-	## Make sure you're in a lobby and this user is valid or Steam might spam your console log
-	#if lobby_id > 0:
-		#print("A user (%s) had information change, update the lobby list" % this_steam_id)
-		#get_lobby_members()
+func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
+	# Make sure you're in a lobby or Steam might spam your console log
+	if Networking.lobby_id > 0:
+		print("A user (%s) had information change, update the lobby list" % this_steam_id)
+		_update_lobby_player_list.rpc(Networking.lobby_members)
 
 #region JOIN LOBBY BROWSER
 func _refresh_lobbies() -> void:
@@ -86,7 +86,7 @@ func _refresh_lobbies() -> void:
 	
 	# Set filters
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
-	#Steam.addRequestLobbyListStringFilter("unique_lobby_id", Networking.UNIQUE_LOBBY_ID, Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
+	Steam.addRequestLobbyListStringFilter("unique_lobby_id", Networking.UNIQUE_LOBBY_ID, Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
 	
 	# Triggers _update_lobbies()
 	Steam.requestLobbyList()
