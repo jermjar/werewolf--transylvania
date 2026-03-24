@@ -1,18 +1,58 @@
 [gd_scene format=3 uid="uid://5hlo1lcus3f3"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yy1wl"]
+bg_color = Color(0.15847227, 0.15847233, 0.15847221, 1)
+corner_radius_top_left = 16
+corner_radius_bottom_left = 16
+corner_detail = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4804"]
+bg_color = Color(0.40784314, 0.40784314, 0.40784314, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f7tcx"]
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_detail = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ap35"]
+bg_color = Color(0.65882355, 0.65882355, 0.65882355, 1)
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_detail = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2lar5"]
+bg_color = Color(0.40784314, 0.40784314, 0.40784314, 1)
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_detail = 16
+
 [node name="LobbyServer" type="HBoxContainer" unique_id=922062452]
 offset_right = 13.0
 offset_bottom = 35.0
 
-[node name="Button" type="Button" parent="." unique_id=1256563204]
-custom_minimum_size = Vector2(0, 35)
+[node name="ServerNameLabel" type="Label" parent="." unique_id=1984435495]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="." unique_id=1799811037]
-layout_mode = 2
+size_flags_vertical = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_yy1wl")
+horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Spacer" type="Control" parent="." unique_id=1829521371]
+[node name="PlayerCountLabel" type="Label" parent="." unique_id=1799811037]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_j4804")
+vertical_alignment = 1
+
+[node name="JoinButton" type="Button" parent="." unique_id=1256563204]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_f7tcx")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_7ap35")
+theme_override_styles/hover = SubResource("StyleBoxFlat_2lar5")
+text = "  Join  "
+
+[node name="Spacer" type="Control" parent="." unique_id=161200460]
 custom_minimum_size = Vector2(5, 0)
 layout_mode = 2

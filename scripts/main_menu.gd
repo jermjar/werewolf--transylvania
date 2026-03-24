@@ -9,7 +9,6 @@ extends CanvasLayer
 # Join Lobby Container references
 @onready var join_lobby_container: VBoxContainer = $JoinLobbyContainer
 @onready var lobby_scroll_container: ScrollContainer = %Lobby_ScrollContainer
-@onready var join_lobby_button: Button = %JoinLobby
 @onready var create_lobby_button_join: Button = %CreateLobby_Join
 @onready var refresh_button: Button = %Refresh
 @onready var back_button_join: Button = %Back_Join
@@ -36,8 +35,6 @@ extends CanvasLayer
 @onready var lobby_server = load("res://scenes/lobby/lobby_server.tscn")
 @onready var lobby_player = load("res://scenes/lobby/lobby_player.tscn")
 
-var join_id: int = 0
-
 func _ready() -> void:
 	SceneManager.changing_scenes = false
 	## Main Menu Signals
@@ -46,7 +43,6 @@ func _ready() -> void:
 	quit_button.button_up.connect(_on_quit_button_up)
 	
 	## Join Lobby Signals
-	join_lobby_button.button_up.connect(_on_join_lobby_button_up)
 	create_lobby_button_join.button_up.connect(_on_create_lobby_button_up.bind(0))
 	refresh_button.button_up.connect(_on_refresh_button_up)
 	back_button_join.button_up.connect(_on_back_button_up.bind(0))
@@ -90,7 +86,7 @@ func _refresh_lobbies() -> void:
 	
 	# Set filters
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
-	Steam.addRequestLobbyListStringFilter("unique_lobby_id", Networking.UNIQUE_LOBBY_ID, Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
+	#Steam.addRequestLobbyListStringFilter("unique_lobby_id", Networking.UNIQUE_LOBBY_ID, Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
 	
 	# Triggers _update_lobbies()
 	Steam.requestLobbyList()
@@ -103,16 +99,16 @@ func _update_lobbies(these_lobbies: Array) -> void:
 		var num_of_members: int = Steam.getNumLobbyMembers(this_lobby)
 		var lobby_server = lobby_server.instantiate()
 		
-		lobby_server.get_node("Button").pressed.connect(
-			_on_lobby_selected.bind(this_lobby)
+		lobby_server.get_node("ServerNameLabel").set_text(_name)
+		lobby_server.get_node("PlayerCountLabel").set_text(" %s/%s " % [num_of_members, SteamInit.LOBBY_MEMBERS_MAX])
+		lobby_server.get_node("JoinButton").pressed.connect(
+			_on_join_lobby_button_up.bind(this_lobby)
 		)
-		lobby_server.get_node("Button").set_text(_name)
-		lobby_server.get_node("Label").set_text("%s/%s" % [num_of_members, SteamInit.LOBBY_MEMBERS_MAX])
 		
 		lobby_scroll_container.get_child(0).add_child(lobby_server)
 
-func _on_lobby_selected(_this_lobby_id: int) -> void:
-	join_id = _this_lobby_id
+func _on_join_lobby_button_up(this_lobby_id: int) -> void:
+	Networking.join_lobby(this_lobby_id)
 #endregion
 
 #region MAIN MENU BUTTONS
@@ -129,9 +125,6 @@ func _on_quit_button_up() -> void:
 #endregion
 
 #region LOBBY BUTTONS
-func _on_join_lobby_button_up() -> void:
-	Networking.join_lobby(join_id)
-
 # There are two create lobby buttons, so I'm binding an ID to
 # them so I don't have to use two separate functions
 func _on_create_lobby_button_up(button_id: int) -> void:
