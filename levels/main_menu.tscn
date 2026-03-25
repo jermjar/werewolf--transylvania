@@ -134,6 +134,7 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Lobby Name"
+max_length = 32
 
 [node name="Buttons" type="HBoxContainer" parent="CanvasLayer/CreateLobbyContainer" unique_id=842661927]
 layout_mode = 2
