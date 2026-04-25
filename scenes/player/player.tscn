@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dpwm7kp3qhfax" path="res://scripts/player/player.gd" id="1_8afob"]
 [ext_resource type="Script" uid="uid://cd44p07bqbffd" path="res://scripts/player/camera_controller.gd" id="2_dovo2"]
+[ext_resource type="PackedScene" uid="uid://ch1s0xi13c0sa" path="res://scenes/components/health_component.tscn" id="3_gmlin"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
@@ -21,8 +22,9 @@ properties/2/path = NodePath(".:steam_id")
 properties/2/spawn = true
 properties/2/replication_mode = 2
 
-[node name="Player" type="CharacterBody3D" unique_id=1592071486]
+[node name="Player" type="CharacterBody3D" unique_id=1592071486 node_paths=PackedStringArray("health_component")]
 script = ExtResource("1_8afob")
+health_component = NodePath("HealthComponent")
 
 [node name="SteamName" type="Label3D" parent="." unique_id=1495183007]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1941276, 0)
@@ -46,6 +48,9 @@ script = ExtResource("2_dovo2")
 player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController" unique_id=1448004898]
+
+[node name="HealthComponent" parent="." unique_id=390150431 instance=ExtResource("3_gmlin")]
+unique_name_in_owner = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=240302807]
 replication_config = SubResource("SceneReplicationConfig_dovo2")

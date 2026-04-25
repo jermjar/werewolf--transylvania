@@ -9,6 +9,9 @@ class_name Player extends CharacterBody3D
 @export var steam_id: int = 0
 @export var steam_name: String
 
+# Components
+@export var health_component: HealthComponent
+
 var current_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_CAPTURED
 var mouse_sensitivity: float = 0.0015
 var capture_mouse: bool
@@ -30,6 +33,8 @@ func _ready() -> void:
 	set_process_unhandled_input(is_multiplayer_authority())
 	set_physics_process(is_multiplayer_authority())
 	Input.mouse_mode = current_mouse_mode
+	add_to_group("player")
+	health_component.died.connect(_on_died)
 	
 	if is_multiplayer_authority():
 		steam_name_label.hide()
@@ -66,3 +71,8 @@ func _physics_process(delta: float) -> void:
 
 func update_rotation(rotation_input) -> void:
 	global_transform.basis = Basis.from_euler(rotation_input)
+
+func _on_died() -> void:
+	var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
+	level_camera.current = true
+	queue_free()

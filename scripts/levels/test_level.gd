@@ -2,6 +2,7 @@ extends Node3D
 
 @onready var player_scene = preload("res://scenes/player/player.tscn")
 @onready var players: Node3D = $Players
+@onready var game_menu: Control = $UI/GameMenu
 
 # Not sure if this is needed, but I'm putting it here so I don't forget it exists
 func _enter_tree() -> void:
@@ -11,6 +12,10 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	
+	# HACK - I don't like having the code here
+	# Connect GameMenu buttons
+	game_menu.leave_game_button.button_up.connect(_on_server_disconnected)
 	
 	# I don't understand the purpose for this yet
 	#if not multiplayer.is_server(): 
@@ -26,11 +31,15 @@ func _ready() -> void:
 		await get_tree().process_frame
 		game_loaded.rpc()
 
-## HACK - Extremely quick way to test leaving games
-##        CHANGE THIS TO A MENU WHEN YOU HIT ESC
+# HACK - I don't like having the code here
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		_on_server_disconnected()
+		if game_menu.visible:
+			game_menu.hide()
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		elif !game_menu.visible:
+			game_menu.show()
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 @rpc("call_local", "reliable")
 func game_loaded() -> void:

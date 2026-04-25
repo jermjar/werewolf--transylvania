@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://ba4l440wfmfi7"]
+
+[ext_resource type="Script" uid="uid://bqdkrdrhfl3wd" path="res://scripts/ui/game_menu.gd" id="1_5s0hc"]
+
+[node name="GameMenu" type="Control" unique_id=700127644]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5s0hc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1189061354]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReturnButton" type="Button" parent="VBoxContainer" unique_id=1100959322]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+text = "Return"
+
+[node name="Spacer" type="Control" parent="VBoxContainer" unique_id=1764277167]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OptionsButton" type="Button" parent="VBoxContainer" unique_id=1776343228]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+disabled = true
+text = "Options"
+
+[node name="Spacer2" type="Control" parent="VBoxContainer" unique_id=325370424]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeaveGameButton" type="Button" parent="VBoxContainer" unique_id=1014066083]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+text = "Leave Game"
