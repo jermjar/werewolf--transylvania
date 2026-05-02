@@ -17,17 +17,12 @@ func _ready() -> void:
 	# Connect GameMenu buttons
 	game_menu.leave_game_button.button_up.connect(_on_server_disconnected)
 	
-	# I don't understand the purpose for this yet
-	#if not multiplayer.is_server(): 
-		#print("if not multiplayer.is_server()")
-		#return
-	
 	# for some reason an example used an await above this
 	await get_tree().create_timer(1.0).timeout
-	for id in Networking.lobby_members:
-		add_player(id, Networking.lobby_members[id])
 	
 	if multiplayer.is_server():
+		for id in Networking.lobby_members:
+			add_player.rpc(id, Networking.lobby_members[id])
 		await get_tree().process_frame
 		game_loaded.rpc()
 
@@ -46,6 +41,10 @@ func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
 	get_tree().paused = false
 
+func _on_player_disconnected(id: int) -> void:
+	rpc("delete_player", id)
+
+@rpc("call_local", "reliable")
 func add_player(id: int, steam_id: int) -> void:
 	var _name = Steam.getFriendPersonaName(steam_id)
 	var player_controller = player_scene.instantiate()
@@ -54,9 +53,6 @@ func add_player(id: int, steam_id: int) -> void:
 	player_controller.name = str(id)
 	players.add_child(player_controller)
 	print("add_player -> spawned: %s, %s" % [id, _name])
-
-func _on_player_disconnected(id: int) -> void:
-	rpc("delete_player", id)
 
 @rpc("call_local", "reliable")
 func delete_player(id: int):
