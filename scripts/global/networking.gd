@@ -98,9 +98,9 @@ func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, resp
 			Steam.CHAT_ROOM_ENTER_RESPONSE_YOU_BLOCKED_MEMBER: fail_reason = "A user you have blocked is in the lobby."
 		print("Failed to join this chat room: %s" % fail_reason)
 
-func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
+func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 	print("_on_lobby_created()")
-	if connect == 1:
+	if connection_response == 1:
 		## Set the lobby ID
 		lobby_id = this_lobby_id
 		print("Created a lobby: %s" % lobby_id)
@@ -110,6 +110,7 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		
 		## Set some lobby data
 		Steam.setLobbyData(lobby_id, "name", lobby_name)
+		# Evaluate usage of "mode"
 		Steam.setLobbyData(lobby_id, "mode", str(lobby_type))
 		Steam.setLobbyData(lobby_id, "unique_lobby_id", UNIQUE_LOBBY_ID)
 		
@@ -127,7 +128,7 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 func _player_connected(id):
 	print("_player_connected()")
 	print("lobby_members before: ", lobby_members)
-	lobby_members[id] = peer.get_steam64_from_peer_id(id)
+	lobby_members[id] = peer.get_steam_id_for_peer_id(id)
 	print("lobby_members after : ", lobby_members)
 	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	player_list_changed.emit()

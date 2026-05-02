@@ -94,18 +94,19 @@ func _refresh_lobbies() -> void:
 func _update_lobbies(these_lobbies: Array) -> void:
 	for this_lobby in these_lobbies:
 		# Pull lobby data from Steam
-		var _name: String = Steam.getLobbyData(this_lobby, "name")
-		var mode: String = Steam.getLobbyData(this_lobby, "mode")
+		var server_name: String = Steam.getLobbyData(this_lobby, "name")
+		# Evaluate usage of "mode"
+		# var mode: String = Steam.getLobbyData(this_lobby, "mode")
 		var num_of_members: int = Steam.getNumLobbyMembers(this_lobby)
-		var lobby_server = lobby_server.instantiate()
+		var new_lobby_server = lobby_server.instantiate()
 		
-		lobby_server.get_node("ServerNameLabel").set_text(_name)
-		lobby_server.get_node("PlayerCountLabel").set_text(" %s/%s " % [num_of_members, SteamInit.LOBBY_MEMBERS_MAX])
-		lobby_server.get_node("JoinButton").pressed.connect(
+		new_lobby_server.get_node("ServerNameLabel").set_text(server_name)
+		new_lobby_server.get_node("PlayerCountLabel").set_text(" %s/%s " % [num_of_members, SteamInit.LOBBY_MEMBERS_MAX])
+		new_lobby_server.get_node("JoinButton").pressed.connect(
 			_on_join_lobby_button_up.bind(this_lobby)
 		)
 		
-		lobby_scroll_container.get_child(0).add_child(lobby_server)
+		lobby_scroll_container.get_child(0).add_child(new_lobby_server)
 
 func _on_join_lobby_button_up(this_lobby_id: int) -> void:
 	Networking.join_lobby(this_lobby_id)
@@ -226,7 +227,7 @@ func _on_send_chat(message: String = "") -> void:
 			print("Failed to send message")
 		input.clear()
 
-func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id: int, chat_state: int) -> void:
+func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_id: int, chat_state: int) -> void:
 	# Get the user who has made the lobby change
 	var changer_name: String = Steam.getFriendPersonaName(change_id)
 
@@ -250,7 +251,7 @@ func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id:
 	else:
 		print("%s did... something." % changer_name)
 
-func _on_lobby_message(this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
+func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
 	var sender = Steam.getFriendPersonaName(user)
 	if chat_type == 1:
 		chat.append_text(str(sender) + ":  " + str(message) + "\n")

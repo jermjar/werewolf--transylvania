@@ -11,14 +11,14 @@ func _ready() -> void:
 	current_health = max_health
 	_emit_health_changed()
 
-func damage(amount: float) -> void:
+func damage(amount: int) -> void:
 	current_health = clampi(current_health - amount, 0, max_health)
 	_emit_health_changed()
 	if current_health == 0:
 		died.emit()
 		print("died.emit()")
 
-func heal(amount: float) -> void:
+func heal(amount: int) -> void:
 	current_health = clampi(current_health + amount, 0, max_health)
 	_emit_health_changed()
 
