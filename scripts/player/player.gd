@@ -72,8 +72,13 @@ func _physics_process(delta: float) -> void:
 func update_rotation(rotation_input) -> void:
 	global_transform.basis = Basis.from_euler(rotation_input)
 
-## Doesn't work over the network, and switches camera for both peer and host
-func _on_died() -> void:
-	var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
-	level_camera.current = true
+func _on_died():
+	if is_multiplayer_authority():
+		die.rpc()
+
+@rpc("call_local", "reliable")
+func die():
+	if is_multiplayer_authority():
+		var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
+		level_camera.current = true
 	queue_free()
