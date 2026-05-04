@@ -9,4 +9,4 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
-		body.health_component.damage.rpc_id(body.get_multiplayer_authority(), damage_number)
+		body.health_component.apply_damage(damage_number)

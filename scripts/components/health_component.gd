@@ -9,12 +9,20 @@ var current_health: int = 0
 func _ready() -> void:
 	current_health = max_health
 
-@rpc("any_peer", "call_local", "reliable")
-func damage(amount: int) -> void:
+# call_local causing issues with double damage
+# I really don't know a solution to this, I just wish you could call an rpc on yourself
+@rpc("any_peer", "reliable")
+func request_damage(amount: int) -> void:
+	if is_multiplayer_authority():
+		apply_damage(amount)
+
+func apply_damage(amount: int) -> void:
 	current_health = clampi(current_health - amount, 0, max_health)
 	print("ID: %s | Current Health: %s" % [multiplayer.get_remote_sender_id(), current_health])
 	if current_health <= 0:
 		died.emit()
+	else:
+		sync_health.rpc(current_health)
 
 ## TODO - Add multiplayer functionality to this, and add a way to take damage
 #func _ready() -> void:
@@ -42,15 +50,15 @@ func damage(amount: int) -> void:
 		#died.emit()
 		#print("died.emit()")
 #
-#@rpc("call_local", "reliable")
-#func sync_health(new_health: int) -> void:
-	#current_health = new_health
-	#_emit_health_changed()
-#
-## Helper function
-#func _emit_health_changed() -> void:
-	#health_changed.emit(current_health, max_health)
-	#print("HP: %s / %s" % [current_health, max_health])
+@rpc("call_local", "reliable")
+func sync_health(new_health: int) -> void:
+	current_health = new_health
+	_emit_health_changed()
+
+# Helper function
+func _emit_health_changed() -> void:
+	health_changed.emit(current_health, max_health)
+	print("ID: %s | HP: %s / %s" % [multiplayer.get_remote_sender_id(), current_health, max_health])
 	
 #func heal(amount: int) -> void:
 	#var owner_id = get_multiplayer_authority()
