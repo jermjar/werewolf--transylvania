@@ -30,7 +30,8 @@ func _enter_tree():
 
 func _ready() -> void:
 	steam_name_label.text = steam_name
-	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
+	health_component.health_changed.connect(_on_health_changed)
+	_on_health_changed(health_component.current_health, health_component.max_health)
 	
 	if not is_multiplayer_authority(): return
 	
@@ -47,9 +48,9 @@ func _ready() -> void:
 	health_label_3d.hide()
 	head.hide()
 	body.hide()
+	health_label.show()
 	
 	health_component.died.connect(_on_died)
-	health_component.health_changed.connect(_on_health_changed)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return

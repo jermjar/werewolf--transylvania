@@ -63,6 +63,7 @@ replication_config = SubResource("SceneReplicationConfig_dovo2")
 [node name="HUD" type="CanvasLayer" parent="." unique_id=830026410]
 
 [node name="HealthLabel" type="Label" parent="HUD" unique_id=1419267353]
+visible = false
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
