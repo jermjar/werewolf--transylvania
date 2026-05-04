@@ -27,6 +27,8 @@ func _enter_tree():
 	set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
+	if not is_multiplayer_authority(): return
+	
 	print("Authority: ", get_multiplayer_authority(), " Peer ID: ", multiplayer.get_unique_id())
 	steam_name_label.text = steam_name
 	camera.current = is_multiplayer_authority()
@@ -42,6 +44,8 @@ func _ready() -> void:
 		body.hide()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not is_multiplayer_authority(): return
+	
 	capture_mouse = event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if capture_mouse:
 		mouse_input.x += -event.screen_relative.x * mouse_sensitivity
@@ -49,9 +53,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera_controller.update_camera_rotation(mouse_input)
 
 func _process(_delta: float) -> void:
+	if not is_multiplayer_authority(): return
+	
 	mouse_input = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
+	if not is_multiplayer_authority(): return
+	
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	
