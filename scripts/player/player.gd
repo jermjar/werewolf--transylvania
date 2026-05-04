@@ -1,5 +1,7 @@
 class_name Player extends CharacterBody3D
 
+@onready var health_label: Label = $HUD/HealthLabel
+@onready var health_label_3d: Label3D = $HealthLabel3D
 @onready var steam_name_label: Label3D = $SteamName
 @onready var camera_controller: CameraController = $CameraController
 @onready var camera: Camera3D = $CameraController/Camera3D
@@ -27,21 +29,27 @@ func _enter_tree():
 	set_multiplayer_authority(name.to_int(), true)
 
 func _ready() -> void:
+	steam_name_label.text = steam_name
+	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
+	
 	if not is_multiplayer_authority(): return
 	
-	print("Authority: ", get_multiplayer_authority(), " Peer ID: ", multiplayer.get_unique_id())
-	steam_name_label.text = steam_name
+	health_label.text = "HP: %s" % [ health_component.current_health ]
 	camera.current = is_multiplayer_authority()
 	set_process_unhandled_input(is_multiplayer_authority())
 	set_physics_process(is_multiplayer_authority())
 	Input.mouse_mode = current_mouse_mode
+	# Currently damage only works properly because on each PC, 
+	# only the person playing is in group player to take damage
 	add_to_group("player")
-	health_component.died.connect(_on_died)
 	
-	if is_multiplayer_authority():
-		steam_name_label.hide()
-		head.hide()
-		body.hide()
+	steam_name_label.hide()
+	health_label_3d.hide()
+	head.hide()
+	body.hide()
+	
+	health_component.died.connect(_on_died)
+	health_component.health_changed.connect(_on_health_changed)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return
@@ -79,6 +87,11 @@ func _physics_process(delta: float) -> void:
 
 func update_rotation(rotation_input) -> void:
 	global_transform.basis = Basis.from_euler(rotation_input)
+
+func _on_health_changed(current_health: int, max_health: int) -> void:
+	if is_multiplayer_authority():
+		health_label.text = "HP: %s" % [ health_component.current_health ]
+	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
 
 func _on_died():
 	if is_multiplayer_authority():

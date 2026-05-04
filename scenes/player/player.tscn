@@ -31,6 +31,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1941276, 0)
 billboard = 1
 text = "NULL"
 
+[node name="HealthLabel3D" type="Label3D" parent="." unique_id=1676162842]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4405314, 0)
+billboard = 1
+text = "NULL"
+
 [node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=62681335]
 mesh = SubResource("CapsuleMesh_8afob")
 
@@ -54,3 +59,17 @@ unique_name_in_owner = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=240302807]
 replication_config = SubResource("SceneReplicationConfig_dovo2")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=830026410]
+
+[node name="HealthLabel" type="Label" parent="HUD" unique_id=1419267353]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -43.0
+offset_right = 60.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 28
+text = "HP: 100"

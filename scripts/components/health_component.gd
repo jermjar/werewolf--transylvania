@@ -24,32 +24,7 @@ func apply_damage(amount: int) -> void:
 	else:
 		sync_health.rpc(current_health)
 
-## TODO - Add multiplayer functionality to this, and add a way to take damage
-#func _ready() -> void:
-	#current_health = max_health
-	#_emit_health_changed()
-#
-#func damage(amount: int) -> void:
-	#var owner_id = get_multiplayer_authority()
-	#
-	#if is_multiplayer_authority():
-		#_apply_damage(amount)
-	#elif !is_multiplayer_authority():
-		#request_damage.rpc_id(owner_id, amount)
-#
-#@rpc("any_peer", "reliable")
-#func request_damage(amount: int) -> void:
-	#if !is_multiplayer_authority(): return
-	#_apply_damage(amount)
-#
-#func _apply_damage(amount: int) -> void:
-	#current_health = clampi(current_health - amount, 0, max_health)
-	#sync_health.rpc(current_health)
-	#
-	#if current_health == 0:
-		#died.emit()
-		#print("died.emit()")
-#
+# I don't fully understand how this works or if it even does
 @rpc("call_local", "reliable")
 func sync_health(new_health: int) -> void:
 	current_health = new_health
