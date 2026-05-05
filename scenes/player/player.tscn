@@ -53,6 +53,7 @@ script = ExtResource("2_dovo2")
 player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController" unique_id=1448004898]
+physics_interpolation_mode = 2
 
 [node name="HealthComponent" parent="." unique_id=390150431 instance=ExtResource("3_gmlin")]
 unique_name_in_owner = true
