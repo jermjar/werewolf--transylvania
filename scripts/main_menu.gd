@@ -185,7 +185,7 @@ func _on_ready_pressed() -> void:
 	else:
 		Networking.lobby_members_ready.append(id)
 		ready_button.text = "Unready"
-	
+	print("lobby_members_ready: %s" % [ Networking.lobby_members_ready ])
 	var start_game = multiplayer.is_server() and Networking.lobby_members_ready.size() == Steam.getNumLobbyMembers(Networking.lobby_id)
 	start_game_button.disabled = !start_game
 
