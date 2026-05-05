@@ -34,6 +34,8 @@ func _enter_tree():
 	pass
 
 func _ready() -> void:
+	print("Player Name: %s | Peer ID: %s | Authority: %s | Synchronizer Authority: %s | Is Authority: %s" % [ name, multiplayer.get_unique_id(), get_multiplayer_authority(), $MultiplayerSynchronizer.get_multiplayer_authority(), is_multiplayer_authority() ])
+	
 	# Currently damage only works properly because on each PC, 
 	# only the person playing is in group player to take damage
 	add_to_group("player")
