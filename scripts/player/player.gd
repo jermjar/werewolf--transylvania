@@ -29,15 +29,14 @@ func _enter_tree():
 	set_multiplayer_authority(name.to_int(), true)
 
 func _ready() -> void:
+	# Currently damage only works properly because on each PC, 
+	# only the person playing is in group player to take damage
+	add_to_group("player")
 	steam_name_label.text = steam_name
 	camera.current = is_multiplayer_authority()
 	set_process_unhandled_input(is_multiplayer_authority())
 	set_physics_process(is_multiplayer_authority())
 	Input.mouse_mode = current_mouse_mode
-	
-	# Currently damage only works properly because on each PC, 
-	# only the person playing is in group player to take damage
-	add_to_group("player")
 	
 	# Signals
 	health_component.health_changed.connect(_on_health_changed)
