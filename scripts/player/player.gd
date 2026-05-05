@@ -8,6 +8,11 @@ class_name Player extends CharacterBody3D
 @onready var head: MeshInstance3D = $HeadMesh
 @onready var body: MeshInstance3D = $BodyMesh
 
+@export var peer_id: int = 0:
+	set(id):
+		peer_id = id
+		set_multiplayer_authority(name.to_int(), true)
+
 @export var steam_id: int = 0
 @export var steam_name: String
 
@@ -26,7 +31,7 @@ var acceleration: float = 0.2
 var deceleration: float = 0.5
 
 func _enter_tree():
-	set_multiplayer_authority(name.to_int(), true)
+	pass
 
 func _ready() -> void:
 	# Currently damage only works properly because on each PC, 

@@ -50,13 +50,14 @@ func add_player(id: int, steam_id: int) -> void:
 	var player_controller = player_scene.instantiate()
 	player_controller.steam_id = steam_id
 	player_controller.steam_name = _name
+	player_controller.peer_id = id
 	player_controller.name = str(id)
 	players.add_child(player_controller)
 	print("add_player -> spawned: %s, %s" % [id, _name])
 
 @rpc("call_local", "reliable")
 func delete_player(id: int):
-	if players.get_node(str(id)):
+	if players.has_node(str(id)):
 		players.get_node(str(id)).queue_free()
 
 func _on_server_disconnected() -> void:

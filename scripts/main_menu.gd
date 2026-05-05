@@ -163,6 +163,7 @@ func _on_leave_lobby_button_up() -> void:
 	lobby_container.visible = false
 	join_lobby_container.visible = true
 	chat.clear()
+	lobby_name_input.clear()
 	_refresh_lobbies()
 
 func _on_start_game_button_up() -> void:

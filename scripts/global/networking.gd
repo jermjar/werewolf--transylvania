@@ -165,3 +165,4 @@ func reset_network():
 	lobby_members_ready = []
 	peer = null
 	lobby_id = 0
+	lobby_name = "Lobby Name"
