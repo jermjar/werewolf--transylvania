@@ -11,7 +11,7 @@ class_name Player extends CharacterBody3D
 @export var peer_id: int = 0:
 	set(id):
 		peer_id = id
-		set_multiplayer_authority(name.to_int(), true)
+		set_multiplayer_authority(id, true)
 
 @export var steam_id: int = 0
 @export var steam_name: String
