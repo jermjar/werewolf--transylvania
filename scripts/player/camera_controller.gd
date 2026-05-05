@@ -7,6 +7,8 @@ var tilt_upper_limit: int = 90
 var _rotation: Vector3
 
 func update_camera_rotation(input: Vector2) -> void:
+	if not is_multiplayer_authority(): return
+	
 	_rotation.x += input.y
 	_rotation.y += input.x
 	_rotation.x = clamp(_rotation.x, deg_to_rad(tilt_lower_limit), deg_to_rad(tilt_upper_limit))
