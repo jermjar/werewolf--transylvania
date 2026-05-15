@@ -33,10 +33,6 @@ func _ready() -> void:
 	# only the person playing is in group player to take damage
 	add_to_group("player")
 	steam_name_label.text = steam_name
-	camera.current = is_multiplayer_authority()
-	set_process_unhandled_input(is_multiplayer_authority())
-	set_physics_process(is_multiplayer_authority())
-	Input.mouse_mode = current_mouse_mode
 	
 	# Signals
 	health_component.health_changed.connect(_on_health_changed)
@@ -49,6 +45,15 @@ func _ready() -> void:
 		head.hide()
 		body.hide()
 		health_label.show()
+		
+		camera.current = is_multiplayer_authority()
+		set_process_unhandled_input(is_multiplayer_authority())
+		set_physics_process(is_multiplayer_authority())
+		Input.mouse_mode = current_mouse_mode
+	else:
+		set_process_unhandled_input(false)
+		set_process(false)
+		set_physics_process(false)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return

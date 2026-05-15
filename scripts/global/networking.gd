@@ -51,21 +51,22 @@ func load_world() -> void:
 	print("load_world()")
 	SceneManager.change_scene("uid://cy05oxvdhtff6")
 
-func create_socket():
+func host_with_lobby():
+	print("host_with_lobby()")
 	peer = SteamMultiplayerPeer.new()
-	peer.create_host(DEFAULT_PORT)
+	peer.host_with_lobby(lobby_id)
 	multiplayer.set_multiplayer_peer(peer)
-	print("create_socket")
 	
 	_player_connected(1)
 	connection_success.emit()
 
-func connect_socket(steam_id : int):
+func connect_to_lobby():
+	print("connect_to_lobby")
 	peer = SteamMultiplayerPeer.new()
-	peer.create_client(steam_id, DEFAULT_PORT)
+	peer.connect_to_lobby(lobby_id)
 	multiplayer.set_multiplayer_peer(peer)
-	print("connect_socket")
 
+#region Steam Signals
 func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
 	# Get the lobby owner's name
 	var owner_name: String = Steam.getFriendPersonaName(friend_id)
@@ -81,7 +82,7 @@ func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, resp
 		if id != Steam.getSteamID():
 			lobby_id = this_lobby_id
 			lobby_name = Steam.getLobbyData(lobby_id, "name")
-			connect_socket(id)
+			connect_to_lobby()
 	else:
 		# Get the failure reason
 		var fail_reason: String
@@ -114,14 +115,14 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 		Steam.setLobbyData(lobby_id, "mode", str(lobby_type))
 		Steam.setLobbyData(lobby_id, "unique_lobby_id", UNIQUE_LOBBY_ID)
 		
-		## Allow P2P connections to fallback to being relayed through Steam if needed
+		## Use Steam as a relay server so the host doesn't need to port forward
 		var set_relay: bool = Steam.allowP2PPacketRelay(true)
-		print("Allowing Steam to be a relay backup: %s" % set_relay)
 		
-		create_socket()
+		host_with_lobby()
 	else:
 		print("Error creating lobby")
 		connection_failed.emit()
+#endregion
 
 #region Peer Signals
 # Ran when a host starts a lobby, and when peers connect to lobby
