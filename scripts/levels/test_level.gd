@@ -56,7 +56,7 @@ func add_player(id: int, steam_id: int) -> void:
 
 @rpc("call_local", "reliable")
 func delete_player(id: int):
-	if players.get_node(str(id)):
+	if players.has_node(str(id)):
 		players.get_node(str(id)).queue_free()
 
 func _on_server_disconnected() -> void:
