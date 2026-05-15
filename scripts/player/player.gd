@@ -15,7 +15,7 @@ class_name Player extends CharacterBody3D
 @export var health_component: HealthComponent
 
 var current_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_CAPTURED
-var mouse_sensitivity: float = 0.0015
+var mouse_sensitivity: float = 0.0012
 var capture_mouse: bool
 var mouse_input: Vector2
 

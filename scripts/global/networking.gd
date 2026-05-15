@@ -68,11 +68,9 @@ func connect_to_lobby():
 
 #region Steam Signals
 func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
-	# Get the lobby owner's name
+	print("_on_lobby_join_requested()")
 	var owner_name: String = Steam.getFriendPersonaName(friend_id)
 	print("Joining %s's lobby..." % owner_name)
-	
-	# Attempt to join lobby
 	join_lobby(this_lobby_id)
 
 func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
@@ -116,7 +114,7 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 		Steam.setLobbyData(lobby_id, "unique_lobby_id", UNIQUE_LOBBY_ID)
 		
 		## Use Steam as a relay server so the host doesn't need to port forward
-		var set_relay: bool = Steam.allowP2PPacketRelay(true)
+		Steam.allowP2PPacketRelay(true)
 		
 		host_with_lobby()
 	else:
@@ -128,9 +126,7 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
 	print("_player_connected()")
-	print("lobby_members before: ", lobby_members)
 	lobby_members[id] = peer.get_steam_id_for_peer_id(id)
-	print("lobby_members after : ", lobby_members)
 	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	player_list_changed.emit()
 
@@ -145,7 +141,6 @@ func _player_disconnected(id):
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
 	print("_connected_to_server()")
-	_player_connected(multiplayer.get_unique_id())
 	connection_success.emit()
 
 func _connection_failed():
@@ -162,7 +157,8 @@ func reset_network():
 	print("reset_network()")
 	multiplayer.multiplayer_peer.close()
 	Steam.leaveLobby(lobby_id)
+	lobby_id = 0
+	lobby_name = "Lobby Name"
 	lobby_members = {}
 	lobby_members_ready = []
 	peer = null
-	lobby_id = 0

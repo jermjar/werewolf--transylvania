@@ -73,11 +73,12 @@ func _ready() -> void:
 	
 	_check_command_line()
 
-func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
-	# Make sure you're in a lobby or Steam might spam your console log
-	if Networking.lobby_id > 0:
-		print("A user (%s) had information change, update the lobby list" % this_steam_id)
-		_update_lobby_player_list.rpc(Networking.lobby_members)
+# Believe this can be used to detect player name updates while in a lobby
+#func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
+	## Make sure you're in a lobby or Steam might spam your console log
+	#if Networking.lobby_id > 0:
+		#print("A user (%s) had information change, update the lobby list" % this_steam_id)
+		#_update_lobby_player_list.rpc(Networking.lobby_members)
 
 #region JOIN LOBBY BROWSER
 func _refresh_lobbies() -> void:
@@ -95,8 +96,6 @@ func _update_lobbies(these_lobbies: Array) -> void:
 	for this_lobby in these_lobbies:
 		# Pull lobby data from Steam
 		var server_name: String = Steam.getLobbyData(this_lobby, "name")
-		# Evaluate usage of "mode"
-		# var mode: String = Steam.getLobbyData(this_lobby, "mode")
 		var num_of_members: int = Steam.getNumLobbyMembers(this_lobby)
 		var new_lobby_server = lobby_server.instantiate()
 		
@@ -191,13 +190,15 @@ func _on_ready_pressed() -> void:
 #endregion
 
 #region LOBBY FUNCTIONALITY
-## `await get_tree().process_frame` is there because of a race condition for the host.
+## process_frames are there because of a race condition for the host and setting ready buttons
 ## Without them, it will add another host before removing the old one fully, making the name
 ## of the new host "2", which breaks functionality for things like readying up
 @rpc("call_local", "reliable")
 func _update_lobby_player_list(players) -> void:
 	await get_tree().process_frame
+	Networking.lobby_members = players
 	Networking.lobby_members_ready = []
+	
 	for player in player_list_container.get_children():
 		player.queue_free()
 	
@@ -212,10 +213,12 @@ func _update_lobby_player_list(players) -> void:
 		player_scene.get_node("Kick").button_up.connect(_on_kick_button_pressed.bind(player))
 		player_scene.get_node("Ready").button_up.connect(_on_ready_button_pressed)
 		player_list_container.add_child(player_scene, true)
+		
 		if SteamInit.steam_id != steam_id:
 			player_scene.get_node("Ready").disabled = true
 		if SteamInit.steam_id == Steam.getLobbyOwner(Networking.lobby_id):
 			player_scene.get_node("Kick").show()
+		
 		print("_update_lobby_player_list: ", str(player), " lobby_members: ", Networking.lobby_members)
 
 func _on_send_chat(message: String = "") -> void:

@@ -9,26 +9,56 @@ var current_health: int = 0
 func _ready() -> void:
 	current_health = max_health
 
-# I really don't know a solution to this, I just wish you could call an rpc on yourself
+func damage(amount: int) -> void:
+	print("damage()")
+	if is_multiplayer_authority():
+		apply_damage(amount)
+	else:
+		request_damage.rpc_id(get_multiplayer_authority(), amount)
+
 @rpc("any_peer", "reliable")
 func request_damage(amount: int) -> void:
+	print("request_damage()")
 	if is_multiplayer_authority():
+		print("request_damage() -> is_multiplayer_authority()")
 		apply_damage(amount)
 
 func apply_damage(amount: int) -> void:
+	print("apply_damage()")
 	current_health = clampi(current_health - amount, 0, max_health)
 	if current_health <= 0:
 		died.emit()
 	else:
 		sync_health.rpc(current_health)
 
-# I don't fully understand how this works or if it even does
+func heal(amount: int) -> void:
+	print("heal()")
+	if is_multiplayer_authority():
+		apply_heal(amount)
+	else:
+		request_heal.rpc_id(get_multiplayer_authority(), amount)
+
+@rpc("any_peer", "reliable")
+func request_heal(amount: int) -> void:
+	print("request_heal()")
+	if is_multiplayer_authority():
+		print("request_heal() -> is_multiplayer_authority()")
+		apply_heal(amount)
+
+func apply_heal(amount: int) -> void:
+	print("apply_heal()")
+	current_health = clampi(current_health + amount, 0, max_health)
+	sync_health.rpc(current_health)
+
+# I don't fully understand how this works
 @rpc("call_local", "reliable")
 func sync_health(new_health: int) -> void:
+	print("sync_health()")
 	current_health = new_health
 	_emit_health_changed()
 
 # Helper function
 func _emit_health_changed() -> void:
+	print("_emit_health_changed()")
 	health_changed.emit(current_health, max_health)
 	print("ID: %s | HP: %s / %s" % [multiplayer.get_remote_sender_id(), current_health, max_health])
