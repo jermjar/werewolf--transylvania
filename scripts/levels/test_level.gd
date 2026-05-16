@@ -46,13 +46,19 @@ func _on_player_disconnected(id: int) -> void:
 
 @rpc("call_local", "reliable")
 func add_player(id: int, steam_id: int) -> void:
-	var _name = Steam.getFriendPersonaName(steam_id)
-	var player_controller = player_scene.instantiate()
-	player_controller.steam_id = steam_id
-	player_controller.steam_name = _name
-	player_controller.name = str(id)
-	players.add_child(player_controller)
-	print("add_player -> spawned: %s, %s" % [id, _name])
+	match SteamInit.backend:
+		SteamInit.MultiplayerBackend.STEAM:
+			var _name = Steam.getFriendPersonaName(steam_id)
+			var player_controller = player_scene.instantiate()
+			player_controller.steam_id = steam_id
+			player_controller.steam_name = _name
+			player_controller.name = str(id)
+			players.add_child(player_controller)
+			print("add_player -> spawned: %s, %s" % [id, _name])
+		SteamInit.MultiplayerBackend.ENET:
+			var player_controller = player_scene.instantiate()
+			player_controller.name = str(id)
+			players.add_child(player_controller)
 
 @rpc("call_local", "reliable")
 func delete_player(id: int):

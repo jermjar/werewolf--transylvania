@@ -42,6 +42,31 @@ theme = ExtResource("2_duh7t")
 text = "Multiplayer
 "
 
+[node name="EnetHostButton" type="Button" parent="CanvasLayer/MainMenuButtons" unique_id=443966913]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Host"
+
+[node name="EnetStartButton" type="Button" parent="CanvasLayer/MainMenuButtons" unique_id=1802073364]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Start
+"
+
+[node name="EnetJoinButton" type="Button" parent="CanvasLayer/MainMenuButtons" unique_id=234196797]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("2_duh7t")
+text = "Join"
+
 [node name="Options" type="Button" parent="CanvasLayer/MainMenuButtons" unique_id=780092098]
 unique_name_in_owner = true
 layout_mode = 2

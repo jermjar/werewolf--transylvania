@@ -35,43 +35,61 @@ extends CanvasLayer
 @onready var lobby_server = load("res://scenes/lobby/lobby_server.tscn")
 @onready var lobby_player = load("res://scenes/lobby/lobby_player.tscn")
 
+@onready var enet_host_button: Button = %EnetHostButton
+@onready var enet_join_button: Button = %EnetJoinButton
+@onready var enet_start_button: Button = %EnetStartButton
+
 func _ready() -> void:
 	SceneManager.changing_scenes = false
-	## Main Menu Signals
-	multiplayer_button.button_up.connect(_on_multiplayer_button_up)
-	options_button.button_up.connect(_on_options_button_up)
-	quit_button.button_up.connect(_on_quit_button_up)
-	
-	## Join Lobby Signals
-	create_lobby_button_join.button_up.connect(_on_create_lobby_button_up.bind(0))
-	refresh_button.button_up.connect(_on_refresh_button_up)
-	back_button_join.button_up.connect(_on_back_button_up.bind(0))
-	
-	## Create Lobby Signals
-	lobby_name_input.text_changed.connect(_on_lobby_name_text_changed)
-	create_lobby_button_create.button_up.connect(_on_create_lobby_button_up.bind(1))
-	back_button_create.button_up.connect(_on_back_button_up.bind(1))
-	
-	## Lobby Signals
-	input.text_submitted.connect(_on_send_chat)
-	send_button.button_up.connect(_on_send_chat)
-	leave_lobby_button.button_up.connect(_on_leave_lobby_button_up)
-	start_game_button.button_up.connect(_on_start_game_button_up)
-	
-	## Steam Signals
-	Steam.lobby_match_list.connect(_update_lobbies)
-	Steam.lobby_chat_update.connect(_on_lobby_chat_update)
-	Steam.lobby_message.connect(_on_lobby_message)
-	
-	# Don't think I need this... yet at least
-	#Steam.persona_state_change.connect(_on_persona_state_change)
-	
-	## Networking Signals
-	Networking.player_list_changed.connect(_on_player_list_changed)
-	Networking.connection_success.connect(_on_connection_success)
-	Networking.connection_failed.connect(_on_connection_failed)
-	
-	_check_command_line()
+	match SteamInit.backend:
+		SteamInit.MultiplayerBackend.STEAM:
+			## Main Menu Signals
+			multiplayer_button.button_up.connect(_on_multiplayer_button_up)
+			options_button.button_up.connect(_on_options_button_up)
+			quit_button.button_up.connect(_on_quit_button_up)
+			
+			## Join Lobby Signals
+			create_lobby_button_join.button_up.connect(_on_create_lobby_button_up.bind(0))
+			refresh_button.button_up.connect(_on_refresh_button_up)
+			back_button_join.button_up.connect(_on_back_button_up.bind(0))
+			
+			## Create Lobby Signals
+			lobby_name_input.text_changed.connect(_on_lobby_name_text_changed)
+			create_lobby_button_create.button_up.connect(_on_create_lobby_button_up.bind(1))
+			back_button_create.button_up.connect(_on_back_button_up.bind(1))
+			
+			## Lobby Signals
+			input.text_submitted.connect(_on_send_chat)
+			send_button.button_up.connect(_on_send_chat)
+			leave_lobby_button.button_up.connect(_on_leave_lobby_button_up)
+			start_game_button.button_up.connect(_on_start_game_button_up)
+			
+			## Steam Signals
+			Steam.lobby_match_list.connect(_update_lobbies)
+			Steam.lobby_chat_update.connect(_on_lobby_chat_update)
+			Steam.lobby_message.connect(_on_lobby_message)
+			
+			# Don't think I need this... yet at least
+			#Steam.persona_state_change.connect(_on_persona_state_change)
+			
+			## Networking Signals
+			Networking.player_list_changed.connect(_on_player_list_changed)
+			Networking.connection_success.connect(_on_connection_success)
+			Networking.connection_failed.connect(_on_connection_failed)
+			
+			_check_command_line()
+		
+		SteamInit.MultiplayerBackend.ENET:
+			multiplayer_button.hide()
+			if OS.has_feature("server"):
+				enet_host_button.show()
+				enet_host_button.button_up.connect(_on_enet_host_button_up)
+				enet_start_button.button_up.connect(_on_enet_start_button_up)
+			else:
+				enet_join_button.show()
+				enet_join_button.button_up.connect(_on_enet_join_button_up)
+			options_button.button_up.connect(_on_options_button_up)
+			quit_button.button_up.connect(_on_quit_button_up)
 
 # Believe this can be used to detect player name updates while in a lobby
 #func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
@@ -319,3 +337,15 @@ func _check_command_line() -> void:
 				## Something like a loading into lobby screen
 				print("Command line lobby ID: %s" % arguments[1])
 				Networking.join_lobby(int(arguments[1]))
+
+func _on_enet_host_button_up() -> void:
+	enet_host_button.disabled = true
+	enet_start_button.show()
+	Networking.enet_host()
+
+func _on_enet_start_button_up() -> void:
+	Networking.start_game()
+
+func _on_enet_join_button_up() -> void:
+	enet_join_button.disabled = true
+	Networking.enet_join()
