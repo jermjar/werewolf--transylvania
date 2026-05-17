@@ -41,9 +41,6 @@ func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
 	get_tree().paused = false
 
-func _on_player_disconnected(id: int) -> void:
-	rpc("delete_player", id)
-
 @rpc("call_local", "reliable")
 func add_player(id: int, steam_id: int) -> void:
 	match SteamInit.backend:
@@ -53,15 +50,14 @@ func add_player(id: int, steam_id: int) -> void:
 			player_controller.steam_id = steam_id
 			player_controller.steam_name = _name
 			player_controller.name = str(id)
-			players.add_child(player_controller)
+			players.call_deferred("add_child", player_controller)
 			print("add_player -> spawned: %s, %s" % [id, _name])
 		SteamInit.MultiplayerBackend.ENET:
 			var player_controller = player_scene.instantiate()
 			player_controller.name = str(id)
-			players.add_child(player_controller)
+			players.call_deferred("add_child", player_controller)
 
-@rpc("call_local", "reliable")
-func delete_player(id: int):
+func _on_player_disconnected(id: int) -> void:
 	if players.has_node(str(id)):
 		players.get_node(str(id)).queue_free()
 

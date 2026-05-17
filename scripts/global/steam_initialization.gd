@@ -11,6 +11,8 @@ var steam_username: String
 var is_online: bool = false
 var is_game_owned: bool = false
 # NOTE - Change this depending on whether or not you want to test locally
+#        Also customize run instances under Debug at the top, and add "server"
+#        feature to the first run instance.
 var backend: MultiplayerBackend = MultiplayerBackend.ENET
 
 func _init() -> void:

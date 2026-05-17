@@ -51,7 +51,8 @@ func start_game() -> void:
 @rpc("call_local", "reliable")
 func load_world() -> void:
 	print("load_world()")
-	SceneManager.change_scene("uid://cy05oxvdhtff6")
+	get_tree().change_scene_to_file("uid://cy05oxvdhtff6")
+	#SceneManager.change_scene("uid://cy05oxvdhtff6")
 
 func host_with_lobby():
 	print("host_with_lobby()")
@@ -161,13 +162,15 @@ func _server_disconnected():
 
 func reset_network():
 	print("reset_network()")
+	if SteamInit.backend == SteamInit.MultiplayerBackend.STEAM:
+		Steam.leaveLobby(lobby_id)
 	multiplayer.multiplayer_peer.close()
-	Steam.leaveLobby(lobby_id)
 	lobby_id = 0
 	lobby_name = "Lobby Name"
 	lobby_members = {}
 	lobby_members_ready = []
 	peer = null
+	enet_peer = null
 
 func enet_host():
 	print("enet_host()")

@@ -29,15 +29,18 @@ func _enter_tree():
 	set_multiplayer_authority(name.to_int(), true)
 
 func _ready() -> void:
-	# Currently damage only works properly because on each PC, 
-	# only the person playing is in group player to take damage
 	add_to_group("player")
-	steam_name_label.text = steam_name
 	
 	# Signals
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
 	_on_health_changed(health_component.current_health, health_component.max_health)
+	
+	match SteamInit.backend:
+		SteamInit.MultiplayerBackend.STEAM:
+			steam_name_label.text = steam_name
+		SteamInit.MultiplayerBackend.ENET:
+			steam_name_label.text = str(name)
 	
 	if is_multiplayer_authority():
 		steam_name_label.hide()
@@ -46,9 +49,11 @@ func _ready() -> void:
 		body.hide()
 		health_label.show()
 		
-		camera.current = is_multiplayer_authority()
 		set_process_unhandled_input(is_multiplayer_authority())
+		set_process(is_multiplayer_authority())
 		set_physics_process(is_multiplayer_authority())
+		
+		camera.current = is_multiplayer_authority()
 		Input.mouse_mode = current_mouse_mode
 	else:
 		set_process_unhandled_input(false)
@@ -56,8 +61,6 @@ func _ready() -> void:
 		set_physics_process(false)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_multiplayer_authority(): return
-	
 	capture_mouse = event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if capture_mouse:
 		mouse_input.x += -event.screen_relative.x * mouse_sensitivity
@@ -65,13 +68,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera_controller.update_camera_rotation(mouse_input)
 
 func _process(_delta: float) -> void:
-	if not is_multiplayer_authority(): return
-	
 	mouse_input = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
-	if not is_multiplayer_authority(): return
-	
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	
@@ -90,8 +89,6 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func update_rotation(rotation_input) -> void:
-	if not is_multiplayer_authority(): return
-	
 	global_transform.basis = Basis.from_euler(rotation_input)
 
 func _on_health_changed(current_health: int, _max_health: int) -> void:
