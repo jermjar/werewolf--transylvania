@@ -7,11 +7,20 @@ signal connection_success()
 const DEFAULT_PORT: int = 8080
 const UNIQUE_LOBBY_ID: String = "54832791483712409738190"
 
+enum MultiplayerBackend { 
+	ENET, 
+	STEAM 
+}
 enum LobbyType {
 	PRIVATE = Steam.LOBBY_TYPE_PRIVATE,
 	FRIENDS_ONLY = Steam.LOBBY_TYPE_FRIENDS_ONLY,
 	PUBLIC = Steam.LOBBY_TYPE_PUBLIC
 }
+
+# NOTE - Change this depending on whether or not you want to test locally
+#        Also customize run instances under Debug at the top, and add "server"
+#        feature to the first run instance.
+var backend: MultiplayerBackend = MultiplayerBackend.STEAM
 var lobby_id: int = 0
 var lobby_type: int = LobbyType.PUBLIC
 var lobby_name: String = "Lobby Name"
@@ -28,7 +37,7 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_connection_failed)
 	multiplayer.server_disconnected.connect(_server_disconnected)
 	
-	if Global.backend == Global.MultiplayerBackend.STEAM:
+	if backend == MultiplayerBackend.STEAM:
 		Steam.join_requested.connect(_on_lobby_join_requested)
 		Steam.lobby_joined.connect(_on_lobby_joined)
 		Steam.lobby_created.connect(_on_lobby_created)
@@ -129,10 +138,10 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
 	print("_player_connected()")
-	match Global.backend:
-		Global.MultiplayerBackend.STEAM:
+	match backend:
+		MultiplayerBackend.STEAM:
 			lobby_members[id] = peer.get_steam_id_for_peer_id(id)
-		Global.MultiplayerBackend.ENET:
+		MultiplayerBackend.ENET:
 			lobby_members[id] = id
 	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	player_list_changed.emit()
@@ -162,7 +171,7 @@ func _server_disconnected():
 
 func reset_network():
 	print("reset_network()")
-	if Global.backend == Global.MultiplayerBackend.STEAM:
+	if backend == MultiplayerBackend.STEAM:
 		Steam.leaveLobby(lobby_id)
 	multiplayer.multiplayer_peer.close()
 	lobby_id = 0

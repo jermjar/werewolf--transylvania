@@ -36,10 +36,10 @@ func _ready() -> void:
 	health_component.died.connect(_on_died)
 	_on_health_changed(health_component.current_health, health_component.max_health)
 	
-	match Global.backend:
-		Global.MultiplayerBackend.STEAM:
+	match Networking.backend:
+		Networking.MultiplayerBackend.STEAM:
 			steam_name_label.text = steam_name
-		Global.MultiplayerBackend.ENET:
+		Networking.MultiplayerBackend.ENET:
 			steam_name_label.text = str(name)
 	
 	if is_multiplayer_authority():

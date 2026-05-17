@@ -49,8 +49,8 @@ func _ready() -> void:
 	create_lobby_container.hide()
 	lobby_container.hide()
 	
-	match Global.backend:
-		Global.MultiplayerBackend.STEAM:
+	match Networking.backend:
+		Networking.MultiplayerBackend.STEAM:
 			## Main Menu Signals
 			multiplayer_button.button_up.connect(_on_multiplayer_button_up)
 			options_button.button_up.connect(_on_options_button_up)
@@ -90,7 +90,7 @@ func _ready() -> void:
 			
 			_check_command_line()
 		
-		Global.MultiplayerBackend.ENET:
+		Networking.MultiplayerBackend.ENET:
 			multiplayer_button.hide()
 			if OS.has_feature("server"):
 				enet_host_button.show()
