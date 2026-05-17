@@ -3,10 +3,34 @@
 [ext_resource type="Script" uid="uid://bvuq245igqp4l" path="res://scripts/main_menu.gd" id="1_0ettg"]
 [ext_resource type="Theme" uid="uid://8qhlaspdedvq" path="res://assets/themes/main_menu.tres" id="2_duh7t"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_duh7t"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.40392157, 0.40392157, 0.40392157, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7rktv"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5294118, 0.5294118, 0.5294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ymyu"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.40392157, 0.40392157, 0.40392157, 1)
+
 [node name="MainMenu" type="Node3D" unique_id=535927768]
+script = ExtResource("1_0ettg")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=5244445]
-script = ExtResource("1_0ettg")
 
 [node name="MainMenuButtons" type="VBoxContainer" parent="CanvasLayer" unique_id=1023629393]
 anchors_preset = 8
@@ -102,6 +126,7 @@ grow_vertical = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_duh7t")
 
 [node name="Lobby_VBoxContainer" type="VBoxContainer" parent="CanvasLayer/JoinLobbyContainer/Lobby_ScrollContainer" unique_id=1006695247]
 layout_mode = 2
@@ -161,6 +186,24 @@ layout_mode = 2
 placeholder_text = "Lobby Name"
 max_length = 32
 
+[node name="LobbyTypes" type="HBoxContainer" parent="CanvasLayer/CreateLobbyContainer" unique_id=1150590885]
+layout_mode = 2
+
+[node name="PublicCheck" type="CheckBox" parent="CanvasLayer/CreateLobbyContainer/LobbyTypes" unique_id=1923454920]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Public"
+
+[node name="PrivateCheck" type="CheckBox" parent="CanvasLayer/CreateLobbyContainer/LobbyTypes" unique_id=904175180]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Private"
+
+[node name="FriendsOnlyCheck" type="CheckBox" parent="CanvasLayer/CreateLobbyContainer/LobbyTypes" unique_id=2094428693]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Friends Only"
+
 [node name="Buttons" type="HBoxContainer" parent="CanvasLayer/CreateLobbyContainer" unique_id=842661927]
 layout_mode = 2
 
@@ -179,7 +222,7 @@ text = "Back"
 
 [node name="LobbyContainer" type="VBoxContainer" parent="CanvasLayer" unique_id=511228592]
 visible = false
-custom_minimum_size = Vector2(960, 540)
+custom_minimum_size = Vector2(1440, 810)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -199,25 +242,33 @@ text = "Lobby Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="CanvasLayer/LobbyContainer" unique_id=889220140]
-layout_mode = 2
-
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/LobbyContainer" unique_id=1299727630]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VSeparator" type="VSeparator" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=1864993896]
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=1986066242]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+theme_override_styles/panel = SubResource("StyleBoxFlat_7rktv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer" unique_id=405599206]
 layout_mode = 2
 
-[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=1509744037]
+[node name="Label" type="Label" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer/VBoxContainer" unique_id=209604980]
+layout_mode = 2
+text = "Players"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer/VBoxContainer" unique_id=1519865781]
+layout_mode = 2
+
+[node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer/VBoxContainer" unique_id=1509744037]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.25
-
-[node name="VSeparator2" type="VSeparator" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=170513659]
-layout_mode = 2
 
 [node name="LobbyChat_ScrollContainer" type="ScrollContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=1730639522]
 unique_name_in_owner = true
@@ -225,6 +276,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.75
+theme_override_styles/panel = SubResource("StyleBoxFlat_6ymyu")
 horizontal_scroll_mode = 0
 
 [node name="Chat" type="RichTextLabel" parent="CanvasLayer/LobbyContainer/HBoxContainer/LobbyChat_ScrollContainer" unique_id=767257833]
@@ -233,9 +285,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 scroll_following = true
-
-[node name="VSeparator3" type="VSeparator" parent="CanvasLayer/LobbyContainer/HBoxContainer" unique_id=905863597]
-layout_mode = 2
 
 [node name="Input_HBoxContainer" type="HBoxContainer" parent="CanvasLayer/LobbyContainer" unique_id=531418216]
 layout_mode = 2

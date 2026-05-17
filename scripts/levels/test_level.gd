@@ -43,8 +43,8 @@ func game_loaded() -> void:
 
 @rpc("call_local", "reliable")
 func add_player(id: int, steam_id: int) -> void:
-	match SteamInit.backend:
-		SteamInit.MultiplayerBackend.STEAM:
+	match Global.backend:
+		Global.MultiplayerBackend.STEAM:
 			var _name = Steam.getFriendPersonaName(steam_id)
 			var player_controller = player_scene.instantiate()
 			player_controller.steam_id = steam_id
@@ -52,7 +52,7 @@ func add_player(id: int, steam_id: int) -> void:
 			player_controller.name = str(id)
 			players.call_deferred("add_child", player_controller)
 			print("add_player -> spawned: %s, %s" % [id, _name])
-		SteamInit.MultiplayerBackend.ENET:
+		Global.MultiplayerBackend.ENET:
 			var player_controller = player_scene.instantiate()
 			player_controller.name = str(id)
 			players.call_deferred("add_child", player_controller)

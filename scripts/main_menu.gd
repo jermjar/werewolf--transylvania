@@ -1,27 +1,30 @@
-extends CanvasLayer
+extends Node3D
 
 # Main Menu references
-@onready var main_menu_container: VBoxContainer = $MainMenuButtons
+@onready var main_menu_container: VBoxContainer = $CanvasLayer/MainMenuButtons
 @onready var multiplayer_button: Button = %Multiplayer
 @onready var options_button: Button = %Options
 @onready var quit_button: Button = %Quit
 
 # Join Lobby Container references
-@onready var join_lobby_container: VBoxContainer = $JoinLobbyContainer
+@onready var join_lobby_container: VBoxContainer = $CanvasLayer/JoinLobbyContainer
 @onready var lobby_scroll_container: ScrollContainer = %Lobby_ScrollContainer
 @onready var create_lobby_button_join: Button = %CreateLobby_Join
 @onready var refresh_button: Button = %Refresh
 @onready var back_button_join: Button = %Back_Join
 
 # Create Lobby Container references
-@onready var create_lobby_container: VBoxContainer = $CreateLobbyContainer
+@onready var create_lobby_container: VBoxContainer = $CanvasLayer/CreateLobbyContainer
 @onready var create_lobby_name_label: Label = %CreateLobbyNameLabel
 @onready var lobby_name_input: LineEdit = %LobbyNameInput
 @onready var create_lobby_button_create: Button = %CreateLobby_Create
 @onready var back_button_create: Button = %Back_Create
+@onready var public_check: CheckBox = %PublicCheck
+@onready var private_check: CheckBox = %PrivateCheck
+@onready var friends_only_check: CheckBox = %FriendsOnlyCheck
 
 # Lobby Container references
-@onready var lobby_container: VBoxContainer = $LobbyContainer
+@onready var lobby_container: VBoxContainer = $CanvasLayer/LobbyContainer
 @onready var lobby_name_label: Label = %LobbyName
 @onready var player_list_container: VBoxContainer = %PlayerList_VBoxContainer
 @onready var lobby_chat_container: ScrollContainer = %LobbyChat_ScrollContainer
@@ -41,8 +44,13 @@ extends CanvasLayer
 
 func _ready() -> void:
 	SceneManager.changing_scenes = false
-	match SteamInit.backend:
-		SteamInit.MultiplayerBackend.STEAM:
+	main_menu_container.show()
+	join_lobby_container.hide()
+	create_lobby_container.hide()
+	lobby_container.hide()
+	
+	match Global.backend:
+		Global.MultiplayerBackend.STEAM:
 			## Main Menu Signals
 			multiplayer_button.button_up.connect(_on_multiplayer_button_up)
 			options_button.button_up.connect(_on_options_button_up)
@@ -57,6 +65,9 @@ func _ready() -> void:
 			lobby_name_input.text_changed.connect(_on_lobby_name_text_changed)
 			create_lobby_button_create.button_up.connect(_on_create_lobby_button_up.bind(1))
 			back_button_create.button_up.connect(_on_back_button_up.bind(1))
+			public_check.toggled.connect(_on_check_toggled.bind("Public"))
+			private_check.toggled.connect(_on_check_toggled.bind("Private"))
+			friends_only_check.toggled.connect(_on_check_toggled.bind("FriendsOnly"))
 			
 			## Lobby Signals
 			input.text_submitted.connect(_on_send_chat)
@@ -79,7 +90,7 @@ func _ready() -> void:
 			
 			_check_command_line()
 		
-		SteamInit.MultiplayerBackend.ENET:
+		Global.MultiplayerBackend.ENET:
 			multiplayer_button.hide()
 			if OS.has_feature("server"):
 				enet_host_button.show()
@@ -150,6 +161,7 @@ func _on_create_lobby_button_up(button_id: int) -> void:
 		0:
 			join_lobby_container.visible = false
 			create_lobby_container.visible = true
+			public_check.button_pressed = true
 		1:
 			Networking.create_lobby()
 			lobby_name_label.text = Networking.lobby_name
@@ -204,6 +216,27 @@ func _on_ready_pressed() -> void:
 	
 	var start_game = multiplayer.is_server() and Networking.lobby_members_ready.size() == Steam.getNumLobbyMembers(Networking.lobby_id)
 	start_game_button.disabled = !start_game
+
+func _on_check_toggled(toggled_on: bool, button_id: String) -> void:
+	match button_id:
+		"Public":
+			if toggled_on:
+				Networking.lobby_type = Networking.LobbyType.PUBLIC
+				private_check.button_pressed = false
+				friends_only_check.button_pressed = false
+		"Private":
+			if toggled_on:
+				Networking.lobby_type = Networking.LobbyType.PRIVATE
+				public_check.button_pressed = false
+				friends_only_check.button_pressed = false
+		"FriendsOnly":
+			if toggled_on:
+				Networking.lobby_type = Networking.LobbyType.FRIENDS_ONLY
+				public_check.button_pressed = false
+				private_check.button_pressed = false
+	
+	if !public_check.button_pressed and !private_check.button_pressed and !friends_only_check.button_pressed:
+		public_check.button_pressed = true
 
 #endregion
 

@@ -28,7 +28,7 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_connection_failed)
 	multiplayer.server_disconnected.connect(_server_disconnected)
 	
-	if SteamInit.backend == SteamInit.MultiplayerBackend.STEAM:
+	if Global.backend == Global.MultiplayerBackend.STEAM:
 		Steam.join_requested.connect(_on_lobby_join_requested)
 		Steam.lobby_joined.connect(_on_lobby_joined)
 		Steam.lobby_created.connect(_on_lobby_created)
@@ -129,10 +129,10 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
 	print("_player_connected()")
-	match SteamInit.backend:
-		SteamInit.MultiplayerBackend.STEAM:
+	match Global.backend:
+		Global.MultiplayerBackend.STEAM:
 			lobby_members[id] = peer.get_steam_id_for_peer_id(id)
-		SteamInit.MultiplayerBackend.ENET:
+		Global.MultiplayerBackend.ENET:
 			lobby_members[id] = id
 	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	player_list_changed.emit()
@@ -162,7 +162,7 @@ func _server_disconnected():
 
 func reset_network():
 	print("reset_network()")
-	if SteamInit.backend == SteamInit.MultiplayerBackend.STEAM:
+	if Global.backend == Global.MultiplayerBackend.STEAM:
 		Steam.leaveLobby(lobby_id)
 	multiplayer.multiplayer_peer.close()
 	lobby_id = 0

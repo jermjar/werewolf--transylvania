@@ -3,25 +3,19 @@ extends Node
 const APP_ID: int = 480
 const LOBBY_MEMBERS_MAX: int = 8
 
-enum MultiplayerBackend { ENET, STEAM }
-
 var steam_enabled: bool = false
 var steam_id: int = 0
 var steam_username: String
 var is_online: bool = false
 var is_game_owned: bool = false
-# NOTE - Change this depending on whether or not you want to test locally
-#        Also customize run instances under Debug at the top, and add "server"
-#        feature to the first run instance.
-var backend: MultiplayerBackend = MultiplayerBackend.ENET
 
 func _init() -> void:
-	if backend == MultiplayerBackend.STEAM:
+	if Global.backend == Global.MultiplayerBackend.STEAM:
 		OS.set_environment("SteamAppId", str(APP_ID))
 		OS.set_environment("SteamGameId", str(APP_ID))
 
 func _ready() -> void:
-	if backend == MultiplayerBackend.STEAM:
+	if Global.backend == Global.MultiplayerBackend.STEAM:
 		_initialize_steam()
 
 func _process(_delta: float) -> void:
