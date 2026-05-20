@@ -4,8 +4,10 @@ signal player_list_changed()
 signal connection_failed()
 signal connection_success()
 
-const DEFAULT_PORT: int = 8080
+# NOTE - Use this to filter out other lobbies under the 480 App ID
+#        Change this number for your game during testing!
 const UNIQUE_LOBBY_ID: String = "54832791483712409738190"
+const DEFAULT_PORT: int = 8080
 
 enum MultiplayerBackend { 
 	ENET, 
@@ -121,7 +123,6 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 		
 		## Set some lobby data
 		Steam.setLobbyData(lobby_id, "name", lobby_name)
-		# Evaluate usage of "mode"
 		Steam.setLobbyData(lobby_id, "mode", str(lobby_type))
 		Steam.setLobbyData(lobby_id, "unique_lobby_id", UNIQUE_LOBBY_ID)
 		

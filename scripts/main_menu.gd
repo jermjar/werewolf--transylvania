@@ -236,7 +236,9 @@ func _on_check_toggled(toggled_on: bool, button_id: String) -> void:
 				private_check.button_pressed = false
 	
 	if !public_check.button_pressed and !private_check.button_pressed and !friends_only_check.button_pressed:
-		public_check.button_pressed = true
+		create_lobby_button_create.disabled = true
+	else:
+		create_lobby_button_create.disabled = false
 
 #endregion
 
@@ -308,7 +310,7 @@ func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_i
 func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
 	var sender = Steam.getFriendPersonaName(user)
 	if chat_type == 1:
-		chat.append_text(str(sender) + ":  " + str(message) + "\n")
+		chat.append_text("%s:  %s\n" % [sender, message])
 	else:
 		match chat_type:
 			2: print(str(sender)+" is typing...\n")

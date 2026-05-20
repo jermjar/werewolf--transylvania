@@ -19,6 +19,10 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.5294118, 0.5294118, 0.5294118, 1)
 
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_duh7t"]
+color = Color(0.5294118, 0.5294118, 0.5294118, 1)
+thickness = 2
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ymyu"]
 draw_center = false
 border_width_left = 2
@@ -263,6 +267,7 @@ vertical_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer/VBoxContainer" unique_id=1519865781]
 layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_duh7t")
 
 [node name="PlayerList_VBoxContainer" type="VBoxContainer" parent="CanvasLayer/LobbyContainer/HBoxContainer/PanelContainer/VBoxContainer" unique_id=1509744037]
 unique_name_in_owner = true
@@ -293,6 +298,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+max_length = 128
 
 [node name="Send" type="Button" parent="CanvasLayer/LobbyContainer/Input_HBoxContainer" unique_id=1557947436]
 unique_name_in_owner = true
