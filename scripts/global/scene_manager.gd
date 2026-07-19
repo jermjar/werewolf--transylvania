@@ -4,6 +4,7 @@ signal finished_loading
 
 var changing_scenes: bool = false
 
+# NOTE - Don't know if this is the best process for loading, especially in Multiplayer
 func _process(_delta: float) -> void:
 	if not changing_scenes: return
 	print("- Changing Scenes -")

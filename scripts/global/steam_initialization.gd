@@ -10,11 +10,13 @@ var is_online: bool = false
 var is_game_owned: bool = false
 
 func _init() -> void:
-	OS.set_environment("SteamAppId", str(APP_ID))
-	OS.set_environment("SteamGameId", str(APP_ID))
+	if Networking.backend == Networking.MultiplayerBackend.STEAM:
+		OS.set_environment("SteamAppId", str(APP_ID))
+		OS.set_environment("SteamGameId", str(APP_ID))
 
 func _ready() -> void:
-	_initialize_steam()
+	if Networking.backend == Networking.MultiplayerBackend.STEAM:
+		_initialize_steam()
 
 func _process(_delta: float) -> void:
 	if steam_enabled:
