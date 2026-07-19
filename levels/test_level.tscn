@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://elbe1afg53ck" path="res://assets/textures/Grass01_NOR_GL.png" id="4_4n8tn"]
 [ext_resource type="Texture2D" uid="uid://1wte0nyciji5" path="res://assets/textures/Grass01_ROUGH.png" id="5_wkb0e"]
 [ext_resource type="Script" uid="uid://ctqiifh8ioyn5" path="res://scripts/test_damage_heal_box.gd" id="7_ly3hx"]
+[ext_resource type="PackedScene" uid="uid://jwx4m7nyd3ex" path="res://scenes/interaction/test_cube_1kg.tscn" id="8_4n8tn"]
 [ext_resource type="PackedScene" uid="uid://ba4l440wfmfi7" path="res://scenes/ui/game_menu.tscn" id="8_wndkh"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_paa45"]
@@ -140,6 +141,9 @@ mesh = SubResource("BoxMesh_ur00s")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Wall4" unique_id=1002102081]
 shape = SubResource("BoxShape3D_wndkh")
+
+[node name="Cube_1kg" parent="Geometry" unique_id=1441000957 instance=ExtResource("8_4n8tn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.879501, 0, 0)
 
 [node name="Players" type="Node3D" parent="." unique_id=1364935372]
 

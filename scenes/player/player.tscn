@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dpwm7kp3qhfax" path="res://scripts/player/player.gd" id="1_8afob"]
 [ext_resource type="Script" uid="uid://cd44p07bqbffd" path="res://scripts/player/camera_controller.gd" id="2_dovo2"]
 [ext_resource type="PackedScene" uid="uid://ch1s0xi13c0sa" path="res://scenes/components/health_component.tscn" id="3_gmlin"]
+[ext_resource type="PackedScene" uid="uid://7lf2jbylc6bl" path="res://scenes/interaction/interaction_controller.tscn" id="3_lvxji"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
@@ -54,6 +55,17 @@ player = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="CameraController" unique_id=1448004898]
 physics_interpolation_mode = 2
+
+[node name="InteractionRayCast3D" type="RayCast3D" parent="CameraController/Camera3D" unique_id=978748140]
+unique_name_in_owner = true
+target_position = Vector3(0, 0, -2)
+
+[node name="InteractionHand" type="Marker3D" parent="CameraController/Camera3D" unique_id=1228361962]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+
+[node name="InteractionController" parent="." unique_id=32777604 instance=ExtResource("3_lvxji")]
+unique_name_in_owner = true
 
 [node name="HealthComponent" parent="." unique_id=390150431 instance=ExtResource("3_gmlin")]
 unique_name_in_owner = true

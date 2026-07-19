@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://jwx4m7nyd3ex"]
+
+[ext_resource type="PackedScene" uid="uid://bejepgjbevc3o" path="res://scenes/components/interaction_component.tscn" id="1_wjq3j"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r81w6"]
+albedo_color = Color(0.5882353, 0.45882353, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a7g22"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nup64"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_wjq3j"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="Cube_1kg" type="RigidBody3D" unique_id=1441000957]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1894644675]
+material_override = SubResource("StandardMaterial3D_r81w6")
+mesh = SubResource("BoxMesh_a7g22")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1693164518]
+shape = SubResource("BoxShape3D_nup64")
+
+[node name="InteractionComponent" parent="." unique_id=541744532 node_paths=PackedStringArray("object_reference") instance=ExtResource("1_wjq3j")]
+object_reference = NodePath("..")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1267318658]
+replication_config = SubResource("SceneReplicationConfig_wjq3j")
