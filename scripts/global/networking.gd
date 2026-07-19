@@ -22,7 +22,7 @@ enum LobbyType {
 # NOTE - Change this depending on whether or not you want to test locally
 #        Also customize run instances under Debug at the top, and add "server"
 #        feature to the first run instance.
-var backend: MultiplayerBackend = MultiplayerBackend.STEAM
+var backend: MultiplayerBackend = MultiplayerBackend.ENET
 var lobby_id: int = 0
 var lobby_type: int = LobbyType.PUBLIC
 var lobby_name: String = "Lobby Name"
