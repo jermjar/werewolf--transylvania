@@ -4,6 +4,7 @@ extends Node3D
 @onready var players: Node3D = $Players
 @onready var spawn_points: Node3D = $SpawnPoints
 @onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
+@onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
 
 # Not sure if this is needed, but I'm putting it here so I don't forget it exists
@@ -41,6 +42,7 @@ func _on_all_peers_loaded() -> void:
 		spawn_index += 1
 
 	game_loaded.rpc()
+	round_manager.start_round()
 
 # HACK - I don't like having the code here
 func _unhandled_input(event: InputEvent) -> void:

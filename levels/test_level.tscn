@@ -10,6 +10,8 @@
 [ext_resource type="Script" uid="uid://ctqiifh8ioyn5" path="res://scripts/test_damage_heal_box.gd" id="7_ly3hx"]
 [ext_resource type="PackedScene" uid="uid://jwx4m7nyd3ex" path="res://scenes/interaction/test_cube_1kg.tscn" id="8_4n8tn"]
 [ext_resource type="PackedScene" uid="uid://ba4l440wfmfi7" path="res://scenes/ui/game_menu.tscn" id="8_wndkh"]
+[ext_resource type="Script" path="res://scripts/game/round_manager.gd" id="9_round"]
+[ext_resource type="PackedScene" path="res://scenes/ui/round_hud.tscn" id="10_hud"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_paa45"]
 albedo_texture = ExtResource("1_ur00s")
@@ -181,7 +183,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -7.5)
 [node name="LevelCamera" type="Camera3D" parent="." unique_id=976224499 groups=["level_camera"]]
 transform = Transform3D(1, 0, 0, 0, 0.9549267, 0.2968416, 0, -0.2968416, 0.9549267, 0, 5.209195, 17.105001)
 
+[node name="RoundManager" type="Node" parent="." unique_id=1873041526]
+script = ExtResource("9_round")
+
+[node name="PhaseTimer" type="Timer" parent="RoundManager" unique_id=1592660387]
+one_shot = true
+
 [node name="UI" type="CanvasLayer" parent="." unique_id=1986386197]
+
+[node name="RoundHUD" parent="UI" unique_id=1046731122 instance=ExtResource("10_hud")]
 
 [node name="GameMenu" parent="UI" unique_id=700127644 instance=ExtResource("8_wndkh")]
 visible = false
