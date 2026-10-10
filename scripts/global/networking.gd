@@ -3,6 +3,7 @@ extends Node
 signal player_list_changed()
 signal connection_failed()
 signal connection_success()
+signal all_peers_loaded()
 
 # NOTE - Use this to filter out other lobbies under the 480 App ID
 #        Change this number for your game during testing!
@@ -28,6 +29,8 @@ var lobby_type: int = LobbyType.PUBLIC
 var lobby_name: String = "Lobby Name"
 var lobby_members := {}
 var lobby_members_ready := []
+# Host only - peers that have finished loading the level
+var loaded_peers: Array[int] = []
 
 var peer: SteamMultiplayerPeer = null
 var enet_peer: ENetMultiplayerPeer = null
@@ -64,6 +67,30 @@ func load_world() -> void:
 	print("load_world()")
 	get_tree().change_scene_to_file("uid://cy05oxvdhtff6")
 	#SceneManager.change_scene("uid://cy05oxvdhtff6")
+
+#region Level Loading
+# Every peer loads the level at its own speed, so each one checks in with the
+# host when its level is ready. The host waits for everyone before spawning.
+# NOTE - This lives here instead of in the level because a client can finish
+#        loading before the host, and the host's level wouldn't exist yet to
+#        receive the message. This autoload always exists.
+func report_level_loaded() -> void:
+	_peer_loaded.rpc_id(1)
+
+# Peer -> Host
+@rpc("any_peer", "call_local", "reliable")
+func _peer_loaded() -> void:
+	loaded_peers.append(multiplayer.get_remote_sender_id())
+	_check_all_loaded()
+
+func _check_all_loaded() -> void:
+	if loaded_peers.is_empty(): return # Nobody is loading a level right now
+	for id in lobby_members:
+		if not loaded_peers.has(id): return
+
+	loaded_peers.clear()
+	all_peers_loaded.emit()
+#endregion
 
 func host_with_lobby():
 	print("host_with_lobby()")
@@ -155,6 +182,11 @@ func _player_disconnected(id):
 	lobby_members_ready.erase(id)
 	player_list_changed.emit()
 
+	# If someone leaves while loading, don't keep waiting for them
+	loaded_peers.erase(id)
+	if multiplayer.is_server():
+		_check_all_loaded()
+
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
 	print("_connected_to_server()")
@@ -179,6 +211,7 @@ func reset_network():
 	lobby_name = "Lobby Name"
 	lobby_members = {}
 	lobby_members_ready = []
+	loaded_peers = []
 	peer = null
 	enet_peer = null
 

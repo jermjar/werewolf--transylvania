@@ -105,4 +105,7 @@ func die():
 	if is_multiplayer_authority():
 		var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
 		level_camera.current = true
-	queue_free()
+	# Players are spawned by the host's PlayerSpawner, so only the host removes
+	# them. The spawner then removes the player for everyone else.
+	if multiplayer.is_server():
+		queue_free()
