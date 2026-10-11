@@ -35,7 +35,10 @@ func _ready() -> void:
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
 	_on_health_changed(health_component.current_health, health_component.max_health)
-	
+
+	if RoundManager.instance:
+		RoundManager.instance.phase_changed.connect(_on_phase_changed)
+
 	match Networking.backend:
 		Networking.MultiplayerBackend.STEAM:
 			steam_name_label.text = steam_name
@@ -96,6 +99,11 @@ func _on_health_changed(current_health: int, _max_health: int) -> void:
 		health_label.text = "HP: %s" % [ health_component.current_health ]
 	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
 
+# Name tags are hidden at night so nobody can tell who the werewolf is
+func _on_phase_changed(phase: RoundManager.Phase) -> void:
+	if is_multiplayer_authority(): return # Our own name tag is always hidden
+	steam_name_label.visible = phase != RoundManager.Phase.NIGHT
+
 func _on_died():
 	if is_multiplayer_authority():
 		die.rpc()
@@ -105,4 +113,7 @@ func die():
 	if is_multiplayer_authority():
 		var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
 		level_camera.current = true
-	queue_free()
+	# Players are spawned by the host's PlayerSpawner, so only the host removes
+	# them. The spawner then removes the player for everyone else.
+	if multiplayer.is_server():
+		queue_free()

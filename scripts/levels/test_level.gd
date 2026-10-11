@@ -2,11 +2,15 @@ extends Node3D
 
 @onready var player_scene = preload("res://scenes/player/player.tscn")
 @onready var players: Node3D = $Players
+@onready var spawn_points: Node3D = $SpawnPoints
+@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
+@onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
 
-# Not sure if this is needed, but I'm putting it here so I don't forget it exists
+# Everyone stays paused until the host has spawned all players and calls
+# game_loaded(), so nobody can move before the round starts
 func _enter_tree() -> void:
-	print("lobby_members: " + str(Networking.lobby_members))
+	Log.debug("lobby_members: " + str(Networking.lobby_members))
 	get_tree().paused = true
 
 func _ready() -> void:
@@ -17,14 +21,29 @@ func _ready() -> void:
 	# Connect GameMenu buttons
 	game_menu.leave_game_button.button_up.connect(_on_server_disconnected)
 	
-	# for some reason an example used an await above this
-	await get_tree().create_timer(1.0).timeout
-	
+	# Must be set on every peer before the host spawns anyone,
+	# which is why it happens before reporting that we're loaded
+	player_spawner.spawn_function = _spawn_player
+
 	if multiplayer.is_server():
-		for id in Networking.lobby_members:
-			add_player.rpc(id, Networking.lobby_members[id])
-		await get_tree().process_frame
-		game_loaded.rpc()
+		Networking.all_peers_loaded.connect(_on_all_peers_loaded, CONNECT_ONE_SHOT)
+	Networking.report_level_loaded()
+
+# Host only - runs once every peer has finished loading the level
+func _on_all_peers_loaded() -> void:
+	var spawn_index: int = 0
+	for id in Networking.lobby_members:
+		# Wraps around if there are more players than spawn points
+		var spawn_point: Marker3D = spawn_points.get_child(spawn_index % spawn_points.get_child_count())
+		player_spawner.spawn({
+			"id": id,
+			"steam_id": Networking.lobby_members[id],
+			"position": spawn_point.global_position,
+		})
+		spawn_index += 1
+
+	game_loaded.rpc()
+	round_manager.start_round()
 
 # HACK - I don't like having the code here
 func _unhandled_input(event: InputEvent) -> void:
@@ -41,23 +60,25 @@ func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
 	get_tree().paused = false
 
-@rpc("call_local", "reliable")
-func add_player(id: int, steam_id: int) -> void:
+# Runs on every peer. When the host calls player_spawner.spawn(data), the
+# spawner runs this with the same data on everyone, then adds the returned
+# player under Players. Don't add_child() it here, the spawner does that.
+func _spawn_player(data: Dictionary) -> Node:
+	var player_controller = player_scene.instantiate()
+	player_controller.name = str(data.id)
+	player_controller.position = data.position
+	player_controller.steam_id = data.steam_id
+
 	match Networking.backend:
 		Networking.MultiplayerBackend.STEAM:
-			var _name = Steam.getFriendPersonaName(steam_id)
-			var player_controller = player_scene.instantiate()
-			player_controller.steam_id = steam_id
-			player_controller.steam_name = _name
-			player_controller.name = str(id)
-			players.call_deferred("add_child", player_controller)
-			print("add_player -> spawned: %s, %s" % [id, _name])
-		Networking.MultiplayerBackend.ENET:
-			var player_controller = player_scene.instantiate()
-			player_controller.name = str(id)
-			players.call_deferred("add_child", player_controller)
+			player_controller.steam_name = Steam.getFriendPersonaName(data.steam_id)
 
+	Log.debug("_spawn_player -> spawned: %s" % data.id)
+	return player_controller
+
+# Host only - removing a spawned player on the host removes it for everyone
 func _on_player_disconnected(id: int) -> void:
+	if not multiplayer.is_server(): return
 	if players.has_node(str(id)):
 		players.get_node(str(id)).queue_free()
 

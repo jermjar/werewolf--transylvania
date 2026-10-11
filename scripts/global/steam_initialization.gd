@@ -26,10 +26,10 @@ func _initialize_steam() -> void:
 	if !Engine.has_singleton("Steam"): get_tree().quit()
 	
 	var initialize_response: Dictionary = Steam.steamInitEx(APP_ID)
-	print ("Did Steam initialize?: %s" % initialize_response)
+	Log.info("Did Steam initialize?: %s" % initialize_response)
 	
 	if initialize_response['status'] > Steam.STEAM_API_INIT_RESULT_OK:
-		print("Failed to initialize Steam, disabling Steam functionality: %s" % initialize_response)
+		Log.error("Failed to initialize Steam, disabling Steam functionality: %s" % initialize_response)
 		steam_enabled = false
 		get_tree().quit()
 
@@ -40,4 +40,4 @@ func _initialize_steam() -> void:
 	steam_username = Steam.getPersonaName()
 	
 	if !is_game_owned:
-		print("User does not own this game")
+		Log.warning("User does not own this game")
