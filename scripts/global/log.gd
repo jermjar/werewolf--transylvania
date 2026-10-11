@@ -11,7 +11,7 @@ enum Level {
 	ERROR    # Something is broken
 }
 
-var level: Level = Level.INFO
+var level: Level = Level.WARNING
 
 func debug(message: String) -> void:
 	_log(Level.DEBUG, message)

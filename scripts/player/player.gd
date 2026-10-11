@@ -14,6 +14,9 @@ class_name Player extends CharacterBody3D
 # Components
 @export var health_component: HealthComponent
 
+# True while a dead player is watching through this player's camera
+var is_spectated: bool = false
+
 var current_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_CAPTURED
 var mouse_sensitivity: float = 0.0012
 var capture_mouse: bool
@@ -99,10 +102,24 @@ func _on_health_changed(current_health: int, _max_health: int) -> void:
 		health_label.text = "HP: %s" % [ health_component.current_health ]
 	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
 
-# Name tags are hidden at night so nobody can tell who the werewolf is
-func _on_phase_changed(phase: RoundManager.Phase) -> void:
-	if is_multiplayer_authority(): return # Our own name tag is always hidden
-	steam_name_label.visible = phase != RoundManager.Phase.NIGHT
+func _on_phase_changed(_phase: RoundManager.Phase) -> void:
+	_update_name_tag()
+
+# Name tags are hidden at night so nobody can tell who the werewolf is.
+# Our own name tag, and the one of a player being spectated, are always hidden.
+func _update_name_tag() -> void:
+	var is_night: bool = RoundManager.instance and RoundManager.instance.phase == RoundManager.Phase.NIGHT
+	steam_name_label.visible = not is_multiplayer_authority() and not is_spectated and not is_night
+
+# Called by the Spectator when a dead player starts or stops watching through
+# this player's eyes. Hides everything that would block or clutter the view.
+func set_spectated(spectated: bool) -> void:
+	is_spectated = spectated
+	head.visible = not spectated
+	body.visible = not spectated
+	health_label_3d.visible = not spectated
+	camera.current = spectated
+	_update_name_tag()
 
 func _on_died():
 	if is_multiplayer_authority():
