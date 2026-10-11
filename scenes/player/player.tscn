@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cd44p07bqbffd" path="res://scripts/player/camera_controller.gd" id="2_dovo2"]
 [ext_resource type="PackedScene" uid="uid://ch1s0xi13c0sa" path="res://scenes/components/health_component.tscn" id="3_gmlin"]
 [ext_resource type="PackedScene" uid="uid://7lf2jbylc6bl" path="res://scenes/interaction/interaction_controller.tscn" id="3_lvxji"]
+[ext_resource type="PackedScene" path="res://scenes/items/fists.tscn" id="4_fists"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
@@ -64,6 +65,8 @@ target_position = Vector3(0, 0, -2)
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
+[node name="Fists" parent="CameraController/Camera3D" unique_id=1203948571 instance=ExtResource("4_fists")]
+
 [node name="InteractionController" parent="." unique_id=32777604 instance=ExtResource("3_lvxji")]
 unique_name_in_owner = true
 
@@ -87,3 +90,21 @@ offset_bottom = -20.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 28
 text = "HP: 100"
+
+[node name="Crosshair" type="Label" parent="HUD" unique_id=1866402957]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1

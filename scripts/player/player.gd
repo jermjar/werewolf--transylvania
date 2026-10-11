@@ -1,12 +1,16 @@
 class_name Player extends CharacterBody3D
 
 @onready var health_label: Label = $HUD/HealthLabel
+@onready var crosshair: Label = $HUD/Crosshair
 @onready var health_label_3d: Label3D = $HealthLabel3D
 @onready var steam_name_label: Label3D = $SteamName
 @onready var camera_controller: CameraController = $CameraController
 @onready var camera: Camera3D = $CameraController/Camera3D
 @onready var head: MeshInstance3D = $HeadMesh
 @onready var body: MeshInstance3D = $BodyMesh
+
+# Whatever the player is holding. Fists for now, the inventory will change this later.
+@onready var equipped_item: Item = $CameraController/Camera3D/Fists
 
 @export var steam_id: int = 0
 @export var steam_name: String
@@ -33,7 +37,7 @@ func _enter_tree():
 
 func _ready() -> void:
 	add_to_group("player")
-	
+
 	# Signals
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
@@ -54,7 +58,8 @@ func _ready() -> void:
 		head.hide()
 		body.hide()
 		health_label.show()
-		
+		crosshair.show()
+
 		set_process_unhandled_input(is_multiplayer_authority())
 		set_process(is_multiplayer_authority())
 		set_physics_process(is_multiplayer_authority())
@@ -72,6 +77,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		mouse_input.x += -event.screen_relative.x * mouse_sensitivity
 		mouse_input.y += -event.screen_relative.y * mouse_sensitivity
 		camera_controller.update_camera_rotation(mouse_input)
+
+	if event.is_action_pressed("use_item"):
+		equipped_item.use()
 
 func _process(_delta: float) -> void:
 	mouse_input = Vector2.ZERO

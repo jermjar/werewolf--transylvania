@@ -25,6 +25,9 @@ func request_damage(amount: int) -> void:
 
 func apply_damage(amount: int) -> void:
 	Log.debug("apply_damage()")
+	# Already dead and waiting to be removed. Without this, extra hits would
+	# emit died again and send a second die() to a player that may be gone.
+	if current_health <= 0: return
 	current_health = clampi(current_health - amount, 0, max_health)
 	if current_health <= 0:
 		died.emit()
