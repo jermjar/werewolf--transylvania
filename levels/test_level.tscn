@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://ctqiifh8ioyn5" path="res://scripts/test_damage_heal_box.gd" id="7_ly3hx"]
 [ext_resource type="PackedScene" uid="uid://jwx4m7nyd3ex" path="res://scenes/interaction/test_cube_1kg.tscn" id="8_4n8tn"]
 [ext_resource type="PackedScene" uid="uid://ba4l440wfmfi7" path="res://scenes/ui/game_menu.tscn" id="8_wndkh"]
-[ext_resource type="Script" path="res://scripts/game/round_manager.gd" id="9_round"]
+[ext_resource type="Script" uid="uid://cwxoe3malifll" path="res://scripts/game/round_manager.gd" id="9_round"]
 [ext_resource type="PackedScene" path="res://scenes/ui/round_hud.tscn" id="10_hud"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_paa45"]

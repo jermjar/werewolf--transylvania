@@ -106,7 +106,7 @@ func _ready() -> void:
 #func _on_persona_state_change(this_steam_id: int, _flag: int) -> void:
 	## Make sure you're in a lobby or Steam might spam your console log
 	#if Networking.lobby_id > 0:
-		#print("A user (%s) had information change, update the lobby list" % this_steam_id)
+		#Log.debug("A user (%s) had information change, update the lobby list" % this_steam_id)
 		#_update_lobby_player_list.rpc(Networking.lobby_members)
 
 #region JOIN LOBBY BROWSER
@@ -272,7 +272,7 @@ func _update_lobby_player_list(players) -> void:
 		if SteamInit.steam_id == Steam.getLobbyOwner(Networking.lobby_id):
 			player_scene.get_node("Kick").show()
 		
-		print("_update_lobby_player_list: ", str(player), " lobby_members: ", Networking.lobby_members)
+		Log.debug("_update_lobby_player_list: %s lobby_members: %s" % [player, Networking.lobby_members])
 
 func _on_send_chat(message: String = "") -> void:
 	if message.length() == 0:
@@ -280,7 +280,7 @@ func _on_send_chat(message: String = "") -> void:
 	if message.length() > 0:
 		var is_sent: bool = Steam.sendLobbyChatMsg(Networking.lobby_id, message)
 		if not is_sent:
-			print("Failed to send message")
+			Log.warning("Failed to send message")
 		input.clear()
 
 func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_id: int, chat_state: int) -> void:
@@ -289,23 +289,23 @@ func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_i
 
 	# If a player has joined the lobby
 	if chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_ENTERED:
-		print("%s has joined the lobby." % changer_name)
+		Log.info("%s has joined the lobby." % changer_name)
 
 	# Else if a player has left the lobby
 	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_LEFT:
-		print("%s has left the lobby." % changer_name)
+		Log.info("%s has left the lobby." % changer_name)
 
 	# Else if a player has been kicked
 	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_KICKED:
-		print("%s has been kicked from the lobby." % changer_name)
+		Log.info("%s has been kicked from the lobby." % changer_name)
 
 	# Else if a player has been banned
 	elif chat_state == Steam.CHAT_MEMBER_STATE_CHANGE_BANNED:
-		print("%s has been banned from the lobby." % changer_name)
+		Log.info("%s has been banned from the lobby." % changer_name)
 
 	# Else there was some unknown change
 	else:
-		print("%s did... something." % changer_name)
+		Log.info("%s did... something." % changer_name)
 
 func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
 	var sender = Steam.getFriendPersonaName(user)
@@ -313,16 +313,16 @@ func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_typ
 		chat.append_text("%s:  %s\n" % [sender, message])
 	else:
 		match chat_type:
-			2: print(str(sender)+" is typing...\n")
-			3: print(str(sender)+" sent an invite that won't work in this chat!\n")
-			4: print(str(sender)+" sent a text emote that is deprecated.\n")
-			6: print(str(sender)+" has left the chat.\n")
-			7: print(str(sender)+" has entered the chat.\n")
-			8: print(str(sender)+" was kicked!\n")
-			9: print(str(sender)+" was banned!\n")
-			10: print(str(sender)+" disconnected.\n")
-			11: print(str(sender)+" sent an old, offline message.\n")
-			12: print(str(sender)+" sent a link that was removed by the chat filter.\n")
+			2: Log.debug(str(sender)+" is typing...")
+			3: Log.debug(str(sender)+" sent an invite that won't work in this chat!")
+			4: Log.debug(str(sender)+" sent a text emote that is deprecated.")
+			6: Log.debug(str(sender)+" has left the chat.")
+			7: Log.debug(str(sender)+" has entered the chat.")
+			8: Log.debug(str(sender)+" was kicked!")
+			9: Log.debug(str(sender)+" was banned!")
+			10: Log.debug(str(sender)+" disconnected.")
+			11: Log.debug(str(sender)+" sent an old, offline message.")
+			12: Log.debug(str(sender)+" sent a link that was removed by the chat filter.")
 
 # Triggers whenever you type in the Create Lobby text field
 func _on_lobby_name_text_changed(text):
@@ -339,14 +339,14 @@ func _on_lobby_name_text_changed(text):
 # Host sends out RPC to everyone (including host) to update the player list
 func _on_player_list_changed() -> void:
 	if multiplayer.is_server():
-		print("_on_player_list_changed")
+		Log.debug("_on_player_list_changed")
 		_update_lobby_player_list.rpc(Networking.lobby_members)
 
 func _on_connection_success() -> void:
 	lobby_name_label.text = Steam.getLobbyData(Networking.lobby_id, "name")
 	join_lobby_container.visible = false
 	lobby_container.visible = true
-	print("Connection Success!")
+	Log.info("Connection Success!")
 
 func _on_connection_failed() -> void:
 	Networking.reset_network()
@@ -354,7 +354,7 @@ func _on_connection_failed() -> void:
 	lobby_container.visible = false
 	main_menu_container.visible = false
 	join_lobby_container.visible = true
-	print("Connection Failed!")
+	Log.warning("Connection Failed!")
 	
 #endregion
 
@@ -370,7 +370,7 @@ func _check_command_line() -> void:
 			if int(arguments[1]) > 0:
 				## At this point, you'll probably want to change scenes
 				## Something like a loading into lobby screen
-				print("Command line lobby ID: %s" % arguments[1])
+				Log.info("Command line lobby ID: %s" % arguments[1])
 				Networking.join_lobby(int(arguments[1]))
 
 func _on_enet_host_button_up() -> void:

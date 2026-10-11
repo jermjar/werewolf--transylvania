@@ -48,23 +48,23 @@ func _ready() -> void:
 		Steam.lobby_created.connect(_on_lobby_created)
 
 func join_lobby(this_lobby_id: int) -> void:
-	print("join_lobby()")
+	Log.debug("join_lobby()")
 	Steam.joinLobby(this_lobby_id)
 
 func create_lobby() -> void:
-	print("create_lobby()")
+	Log.debug("create_lobby()")
 	if lobby_id == 0:
 		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
-		print("Lobby Created!")
+		Log.debug("Lobby Created!")
 
 func start_game() -> void:
 	assert(multiplayer.is_server())
-	print("start_game()")
+	Log.debug("start_game()")
 	load_world.rpc()
 
 @rpc("call_local", "reliable")
 func load_world() -> void:
-	print("load_world()")
+	Log.debug("load_world()")
 	get_tree().change_scene_to_file("uid://cy05oxvdhtff6")
 	#SceneManager.change_scene("uid://cy05oxvdhtff6")
 
@@ -93,7 +93,7 @@ func _check_all_loaded() -> void:
 #endregion
 
 func host_with_lobby():
-	print("host_with_lobby()")
+	Log.debug("host_with_lobby()")
 	peer = SteamMultiplayerPeer.new()
 	peer.host_with_lobby(lobby_id)
 	multiplayer.set_multiplayer_peer(peer)
@@ -102,20 +102,20 @@ func host_with_lobby():
 	connection_success.emit()
 
 func connect_to_lobby():
-	print("connect_to_lobby")
+	Log.debug("connect_to_lobby")
 	peer = SteamMultiplayerPeer.new()
 	peer.connect_to_lobby(lobby_id)
 	multiplayer.set_multiplayer_peer(peer)
 
 #region Steam Signals
 func _on_lobby_join_requested(this_lobby_id: int, friend_id: int) -> void:
-	print("_on_lobby_join_requested()")
+	Log.debug("_on_lobby_join_requested()")
 	var owner_name: String = Steam.getFriendPersonaName(friend_id)
-	print("Joining %s's lobby..." % owner_name)
+	Log.info("Joining %s's lobby..." % owner_name)
 	join_lobby(this_lobby_id)
 
 func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
-	print("_on_lobby_joined()")
+	Log.debug("_on_lobby_joined()")
 	if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
 		var id = Steam.getLobbyOwner(this_lobby_id)
 		if id != Steam.getSteamID():
@@ -136,14 +136,14 @@ func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, resp
 			Steam.CHAT_ROOM_ENTER_RESPONSE_COMMUNITY_BAN: fail_reason = "This lobby is community locked."
 			Steam.CHAT_ROOM_ENTER_RESPONSE_MEMBER_BLOCKED_YOU: fail_reason = "A user in the lobby has blocked you from joining."
 			Steam.CHAT_ROOM_ENTER_RESPONSE_YOU_BLOCKED_MEMBER: fail_reason = "A user you have blocked is in the lobby."
-		print("Failed to join this chat room: %s" % fail_reason)
+		Log.warning("Failed to join this chat room: %s" % fail_reason)
 
 func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
-	print("_on_lobby_created()")
+	Log.debug("_on_lobby_created()")
 	if connection_response == 1:
 		## Set the lobby ID
 		lobby_id = this_lobby_id
-		print("Created a lobby: %s" % lobby_id)
+		Log.info("Created a lobby: %s" % lobby_id)
 		
 		## Set this lobby as joinable, just in case, though this should be done by default
 		Steam.setLobbyJoinable(lobby_id, true)
@@ -158,26 +158,26 @@ func _on_lobby_created(connection_response: int, this_lobby_id: int) -> void:
 		
 		host_with_lobby()
 	else:
-		print("Error creating lobby")
+		Log.error("Error creating lobby")
 		connection_failed.emit()
 #endregion
 
 #region Peer Signals
 # Ran when a host starts a lobby, and when peers connect to lobby
 func _player_connected(id):
-	print("_player_connected()")
+	Log.debug("_player_connected()")
 	match backend:
 		MultiplayerBackend.STEAM:
 			lobby_members[id] = peer.get_steam_id_for_peer_id(id)
 		MultiplayerBackend.ENET:
 			lobby_members[id] = id
-	print("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
+	Log.info("Player Connected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	player_list_changed.emit()
 
 # Ran when peers disconnect from the lobby
 func _player_disconnected(id):
-	print("_player_disconnected()")
-	print("Player Disconnected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
+	Log.debug("_player_disconnected()")
+	Log.info("Player Disconnected - Peer ID = %s | Steam ID = %s" % [ id, lobby_members[id] ])
 	lobby_members.erase(id)
 	lobby_members_ready.erase(id)
 	player_list_changed.emit()
@@ -189,21 +189,21 @@ func _player_disconnected(id):
 
 # Ran when peer connects to a host (doesn't trigger on host)
 func _connected_to_server():
-	print("_connected_to_server()")
+	Log.debug("_connected_to_server()")
 	connection_success.emit()
 
 func _connection_failed():
-	print("_connection_failed()")
+	Log.debug("_connection_failed()")
 	connection_failed.emit()
 
 # Ran when peer disconnects from a host
 func _server_disconnected():
-	print("_server_disconnected()")
+	Log.debug("_server_disconnected()")
 	reset_network()
 #endregion
 
 func reset_network():
-	print("reset_network()")
+	Log.debug("reset_network()")
 	if backend == MultiplayerBackend.STEAM:
 		Steam.leaveLobby(lobby_id)
 	multiplayer.multiplayer_peer.close()
@@ -216,7 +216,7 @@ func reset_network():
 	enet_peer = null
 
 func enet_host():
-	print("enet_host()")
+	Log.debug("enet_host()")
 	enet_peer = ENetMultiplayerPeer.new()
 	enet_peer.create_server(DEFAULT_PORT)
 	multiplayer.set_multiplayer_peer(enet_peer)
@@ -225,7 +225,7 @@ func enet_host():
 	connection_success.emit()
 
 func enet_join():
-	print("enet_join()")
+	Log.debug("enet_join()")
 	enet_peer = ENetMultiplayerPeer.new()
 	enet_peer.create_client("127.0.0.1", DEFAULT_PORT)
 	multiplayer.set_multiplayer_peer(enet_peer)

@@ -83,7 +83,7 @@ func _choose_werewolf() -> void:
 func _start_phase(new_phase: Phase, duration: float) -> void:
 	phase = new_phase
 	phase_timer.start(duration)
-	print("_start_phase() -> %s for %ss" % [Phase.keys()[phase], duration])
+	Log.info("_start_phase() -> %s for %ss" % [Phase.keys()[phase], duration])
 	phase_changed.emit(phase)
 
 # Host -> Everyone
@@ -92,5 +92,5 @@ func _start_phase(new_phase: Phase, duration: float) -> void:
 @rpc("call_local", "reliable")
 func _set_werewolf(id: int) -> void:
 	werewolf_id = id
-	print("_set_werewolf() -> %s" % id)
+	Log.info("_set_werewolf() -> %s" % id)
 	werewolf_chosen.emit(id)

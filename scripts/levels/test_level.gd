@@ -7,9 +7,10 @@ extends Node3D
 @onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
 
-# Not sure if this is needed, but I'm putting it here so I don't forget it exists
+# Everyone stays paused until the host has spawned all players and calls
+# game_loaded(), so nobody can move before the round starts
 func _enter_tree() -> void:
-	print("lobby_members: " + str(Networking.lobby_members))
+	Log.debug("lobby_members: " + str(Networking.lobby_members))
 	get_tree().paused = true
 
 func _ready() -> void:
@@ -72,7 +73,7 @@ func _spawn_player(data: Dictionary) -> Node:
 		Networking.MultiplayerBackend.STEAM:
 			player_controller.steam_name = Steam.getFriendPersonaName(data.steam_id)
 
-	print("_spawn_player -> spawned: %s" % data.id)
+	Log.debug("_spawn_player -> spawned: %s" % data.id)
 	return player_controller
 
 # Host only - removing a spawned player on the host removes it for everyone

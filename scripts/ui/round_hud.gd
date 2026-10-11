@@ -25,5 +25,4 @@ func _on_werewolf_chosen(werewolf_id: int) -> void:
 	if werewolf_id != multiplayer.get_unique_id(): return
 
 	werewolf_label.show()
-	await get_tree().create_timer(WEREWOLF_MESSAGE_TIME).timeout
-	werewolf_label.hide()
+	get_tree().create_timer(WEREWOLF_MESSAGE_TIME).timeout.connect(werewolf_label.hide)
