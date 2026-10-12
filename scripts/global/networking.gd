@@ -57,6 +57,12 @@ func create_lobby() -> void:
 		Steam.createLobby(lobby_type, SteamInit.LOBBY_MEMBERS_MAX)
 		Log.debug("Lobby Created!")
 
+# The name to show for a player: their Steam name, or their peer ID when testing with ENet
+func get_display_name(peer_id: int) -> String:
+	if backend == MultiplayerBackend.STEAM and lobby_members.has(peer_id):
+		return Steam.getFriendPersonaName(lobby_members[peer_id])
+	return str(peer_id)
+
 func start_game() -> void:
 	assert(multiplayer.is_server())
 	Log.debug("start_game()")

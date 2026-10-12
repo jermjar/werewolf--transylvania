@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://7lf2jbylc6bl" path="res://scenes/interaction/interaction_controller.tscn" id="3_lvxji"]
 [ext_resource type="PackedScene" path="res://scenes/items/fists.tscn" id="4_fists"]
 [ext_resource type="PackedScene" path="res://scenes/components/inventory_component.tscn" id="5_inventory"]
-[ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="6_hotbar"]
+[ext_resource type="Script" uid="uid://ckcvjfelkwxkn" path="res://scripts/ui/hotbar.gd" id="6_hotbar"]
 [ext_resource type="PackedScene" path="res://scenes/items/claws.tscn" id="7_claws"]
 [ext_resource type="PackedScene" path="res://scenes/components/werewolf_component.tscn" id="8_werewolf"]
 
@@ -89,9 +89,9 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="InventoryComponent" parent="." unique_id=1593827461 node_paths=PackedStringArray("item_holder", "fists") instance=ExtResource("5_inventory")]
+unique_name_in_owner = true
 item_holder = NodePath("../CameraController/Camera3D")
 fists = NodePath("../CameraController/Camera3D/Fists")
-unique_name_in_owner = true
 
 [node name="WerewolfComponent" parent="." unique_id=1123847569 node_paths=PackedStringArray("claws") instance=ExtResource("8_werewolf")]
 claws = NodePath("../CameraController/Camera3D/Claws")

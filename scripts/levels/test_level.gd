@@ -61,6 +61,14 @@ func _unhandled_input(event: InputEvent) -> void:
 @rpc("call_local", "reliable")
 func game_loaded() -> void:
 	SceneManager.finished_loading.emit()
+
+	# Props placed in the level (like the cube) start hidden from the network,
+	# because the host would otherwise start syncing them before slower clients
+	# finish loading. Godot only introduces a synced node to each client once, so a
+	# client that missed it would never see that prop move. Everyone has the level now.
+	for synchronizer in find_children("*", "MultiplayerSynchronizer", true, false):
+		synchronizer.public_visibility = true
+
 	get_tree().paused = false
 
 # Runs on every peer. When the host calls player_spawner.spawn(data), the

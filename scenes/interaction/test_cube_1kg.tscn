@@ -31,3 +31,4 @@ object_reference = NodePath("..")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1267318658]
 replication_config = SubResource("SceneReplicationConfig_wjq3j")
+public_visibility = false

@@ -33,6 +33,7 @@ func _ready() -> void:
 		RoundManager.instance.phase_changed.connect(_on_phase_changed)
 
 func _on_phase_changed(phase: RoundManager.Phase) -> void:
+	if not is_inside_tree(): return # Our player was removed this frame (died or left), about to be deleted
 	var is_werewolf: bool = RoundManager.instance.werewolf_id == player.name.to_int()
 	var should_transform: bool = is_werewolf and phase == RoundManager.Phase.NIGHT
 	if should_transform != is_transformed:

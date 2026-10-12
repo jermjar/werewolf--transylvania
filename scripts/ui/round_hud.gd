@@ -3,12 +3,19 @@ extends Control
 const WEREWOLF_MESSAGE_TIME: float = 5.0
 
 @onready var phase_label: Label = %PhaseLabel
+@onready var round_time_label: Label = %RoundTimeLabel
 @onready var werewolf_label: Label = %WerewolfLabel
 @onready var werewolf_form_label: Label = %WerewolfFormLabel
+@onready var result_label: Label = %ResultLabel
+
+# Saved once, because asking for it every frame errors after the connection closes
+var my_peer_id: int
 
 func _ready() -> void:
+	my_peer_id = multiplayer.get_unique_id()
 	werewolf_label.hide()
 	RoundManager.instance.werewolf_chosen.connect(_on_werewolf_chosen)
+	RoundManager.instance.phase_changed.connect(_on_phase_changed)
 
 func _process(_delta: float) -> void:
 	var round_manager: RoundManager = RoundManager.instance
@@ -16,18 +23,31 @@ func _process(_delta: float) -> void:
 		phase_label.text = ""
 		return
 
-	var seconds_left: int = ceili(round_manager.get_time_left())
-	var minutes: int = floori(seconds_left / 60.0)
-	var phase_name: String = RoundManager.Phase.keys()[round_manager.phase]
-	phase_label.text = "%s  %d:%02d" % [phase_name, minutes, seconds_left % 60]
+	var is_ended: bool = round_manager.phase == RoundManager.Phase.ENDED
+	var phase_name: String = "NEXT ROUND" if is_ended else RoundManager.Phase.keys()[round_manager.phase]
+	phase_label.text = "%s  %s" % [phase_name, _format_time(round_manager.get_time_left())]
+	round_time_label.text = "" if is_ended else "Round ends in %s" % _format_time(round_manager.get_round_time_left())
 
 	# Reminds the werewolf that they're transformed
-	var is_werewolf: bool = round_manager.werewolf_id == multiplayer.get_unique_id()
+	var is_werewolf: bool = round_manager.werewolf_id == my_peer_id
 	werewolf_form_label.visible = is_werewolf and round_manager.phase == RoundManager.Phase.NIGHT
+
+func _format_time(seconds: float) -> String:
+	var whole_seconds: int = ceili(seconds)
+	return "%d:%02d" % [floori(whole_seconds / 60.0), whole_seconds % 60]
 
 # Only the chosen player sees the message
 func _on_werewolf_chosen(werewolf_id: int) -> void:
-	if werewolf_id != multiplayer.get_unique_id(): return
+	if werewolf_id != my_peer_id: return
 
 	werewolf_label.show()
 	get_tree().create_timer(WEREWOLF_MESSAGE_TIME).timeout.connect(werewolf_label.hide)
+
+# Shows who won, and reveals who the werewolf was
+func _on_phase_changed(phase: RoundManager.Phase) -> void:
+	if phase != RoundManager.Phase.ENDED: return
+
+	var round_manager: RoundManager = RoundManager.instance
+	var title: String = "VILLAGERS WIN" if round_manager.winner == RoundManager.Winner.VILLAGERS else "WEREWOLF WINS"
+	result_label.text = "%s\nThe werewolf was %s" % [title, Networking.get_display_name(round_manager.werewolf_id)]
+	result_label.show()

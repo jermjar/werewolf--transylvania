@@ -114,6 +114,7 @@ func _on_health_changed(current_health: int, _max_health: int) -> void:
 	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
 
 func _on_phase_changed(_phase: RoundManager.Phase) -> void:
+	if not is_inside_tree(): return # Removed this frame (died or left), about to be deleted
 	_update_name_tag()
 
 # Name tags are hidden at night so nobody can tell who the werewolf is.

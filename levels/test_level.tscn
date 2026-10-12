@@ -217,10 +217,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -7.5)
 [node name="LevelCamera" type="Camera3D" parent="." unique_id=976224499 groups=["level_camera"]]
 transform = Transform3D(1, 0, 0, 0, 0.9549267, 0.2968416, 0, -0.2968416, 0.9549267, 0, 5.209195, 17.105001)
 
-[node name="RoundManager" type="Node" parent="." unique_id=1873041526]
+[node name="RoundManager" type="Node" parent="." unique_id=1873041526 node_paths=PackedStringArray("players")]
 script = ExtResource("9_round")
+players = NodePath("../Players")
 
 [node name="PhaseTimer" type="Timer" parent="RoundManager" unique_id=1592660387]
+one_shot = true
+
+[node name="RoundTimer" type="Timer" parent="RoundManager" unique_id=1384729105]
 one_shot = true
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1986386197]
