@@ -10,11 +10,13 @@ var is_online: bool = false
 var is_game_owned: bool = false
 
 func _init() -> void:
+	Log.debug("SteamInit._init()")
 	if Networking.backend == Networking.MultiplayerBackend.STEAM:
 		OS.set_environment("SteamAppId", str(APP_ID))
 		OS.set_environment("SteamGameId", str(APP_ID))
 
 func _ready() -> void:
+	Log.debug("SteamInit._ready()")
 	if Networking.backend == Networking.MultiplayerBackend.STEAM:
 		_initialize_steam()
 
@@ -23,6 +25,7 @@ func _process(_delta: float) -> void:
 		Steam.run_callbacks()
 
 func _initialize_steam() -> void:
+	Log.debug("SteamInit._initialize_steam()")
 	if !Engine.has_singleton("Steam"): get_tree().quit()
 	
 	var initialize_response: Dictionary = Steam.steamInitEx(APP_ID)

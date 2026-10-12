@@ -11,6 +11,7 @@ const NORMAL_COLOR: Color = Color(1.0, 1.0, 1.0, 0.6)
 var slot_labels: Array[Label] = []
 
 func _ready() -> void:
+	Log.debug("Hotbar._ready()")
 	for slot in InventoryComponent.SLOT_COUNT:
 		var label: Label = Label.new()
 		label.add_theme_font_size_override("font_size", 24)
@@ -21,6 +22,7 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
+	Log.debug("Hotbar._refresh()")
 	for slot in InventoryComponent.SLOT_COUNT:
 		var item: Item = inventory.items[slot]
 		var label: Label = slot_labels[slot]

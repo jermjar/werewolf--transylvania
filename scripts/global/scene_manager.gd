@@ -10,6 +10,7 @@ func _process(_delta: float) -> void:
 	Log.debug("- Changing Scenes -")
 
 func change_scene(scene: String) -> void:
+	Log.debug("SceneManager.change_scene()")
 	if changing_scenes: return
 	changing_scenes = true
 	
@@ -17,6 +18,7 @@ func change_scene(scene: String) -> void:
 	_load_progress(scene)
 
 func _load_progress(scene: String) -> void:
+	Log.debug("SceneManager._load_progress()")
 	var progress: Array = []
 	while true:
 		var status: ResourceLoader.ThreadLoadStatus = ResourceLoader.load_threaded_get_status(scene, progress)

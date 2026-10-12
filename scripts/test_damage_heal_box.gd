@@ -8,13 +8,17 @@ var heal_amount: int = 20
 @export_enum("DAMAGE", "HEAL") var box_type: String
 
 func _ready() -> void:
+	Log.debug("TestDamageHealBox._ready()")
 	area_3d.body_entered.connect(_on_body_entered)
 
 # Making damage server authoritative
 func _on_body_entered(body: Node3D) -> void:
-	if not multiplayer.is_server() or not body.is_in_group("player"): return
-	
+	Log.debug("TestDamageHealBox._on_body_entered()")
+	if not multiplayer.is_server(): return
+	var health: HealthComponent = HealthComponent.find_on(body)
+	if health == null: return
+
 	if box_type == "DAMAGE":
-		body.health_component.damage(damage_number)
+		health.damage(damage_number)
 	elif box_type == "HEAL":
-		body.health_component.heal(heal_amount)
+		health.heal(heal_amount)

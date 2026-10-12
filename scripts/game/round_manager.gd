@@ -49,15 +49,18 @@ var winner: Winner
 # Set in _enter_tree() instead of _ready() so it's available to every other
 # node's _ready() in the level, no matter what order they're in
 func _enter_tree() -> void:
+	Log.debug("RoundManager._enter_tree()")
 	instance = self
 
 func _exit_tree() -> void:
+	Log.debug("RoundManager._exit_tree()")
 	# Only clear it if it's still us, in case the next match's RoundManager
 	# was already added before this one finished leaving
 	if instance == self:
 		instance = null
 
 func _ready() -> void:
+	Log.debug("RoundManager._ready()")
 	# Every peer runs the timers so the HUD can show the time left,
 	# but only the host acts when they run out
 	if multiplayer.is_server():
@@ -71,13 +74,28 @@ func get_time_left() -> float:
 func get_round_time_left() -> float:
 	return round_timer.time_left
 
+func is_night() -> bool:
+	return phase == Phase.NIGHT
+
+func is_werewolf(peer_id: int) -> bool:
+	return peer_id == werewolf_id
+
+# Dead players are removed from Players, so everyone in it is alive
+func get_alive_players() -> Array[Player]:
+	Log.debug("RoundManager.get_alive_players()")
+	var alive_players: Array[Player] = []
+	alive_players.assign(players.get_children())
+	return alive_players
+
 # Host only
 func start_round() -> void:
+	Log.debug("RoundManager.start_round()")
 	_start_round_timer.rpc(round_length)
 	_start_phase.rpc(Phase.DAY, first_day_length)
 
 # Host only - the current phase is over, decide what comes next
 func _on_phase_timer_timeout() -> void:
+	Log.debug("RoundManager._on_phase_timer_timeout()")
 	match phase:
 		Phase.DAY:
 			if werewolf_id == NO_WEREWOLF:
@@ -88,35 +106,38 @@ func _on_phase_timer_timeout() -> void:
 		Phase.ENDED:
 			Networking.start_game() # Reloads the level for everyone, starting a new round
 
-# Host only - dead players are removed from the game, so everyone
-# in the "player" group is alive
+# Host only
 func _choose_werewolf() -> void:
-	var alive_players: Array[Node] = get_tree().get_nodes_in_group("player")
+	Log.debug("RoundManager._choose_werewolf()")
+	var alive_players: Array[Player] = get_alive_players()
 	if alive_players.is_empty(): return
 
-	var werewolf: Node = alive_players.pick_random()
-	_set_werewolf.rpc(werewolf.name.to_int())
+	var werewolf: Player = alive_players.pick_random()
+	_set_werewolf.rpc(werewolf.peer_id)
 	# In case the werewolf is already the only one left
 	_check_for_winner()
 
 #region Winning
 # Host only
 func _on_round_timer_timeout() -> void:
+	Log.debug("RoundManager._on_round_timer_timeout()")
 	_end_round.rpc(Winner.VILLAGERS)
 
 # Host only - a player died or left the game
 func _on_player_removed(player: Node) -> void:
+	Log.debug("RoundManager._on_player_removed()")
 	# The whole level is being unloaded, not a player leaving
 	if not is_inside_tree(): return
 	_check_for_winner(player)
 
 # Host only
 func _check_for_winner(leaving_player: Node = null) -> void:
+	Log.debug("RoundManager._check_for_winner()")
 	if phase == Phase.ENDED or werewolf_id == NO_WEREWOLF: return
 
-	var alive_players: Array[Node] = players.get_children()
+	var alive_players: Array[Player] = get_alive_players()
 	alive_players.erase(leaving_player) # It's still a child while it's being removed
-	var werewolf_alive: bool = alive_players.any(func(player: Node) -> bool: return player.name.to_int() == werewolf_id)
+	var werewolf_alive: bool = alive_players.any(func(player: Player) -> bool: return is_werewolf(player.peer_id))
 
 	if not werewolf_alive:
 		_end_round.rpc(Winner.VILLAGERS)
@@ -129,6 +150,7 @@ func _check_for_winner(leaving_player: Node = null) -> void:
 # phase actually ends, and the next _start_phase() resyncs everyone.
 @rpc("call_local", "reliable")
 func _start_phase(new_phase: Phase, duration: float) -> void:
+	Log.debug("RoundManager._start_phase()")
 	phase = new_phase
 	phase_timer.start(duration)
 	Log.info("_start_phase() -> %s for %ss" % [Phase.keys()[phase], duration])
@@ -137,6 +159,7 @@ func _start_phase(new_phase: Phase, duration: float) -> void:
 # Host -> Everyone
 @rpc("call_local", "reliable")
 func _start_round_timer(duration: float) -> void:
+	Log.debug("RoundManager._start_round_timer()")
 	round_timer.start(duration)
 
 # Host -> Everyone
@@ -144,6 +167,7 @@ func _start_round_timer(duration: float) -> void:
 # them as a werewolf at night. Name tags being hidden is what keeps it a secret.
 @rpc("call_local", "reliable")
 func _set_werewolf(id: int) -> void:
+	Log.debug("RoundManager._set_werewolf()")
 	werewolf_id = id
 	Log.info("_set_werewolf() -> %s" % id)
 	werewolf_chosen.emit(id)
@@ -151,6 +175,7 @@ func _set_werewolf(id: int) -> void:
 # Host -> Everyone
 @rpc("call_local", "reliable")
 func _end_round(round_winner: Winner) -> void:
+	Log.debug("RoundManager._end_round()")
 	winner = round_winner
 	round_timer.stop()
 	Log.info("_end_round() -> %s win" % Winner.keys()[winner])

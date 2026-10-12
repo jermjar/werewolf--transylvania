@@ -12,6 +12,7 @@ const WEREWOLF_MESSAGE_TIME: float = 5.0
 var my_peer_id: int
 
 func _ready() -> void:
+	Log.debug("RoundHUD._ready()")
 	my_peer_id = multiplayer.get_unique_id()
 	werewolf_label.hide()
 	RoundManager.instance.werewolf_chosen.connect(_on_werewolf_chosen)
@@ -29,8 +30,7 @@ func _process(_delta: float) -> void:
 	round_time_label.text = "" if is_ended else "Round ends in %s" % _format_time(round_manager.get_round_time_left())
 
 	# Reminds the werewolf that they're transformed
-	var is_werewolf: bool = round_manager.werewolf_id == my_peer_id
-	werewolf_form_label.visible = is_werewolf and round_manager.phase == RoundManager.Phase.NIGHT
+	werewolf_form_label.visible = round_manager.is_werewolf(my_peer_id) and round_manager.is_night()
 
 func _format_time(seconds: float) -> String:
 	var whole_seconds: int = ceili(seconds)
@@ -38,6 +38,7 @@ func _format_time(seconds: float) -> String:
 
 # Only the chosen player sees the message
 func _on_werewolf_chosen(werewolf_id: int) -> void:
+	Log.debug("RoundHUD._on_werewolf_chosen()")
 	if werewolf_id != my_peer_id: return
 
 	werewolf_label.show()
@@ -45,6 +46,7 @@ func _on_werewolf_chosen(werewolf_id: int) -> void:
 
 # Shows who won, and reveals who the werewolf was
 func _on_phase_changed(phase: RoundManager.Phase) -> void:
+	Log.debug("RoundHUD._on_phase_changed()")
 	if phase != RoundManager.Phase.ENDED: return
 
 	var round_manager: RoundManager = RoundManager.instance

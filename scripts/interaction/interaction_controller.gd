@@ -6,7 +6,6 @@ const HOLD_TO_GRAB_TIME: float = 0.25
 
 @onready var interaction_hand: Marker3D = %InteractionHand
 @onready var interaction_raycast: RayCast3D = %InteractionRayCast3D
-@onready var player_camera: Camera3D = $"../CameraController/Camera3D"
 @onready var inventory: InventoryComponent = $"../InventoryComponent"
 
 var current_object: Object
@@ -14,6 +13,7 @@ var interaction_component: InteractionComponent
 var hold_time: float = 0.0 # How long interact has been held while not grabbing
 
 func _ready() -> void:
+	Log.debug("InteractionController._ready()")
 	# Every player on our screen has one of these, but only the one for the
 	# player we control should react to our input
 	set_physics_process(is_multiplayer_authority())

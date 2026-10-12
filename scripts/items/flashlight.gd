@@ -7,9 +7,11 @@ class_name Flashlight extends Item
 @onready var light: SpotLight3D = $SpotLight3D
 
 func use() -> void:
+	Log.debug("Flashlight.use()")
 	_set_light_on.rpc(not light.visible)
 
 # Owner -> Everyone
 @rpc("call_local", "reliable")
 func _set_light_on(on: bool) -> void:
+	Log.debug("Flashlight._set_light_on()")
 	light.visible = on

@@ -22,10 +22,12 @@ const SWING_BACK_TIME: float = 0.15
 var mesh_rest_position: Vector3
 
 func _ready() -> void:
+	Log.debug("MeleeWeapon._ready()")
 	mesh_rest_position = mesh.position
 	raycast.target_position = Vector3(0, 0, -reach)
 
 func use() -> void:
+	Log.debug("MeleeWeapon.use()")
 	if not cooldown_timer.is_stopped(): return
 	cooldown_timer.start(cooldown)
 
@@ -35,16 +37,19 @@ func use() -> void:
 	# it's updated only when swinging. It starts inside our own body, which
 	# rays ignore, so it can't hit ourselves.
 	raycast.force_raycast_update()
-	var hit_player: Player = raycast.get_collider() as Player
-	if hit_player:
-		Log.debug("%s.use() -> hit %s for %s" % [name, hit_player.name, damage])
-		hit_player.health_component.damage(damage)
+	# Anything with a HealthComponent can be hit, not just players
+	var hit: Node = raycast.get_collider() as Node
+	var hit_health: HealthComponent = HealthComponent.find_on(hit)
+	if hit_health:
+		Log.debug("%s.use() -> hit %s for %s" % [name, hit.name, damage])
+		hit_health.damage(damage)
 
 # Owner -> Everyone
 # Purely visual, so "unreliable" is fine: if a packet is lost, someone
 # just misses seeing one swing.
 @rpc("call_local", "unreliable")
 func _play_swing_animation() -> void:
+	Log.debug("MeleeWeapon._play_swing_animation()")
 	var swung_position: Vector3 = mesh_rest_position + Vector3(0, 0, -SWING_DISTANCE)
 	var tween: Tween = create_tween()
 	tween.tween_property(mesh, "position", swung_position, SWING_OUT_TIME)

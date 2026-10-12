@@ -11,13 +11,13 @@ class_name Player extends CharacterBody3D
 @onready var head: MeshInstance3D = $Model/HeadMesh
 @onready var body: MeshInstance3D = $Model/BodyMesh
 
-@export var steam_id: int = 0
-@export var steam_name: String
-
 # Components
 @export var health_component: HealthComponent
 # Also handles using items and switching slots
 @export var inventory_component: InventoryComponent
+
+# The peer ID of the machine controlling this player. The player node is named after it.
+var peer_id: int
 
 # True while a dead player is watching through this player's camera
 var is_spectated: bool = false
@@ -35,11 +35,12 @@ var acceleration: float = 0.2
 var deceleration: float = 0.5
 
 func _enter_tree():
-	set_multiplayer_authority(name.to_int(), true)
+	Log.debug("Player._enter_tree()")
+	peer_id = name.to_int()
+	set_multiplayer_authority(peer_id, true)
 
 func _ready() -> void:
-	add_to_group("player")
-
+	Log.debug("Player._ready()")
 	# Signals
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
@@ -48,12 +49,8 @@ func _ready() -> void:
 	if RoundManager.instance:
 		RoundManager.instance.phase_changed.connect(_on_phase_changed)
 
-	match Networking.backend:
-		Networking.MultiplayerBackend.STEAM:
-			steam_name_label.text = steam_name
-		Networking.MultiplayerBackend.ENET:
-			steam_name_label.text = str(name)
-	
+	steam_name_label.text = Networking.get_display_name(peer_id)
+
 	if is_multiplayer_authority():
 		steam_name_label.hide()
 		health_label_3d.hide()
@@ -109,23 +106,27 @@ func update_rotation(rotation_input) -> void:
 	global_transform.basis = Basis.from_euler(rotation_input)
 
 func _on_health_changed(current_health: int, _max_health: int) -> void:
+	Log.debug("Player._on_health_changed()")
 	if is_multiplayer_authority():
 		health_label.text = "HP: %s" % [ health_component.current_health ]
 	health_label_3d.text = "HP: %s" % [ health_component.current_health ]
 
 func _on_phase_changed(_phase: RoundManager.Phase) -> void:
+	Log.debug("Player._on_phase_changed()")
 	if not is_inside_tree(): return # Removed this frame (died or left), about to be deleted
 	_update_name_tag()
 
 # Name tags are hidden at night so nobody can tell who the werewolf is.
 # Our own name tag, and the one of a player being spectated, are always hidden.
 func _update_name_tag() -> void:
-	var is_night: bool = RoundManager.instance and RoundManager.instance.phase == RoundManager.Phase.NIGHT
+	Log.debug("Player._update_name_tag()")
+	var is_night: bool = RoundManager.instance and RoundManager.instance.is_night()
 	steam_name_label.visible = not is_multiplayer_authority() and not is_spectated and not is_night
 
 # Called by the Spectator when a dead player starts or stops watching through
 # this player's eyes. Hides everything that would block or clutter the view.
 func set_spectated(spectated: bool) -> void:
+	Log.debug("Player.set_spectated()")
 	is_spectated = spectated
 	head.visible = not spectated
 	body.visible = not spectated
@@ -134,11 +135,13 @@ func set_spectated(spectated: bool) -> void:
 	_update_name_tag()
 
 func _on_died():
+	Log.debug("Player._on_died()")
 	if is_multiplayer_authority():
 		die.rpc()
 
 @rpc("call_local", "reliable")
 func die():
+	Log.debug("Player.die()")
 	if is_multiplayer_authority():
 		var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
 		level_camera.current = true

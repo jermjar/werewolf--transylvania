@@ -43,6 +43,7 @@ extends Node3D
 @onready var enet_start_button: Button = %EnetStartButton
 
 func _ready() -> void:
+	Log.debug("MainMenu._ready()")
 	SceneManager.changing_scenes = false
 	main_menu_container.show()
 	join_lobby_container.hide()
@@ -111,6 +112,7 @@ func _ready() -> void:
 
 #region JOIN LOBBY BROWSER
 func _refresh_lobbies() -> void:
+	Log.debug("MainMenu._refresh_lobbies()")
 	for this_lobby in lobby_scroll_container.get_child(0).get_children():
 		this_lobby.queue_free()
 	
@@ -122,6 +124,7 @@ func _refresh_lobbies() -> void:
 	Steam.requestLobbyList()
 
 func _update_lobbies(these_lobbies: Array) -> void:
+	Log.debug("MainMenu._update_lobbies()")
 	for this_lobby in these_lobbies:
 		# Pull lobby data from Steam
 		var server_name: String = Steam.getLobbyData(this_lobby, "name")
@@ -137,19 +140,23 @@ func _update_lobbies(these_lobbies: Array) -> void:
 		lobby_scroll_container.get_child(0).add_child(new_lobby_server)
 
 func _on_join_lobby_button_up(this_lobby_id: int) -> void:
+	Log.debug("MainMenu._on_join_lobby_button_up()")
 	Networking.join_lobby(this_lobby_id)
 #endregion
 
 #region MAIN MENU BUTTONS
 func _on_multiplayer_button_up() -> void:
+	Log.debug("MainMenu._on_multiplayer_button_up()")
 	main_menu_container.visible = false
 	join_lobby_container.visible = true
 	_refresh_lobbies()
 
 func _on_options_button_up() -> void:
+	Log.debug("MainMenu._on_options_button_up()")
 	pass
 
 func _on_quit_button_up() -> void:
+	Log.debug("MainMenu._on_quit_button_up()")
 	get_tree().quit()
 #endregion
 
@@ -157,6 +164,7 @@ func _on_quit_button_up() -> void:
 # There are two create lobby buttons, so I'm binding an ID to
 # them so I don't have to use two separate functions
 func _on_create_lobby_button_up(button_id: int) -> void:
+	Log.debug("MainMenu._on_create_lobby_button_up()")
 	match button_id:
 		0:
 			join_lobby_container.visible = false
@@ -169,11 +177,13 @@ func _on_create_lobby_button_up(button_id: int) -> void:
 			lobby_container.visible = true
 
 func _on_refresh_button_up() -> void:
+	Log.debug("MainMenu._on_refresh_button_up()")
 	_refresh_lobbies()
 
 # There are two back buttons, so I'm binding an ID to them
 # so I don't have to use two separate functions
 func _on_back_button_up(button_id: int) -> void:
+	Log.debug("MainMenu._on_back_button_up()")
 	match button_id:
 		0:
 			join_lobby_container.visible = false
@@ -186,6 +196,7 @@ func _on_back_button_up(button_id: int) -> void:
 # NOTE - This is an RPC so Host can kick others
 @rpc("call_local", "reliable")
 func _on_leave_lobby_button_up() -> void:
+	Log.debug("MainMenu._on_leave_lobby_button_up()")
 	Networking.reset_network()
 	for player in player_list_container.get_children():
 		player.queue_free()
@@ -195,16 +206,20 @@ func _on_leave_lobby_button_up() -> void:
 	_refresh_lobbies()
 
 func _on_start_game_button_up() -> void:
+	Log.debug("MainMenu._on_start_game_button_up()")
 	Networking.start_game()
 
 func _on_kick_button_pressed(id: int) -> void:
+	Log.debug("MainMenu._on_kick_button_pressed()")
 	_on_leave_lobby_button_up.rpc_id(id)
 
 func _on_ready_button_pressed():
+	Log.debug("MainMenu._on_ready_button_pressed()")
 	_on_ready_pressed.rpc()
 
 @rpc("any_peer", "call_local", "reliable")
 func _on_ready_pressed() -> void:
+	Log.debug("MainMenu._on_ready_pressed()")
 	var id = multiplayer.get_remote_sender_id()
 	var ready_button = player_list_container.get_node("%s/Ready" % str(id))
 	if Networking.lobby_members_ready.has(id):
@@ -218,6 +233,7 @@ func _on_ready_pressed() -> void:
 	start_game_button.disabled = !start_game
 
 func _on_check_toggled(toggled_on: bool, button_id: String) -> void:
+	Log.debug("MainMenu._on_check_toggled()")
 	match button_id:
 		"Public":
 			if toggled_on:
@@ -248,6 +264,7 @@ func _on_check_toggled(toggled_on: bool, button_id: String) -> void:
 ## of the new host "2", which breaks functionality for things like readying up
 @rpc("call_local", "reliable")
 func _update_lobby_player_list(players) -> void:
+	Log.debug("MainMenu._update_lobby_player_list()")
 	await get_tree().process_frame
 	Networking.lobby_members = players
 	Networking.lobby_members_ready = []
@@ -275,6 +292,7 @@ func _update_lobby_player_list(players) -> void:
 		Log.debug("_update_lobby_player_list: %s lobby_members: %s" % [player, Networking.lobby_members])
 
 func _on_send_chat(message: String = "") -> void:
+	Log.debug("MainMenu._on_send_chat()")
 	if message.length() == 0:
 		message = input.get_text()
 	if message.length() > 0:
@@ -284,6 +302,7 @@ func _on_send_chat(message: String = "") -> void:
 		input.clear()
 
 func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_id: int, chat_state: int) -> void:
+	Log.debug("MainMenu._on_lobby_chat_update()")
 	# Get the user who has made the lobby change
 	var changer_name: String = Steam.getFriendPersonaName(change_id)
 
@@ -308,6 +327,7 @@ func _on_lobby_chat_update(_this_lobby_id: int, change_id: int, _making_change_i
 		Log.info("%s did... something." % changer_name)
 
 func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_type: int) -> void:
+	Log.debug("MainMenu._on_lobby_message()")
 	var sender = Steam.getFriendPersonaName(user)
 	if chat_type == 1:
 		chat.append_text("%s:  %s\n" % [sender, message])
@@ -326,6 +346,7 @@ func _on_lobby_message(_this_lobby_id: int, user: int, message: String, chat_typ
 
 # Triggers whenever you type in the Create Lobby text field
 func _on_lobby_name_text_changed(text):
+	Log.debug("MainMenu._on_lobby_name_text_changed()")
 	if text:
 		Networking.lobby_name = text
 		create_lobby_name_label.text = text
@@ -338,17 +359,20 @@ func _on_lobby_name_text_changed(text):
 #region NETWORKING SIGNALS
 # Host sends out RPC to everyone (including host) to update the player list
 func _on_player_list_changed() -> void:
+	Log.debug("MainMenu._on_player_list_changed()")
 	if multiplayer.is_server():
 		Log.debug("_on_player_list_changed")
 		_update_lobby_player_list.rpc(Networking.lobby_members)
 
 func _on_connection_success() -> void:
+	Log.debug("MainMenu._on_connection_success()")
 	lobby_name_label.text = Steam.getLobbyData(Networking.lobby_id, "name")
 	join_lobby_container.visible = false
 	lobby_container.visible = true
 	Log.info("Connection Success!")
 
 func _on_connection_failed() -> void:
+	Log.debug("MainMenu._on_connection_failed()")
 	Networking.reset_network()
 	create_lobby_container.visible = false
 	lobby_container.visible = false
@@ -360,6 +384,7 @@ func _on_connection_failed() -> void:
 
 ## Handles joining off of Steam invite/friends list allegedly
 func _check_command_line() -> void:
+	Log.debug("MainMenu._check_command_line()")
 	var arguments: Array = OS.get_cmdline_args()
 	
 	## Arguments to process
@@ -374,13 +399,16 @@ func _check_command_line() -> void:
 				Networking.join_lobby(int(arguments[1]))
 
 func _on_enet_host_button_up() -> void:
+	Log.debug("MainMenu._on_enet_host_button_up()")
 	enet_host_button.disabled = true
 	enet_start_button.show()
 	Networking.enet_host()
 
 func _on_enet_start_button_up() -> void:
+	Log.debug("MainMenu._on_enet_start_button_up()")
 	Networking.start_game()
 
 func _on_enet_join_button_up() -> void:
+	Log.debug("MainMenu._on_enet_join_button_up()")
 	enet_join_button.disabled = true
 	Networking.enet_join()

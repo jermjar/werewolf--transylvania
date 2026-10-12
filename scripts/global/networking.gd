@@ -9,6 +9,7 @@ signal all_peers_loaded()
 #        Change this number for your game during testing!
 const UNIQUE_LOBBY_ID: String = "54832791483712409738190"
 const DEFAULT_PORT: int = 8080
+const HOST_ID: int = 1 # Godot always gives the host peer ID 1
 
 enum MultiplayerBackend { 
 	ENET, 
@@ -36,6 +37,7 @@ var peer: SteamMultiplayerPeer = null
 var enet_peer: ENetMultiplayerPeer = null
 
 func _ready() -> void:
+	Log.debug("_ready()")
 	multiplayer.peer_connected.connect(_player_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
 	multiplayer.connected_to_server.connect(_connected_to_server)
@@ -59,6 +61,7 @@ func create_lobby() -> void:
 
 # The name to show for a player: their Steam name, or their peer ID when testing with ENet
 func get_display_name(peer_id: int) -> String:
+	Log.debug("get_display_name()")
 	if backend == MultiplayerBackend.STEAM and lobby_members.has(peer_id):
 		return Steam.getFriendPersonaName(lobby_members[peer_id])
 	return str(peer_id)
@@ -81,15 +84,18 @@ func load_world() -> void:
 #        loading before the host, and the host's level wouldn't exist yet to
 #        receive the message. This autoload always exists.
 func report_level_loaded() -> void:
-	_peer_loaded.rpc_id(1)
+	Log.debug("report_level_loaded()")
+	_peer_loaded.rpc_id(HOST_ID)
 
 # Peer -> Host
 @rpc("any_peer", "call_local", "reliable")
 func _peer_loaded() -> void:
+	Log.debug("_peer_loaded()")
 	loaded_peers.append(multiplayer.get_remote_sender_id())
 	_check_all_loaded()
 
 func _check_all_loaded() -> void:
+	Log.debug("_check_all_loaded()")
 	if loaded_peers.is_empty(): return # Nobody is loading a level right now
 	for id in lobby_members:
 		if not loaded_peers.has(id): return

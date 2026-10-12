@@ -1,7 +1,6 @@
 class_name InteractionComponent extends Node
 
 const SPEED: float = 5.0
-const HOST_ID: int = 1
 
 enum InteractionType {
 	DEFAULT
@@ -11,11 +10,11 @@ enum InteractionType {
 @export var interaction_type: InteractionType = InteractionType.DEFAULT
 
 var can_interact: bool = true
-var is_interacting: bool = false
 
 var player_hand: Marker3D
 
 func _ready() -> void:
+	Log.debug("InteractionComponent._ready()")
 	_update_freeze()
 
 	if multiplayer.is_server():
@@ -23,14 +22,13 @@ func _ready() -> void:
 
 # Runs once when the Player first clicks on an object
 func pre_interact(hand: Marker3D) -> void:
-	is_interacting = true
-
+	Log.debug("InteractionComponent.pre_interact()")
 	match interaction_type:
 		InteractionType.DEFAULT:
 			player_hand = hand
 
 	# Ask the host to make us the owner of this object
-	_request_ownership.rpc_id(HOST_ID)
+	_request_ownership.rpc_id(Networking.HOST_ID)
 
 # Runs every physics frame when the Player is interacting with the object
 func interact() -> void:
@@ -45,8 +43,7 @@ func interact() -> void:
 
 # Runs once when the Player stops interacting with an object
 func post_interact() -> void:
-	is_interacting = false
-
+	Log.debug("InteractionComponent.post_interact()")
 	match interaction_type:
 		InteractionType.DEFAULT:
 			pass
@@ -70,6 +67,7 @@ func _default_interact() -> void:
 # Grabbing player -> Host
 @rpc("any_peer", "call_local", "reliable")
 func _request_ownership() -> void:
+	Log.debug("InteractionComponent._request_ownership()")
 	if not multiplayer.is_server(): return
 	_set_owner.rpc(multiplayer.get_remote_sender_id())
 
@@ -78,7 +76,8 @@ func _request_ownership() -> void:
 #        the current owner, and the host isn't always the owner
 @rpc("any_peer", "call_local", "reliable")
 func _set_owner(peer_id: int) -> void:
-	if multiplayer.get_remote_sender_id() != HOST_ID: return
+	Log.debug("InteractionComponent._set_owner()")
+	if multiplayer.get_remote_sender_id() != Networking.HOST_ID: return
 
 	# Recursive so the MultiplayerSynchronizer child changes owner too
 	object_reference.set_multiplayer_authority(peer_id, true)
@@ -87,6 +86,7 @@ func _set_owner(peer_id: int) -> void:
 # Freeze the object for everyone except its owner, so their physics doesn't
 # fight the positions coming in from the MultiplayerSynchronizer
 func _update_freeze() -> void:
+	Log.debug("InteractionComponent._update_freeze()")
 	var rb3d: RigidBody3D = object_reference as RigidBody3D
 	if rb3d:
 		rb3d.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
@@ -94,6 +94,7 @@ func _update_freeze() -> void:
 
 # Host only - if the owner leaves the game, the host takes the object back
 func _on_peer_disconnected(id: int) -> void:
+	Log.debug("InteractionComponent._on_peer_disconnected()")
 	if object_reference.get_multiplayer_authority() == id:
-		_set_owner.rpc(HOST_ID)
+		_set_owner.rpc(Networking.HOST_ID)
 #endregion

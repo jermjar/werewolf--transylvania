@@ -12,6 +12,7 @@ const FADE_TIME: float = 3.0
 @onready var sun: DirectionalLight3D = $DirectionalLight3D
 
 func _ready() -> void:
+	Log.debug("WorldEnvironment._ready()")
 	# NOTE - The Environment resource is shared and stays loaded between matches,
 	#        so reset it here or a match could start dark if the last one ended at night
 	environment.tonemap_exposure = DAY_EXPOSURE
@@ -21,6 +22,7 @@ func _ready() -> void:
 		RoundManager.instance.phase_changed.connect(_on_phase_changed)
 
 func _on_phase_changed(phase: RoundManager.Phase) -> void:
+	Log.debug("WorldEnvironment._on_phase_changed()")
 	var is_night: bool = phase == RoundManager.Phase.NIGHT
 
 	var tween: Tween = create_tween().set_parallel()

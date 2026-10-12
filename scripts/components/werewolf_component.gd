@@ -25,6 +25,7 @@ var _human_max_health: int
 var _material: StandardMaterial3D = StandardMaterial3D.new()
 
 func _ready() -> void:
+	Log.debug("WerewolfComponent._ready()")
 	_human_speed = player.speed
 	_human_max_health = player.health_component.max_health
 	_material.albedo_color = COLOR
@@ -32,14 +33,16 @@ func _ready() -> void:
 	if RoundManager.instance:
 		RoundManager.instance.phase_changed.connect(_on_phase_changed)
 
-func _on_phase_changed(phase: RoundManager.Phase) -> void:
+func _on_phase_changed(_phase: RoundManager.Phase) -> void:
+	Log.debug("WerewolfComponent._on_phase_changed()")
 	if not is_inside_tree(): return # Our player was removed this frame (died or left), about to be deleted
-	var is_werewolf: bool = RoundManager.instance.werewolf_id == player.name.to_int()
-	var should_transform: bool = is_werewolf and phase == RoundManager.Phase.NIGHT
+	var round_manager: RoundManager = RoundManager.instance
+	var should_transform: bool = round_manager.is_werewolf(player.peer_id) and round_manager.is_night()
 	if should_transform != is_transformed:
 		_set_transformed(should_transform)
 
 func _set_transformed(transformed: bool) -> void:
+	Log.debug("WerewolfComponent._set_transformed()")
 	is_transformed = transformed
 	Log.info("%s %s" % [player.name, "turned into the werewolf" if transformed else "turned back into a human"])
 

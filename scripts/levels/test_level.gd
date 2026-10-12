@@ -15,11 +15,11 @@ func _enter_tree() -> void:
 	get_tree().paused = true
 
 func _ready() -> void:
+	Log.debug("TestLevel._ready()")
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	# HACK - I don't like having the code here
-	# Connect GameMenu buttons
+	# Leaving the game goes back to the main menu, the same as losing the host
 	game_menu.leave_game_button.button_up.connect(_on_server_disconnected)
 	
 	# Must be set on every peer before the host spawns anyone,
@@ -32,13 +32,13 @@ func _ready() -> void:
 
 # Host only - runs once every peer has finished loading the level
 func _on_all_peers_loaded() -> void:
+	Log.debug("TestLevel._on_all_peers_loaded()")
 	var spawn_index: int = 0
 	for id in Networking.lobby_members:
 		# Wraps around if there are more players than spawn points
 		var spawn_point: Marker3D = spawn_points.get_child(spawn_index % spawn_points.get_child_count())
 		player_spawner.spawn({
 			"id": id,
-			"steam_id": Networking.lobby_members[id],
 			"position": spawn_point.global_position,
 		})
 		spawn_index += 1
@@ -48,18 +48,9 @@ func _on_all_peers_loaded() -> void:
 	game_loaded.rpc()
 	round_manager.start_round()
 
-# HACK - I don't like having the code here
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		if game_menu.visible:
-			game_menu.hide()
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		elif !game_menu.visible:
-			game_menu.show()
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-
 @rpc("call_local", "reliable")
 func game_loaded() -> void:
+	Log.debug("TestLevel.game_loaded()")
 	SceneManager.finished_loading.emit()
 
 	# Props placed in the level (like the cube) start hidden from the network,
@@ -78,22 +69,18 @@ func _spawn_player(data: Dictionary) -> Node:
 	var player_controller = player_scene.instantiate()
 	player_controller.name = str(data.id)
 	player_controller.position = data.position
-	player_controller.steam_id = data.steam_id
-
-	match Networking.backend:
-		Networking.MultiplayerBackend.STEAM:
-			player_controller.steam_name = Steam.getFriendPersonaName(data.steam_id)
-
 	Log.debug("_spawn_player -> spawned: %s" % data.id)
 	return player_controller
 
 # Host only - removing a spawned player on the host removes it for everyone
 func _on_player_disconnected(id: int) -> void:
+	Log.debug("TestLevel._on_player_disconnected()")
 	if not multiplayer.is_server(): return
 	if players.has_node(str(id)):
 		players.get_node(str(id)).queue_free()
 
 func _on_server_disconnected() -> void:
+	Log.debug("TestLevel._on_server_disconnected()")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	SceneManager.change_scene("uid://dlgk7ywyn41us")
 	Networking.reset_network()

@@ -10,7 +10,6 @@ signal changed # Used by the hotbar
 
 const SLOT_COUNT: int = 4
 const NO_SLOT: int = -1 # Nothing equipped, so the fists are out
-const HOST_ID: int = 1
 
 # Items are created under the camera so they aim where the player looks
 @export var item_holder: Node3D
@@ -30,6 +29,7 @@ var override_item: Item:
 		_update_equipped_item()
 
 func _ready() -> void:
+	Log.debug("InventoryComponent._ready()")
 	# Only our own player reacts to our input
 	set_process_unhandled_input(is_multiplayer_authority())
 	_update_equipped_item()
@@ -45,7 +45,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cycle_slot(-1)
 	elif event.is_action_pressed("drop_item"):
 		if equipped_slot != NO_SLOT:
-			_request_drop.rpc_id(HOST_ID, equipped_slot)
+			_request_drop.rpc_id(Networking.HOST_ID, equipped_slot)
 	else:
 		for slot in SLOT_COUNT:
 			if event.is_action_pressed("slot_%d" % (slot + 1)):
@@ -53,12 +53,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # Pressing the slot you're already holding puts it away. Empty slots do nothing.
 func _select_slot(slot: int) -> void:
+	Log.debug("InventoryComponent._select_slot()")
 	if items[slot] == null: return
 	equipped_slot = NO_SLOT if equipped_slot == slot else slot
 
 # Mouse wheel: cycles through the filled slots only. The fists are only
 # reached by pressing the equipped slot's key again.
 func _cycle_slot(direction: int) -> void:
+	Log.debug("InventoryComponent._cycle_slot()")
 	var filled_slots: Array[int] = []
 	for slot in SLOT_COUNT:
 		if items[slot]:
@@ -74,6 +76,7 @@ func _cycle_slot(direction: int) -> void:
 
 # Host only. Puts an item in a slot on every machine, or empties it with null.
 func set_slot(slot: int, item_data: ItemData) -> void:
+	Log.debug("InventoryComponent.set_slot()")
 	_set_slot.rpc(slot, item_data.resource_path if item_data else "")
 
 #region Picking up and dropping
@@ -83,12 +86,14 @@ func set_slot(slot: int, item_data: ItemData) -> void:
 
 # Called by the InteractionController when we tap interact on a pickup
 func request_pickup(pickup: ItemPickup) -> void:
+	Log.debug("InventoryComponent.request_pickup()")
 	if override_item: return # Can't pick things up while something else is in our hands
-	_request_pickup.rpc_id(HOST_ID, pickup.get_path())
+	_request_pickup.rpc_id(Networking.HOST_ID, pickup.get_path())
 
 # Player -> Host
 @rpc("any_peer", "call_local", "reliable")
 func _request_pickup(pickup_path: NodePath) -> void:
+	Log.debug("InventoryComponent._request_pickup()")
 	if multiplayer.get_remote_sender_id() != get_multiplayer_authority(): return
 
 	var pickup: ItemPickup = get_node_or_null(pickup_path)
@@ -102,6 +107,7 @@ func _request_pickup(pickup_path: NodePath) -> void:
 # Player -> Host
 @rpc("any_peer", "call_local", "reliable")
 func _request_drop(slot: int) -> void:
+	Log.debug("InventoryComponent._request_drop()")
 	if multiplayer.get_remote_sender_id() != get_multiplayer_authority(): return
 	if items[slot] == null: return
 
@@ -113,6 +119,7 @@ func _request_drop(slot: int) -> void:
 
 # Host only - called when the player dies, so everything they carried falls around them
 func drop_all() -> void:
+	Log.debug("InventoryComponent.drop_all()")
 	var player: Node3D = get_parent()
 	for item in items:
 		if item:
@@ -125,7 +132,8 @@ func drop_all() -> void:
 #        so the default "authority" mode would reject the host's call
 @rpc("any_peer", "call_local", "reliable")
 func _set_slot(slot: int, item_path: String) -> void:
-	if multiplayer.get_remote_sender_id() != HOST_ID: return
+	Log.debug("InventoryComponent._set_slot()")
+	if multiplayer.get_remote_sender_id() != Networking.HOST_ID: return
 
 	if items[slot]:
 		# remove_child() right away, instead of waiting for queue_free(), so the new item can reuse the name
@@ -149,6 +157,7 @@ func _set_slot(slot: int, item_path: String) -> void:
 	_update_equipped_item()
 
 func _update_equipped_item() -> void:
+	Log.debug("InventoryComponent._update_equipped_item()")
 	if not is_node_ready(): return
 	if is_instance_valid(equipped_item):
 		equipped_item.hide()

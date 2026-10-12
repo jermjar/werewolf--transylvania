@@ -10,4 +10,5 @@ var data: ItemData
 
 # Called when the player presses "use_item" with this item equipped
 func use() -> void:
+	Log.debug("Item.use()")
 	pass

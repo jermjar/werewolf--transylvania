@@ -13,6 +13,7 @@ var item_data: ItemData # Set by the ItemSpawner before this is added
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 func _ready() -> void:
+	Log.debug("ItemPickup._ready()")
 	# Shows the item's own held model, moved so its mesh sits at the pickup's centre
 	var model: Node3D = item_data.held_scene.instantiate()
 	add_child(model)
