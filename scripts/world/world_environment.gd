@@ -4,9 +4,9 @@ extends WorldEnvironment
 # whenever the RoundManager changes phase.
 
 const DAY_EXPOSURE: float = 1.0
-const NIGHT_EXPOSURE: float = 0.15
+const NIGHT_EXPOSURE: float = 0.25
 const DAY_SUN_ENERGY: float = 1.0
-const NIGHT_SUN_ENERGY: float = 0.1
+const NIGHT_SUN_ENERGY: float = 0.2
 const FADE_TIME: float = 3.0
 
 @onready var sun: DirectionalLight3D = $DirectionalLight3D
