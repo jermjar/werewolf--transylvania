@@ -7,8 +7,9 @@ class_name Player extends CharacterBody3D
 @onready var steam_name_label: Label3D = $SteamName
 @onready var camera_controller: CameraController = $CameraController
 @onready var camera: Camera3D = $CameraController/Camera3D
-@onready var head: MeshInstance3D = $HeadMesh
-@onready var body: MeshInstance3D = $BodyMesh
+@onready var model: Node3D = $Model # At the player's feet, so scaling it keeps the body on the floor
+@onready var head: MeshInstance3D = $Model/HeadMesh
+@onready var body: MeshInstance3D = $Model/BodyMesh
 
 @export var steam_id: int = 0
 @export var steam_name: String

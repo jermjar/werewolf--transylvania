@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/items/melee_weapon.gd" id="1_melee"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_claws"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_claws"]
+material = SubResource("StandardMaterial3D_claws")
+size = Vector3(0.2, 0.06, 0.3)
+
+[node name="Claws" type="Node3D" unique_id=1472093856]
+script = ExtResource("1_melee")
+damage = 50
+cooldown = 1.5
+reach = 2.5
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=1839201746]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.25, -0.5)
+mesh = SubResource("BoxMesh_claws")
+
+[node name="RayCast3D" type="RayCast3D" parent="." unique_id=1290384756]
+enabled = false
+
+[node name="CooldownTimer" type="Timer" parent="." unique_id=1702938465]
+one_shot = true

@@ -22,6 +22,12 @@ var equipped_slot: int = NO_SLOT:
 		equipped_slot = value
 		_update_equipped_item()
 var equipped_item: Item # The fists, or the item in the equipped slot
+# When set, this is held instead of anything in the inventory, and the
+# inventory can't be used or changed (the werewolf's claws at night)
+var override_item: Item:
+	set(value):
+		override_item = value
+		_update_equipped_item()
 
 func _ready() -> void:
 	# Only our own player reacts to our input
@@ -31,6 +37,8 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("use_item"):
 		equipped_item.use()
+	elif override_item:
+		return # No switching or dropping while something else is in our hands
 	elif event.is_action_pressed("next_item"):
 		_cycle_slot(1)
 	elif event.is_action_pressed("previous_item"):
@@ -75,6 +83,7 @@ func set_slot(slot: int, item_data: ItemData) -> void:
 
 # Called by the InteractionController when we tap interact on a pickup
 func request_pickup(pickup: ItemPickup) -> void:
+	if override_item: return # Can't pick things up while something else is in our hands
 	_request_pickup.rpc_id(HOST_ID, pickup.get_path())
 
 # Player -> Host
@@ -147,7 +156,9 @@ func _update_equipped_item() -> void:
 	# Falls back to the fists if the slot's item hasn't arrived yet, since on
 	# other machines equipped_slot and _set_slot() can arrive in either order
 	equipped_item = fists
-	if equipped_slot != NO_SLOT and items[equipped_slot]:
+	if override_item:
+		equipped_item = override_item
+	elif equipped_slot != NO_SLOT and items[equipped_slot]:
 		equipped_item = items[equipped_slot]
 	equipped_item.show()
 	changed.emit()

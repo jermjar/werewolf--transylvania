@@ -4,6 +4,7 @@ const WEREWOLF_MESSAGE_TIME: float = 5.0
 
 @onready var phase_label: Label = %PhaseLabel
 @onready var werewolf_label: Label = %WerewolfLabel
+@onready var werewolf_form_label: Label = %WerewolfFormLabel
 
 func _ready() -> void:
 	werewolf_label.hide()
@@ -19,6 +20,10 @@ func _process(_delta: float) -> void:
 	var minutes: int = floori(seconds_left / 60.0)
 	var phase_name: String = RoundManager.Phase.keys()[round_manager.phase]
 	phase_label.text = "%s  %d:%02d" % [phase_name, minutes, seconds_left % 60]
+
+	# Reminds the werewolf that they're transformed
+	var is_werewolf: bool = round_manager.werewolf_id == multiplayer.get_unique_id()
+	werewolf_form_label.visible = is_werewolf and round_manager.phase == RoundManager.Phase.NIGHT
 
 # Only the chosen player sees the message
 func _on_werewolf_chosen(werewolf_id: int) -> void:

@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/items/fists.tscn" id="4_fists"]
 [ext_resource type="PackedScene" path="res://scenes/components/inventory_component.tscn" id="5_inventory"]
 [ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="6_hotbar"]
+[ext_resource type="PackedScene" path="res://scenes/items/claws.tscn" id="7_claws"]
+[ext_resource type="PackedScene" path="res://scenes/components/werewolf_component.tscn" id="8_werewolf"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
@@ -44,11 +46,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4405314, 0)
 billboard = 1
 text = "NULL"
 
-[node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=62681335]
+[node name="Model" type="Node3D" parent="." unique_id=1650284937]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Model" unique_id=62681335]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_8afob")
 
-[node name="HeadMesh" type="MeshInstance3D" parent="." unique_id=1892059129]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48904562, -0.5133159)
+[node name="HeadMesh" type="MeshInstance3D" parent="Model" unique_id=1892059129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4890456, -0.5133159)
 mesh = SubResource("BoxMesh_dovo2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=188188067]
@@ -73,6 +79,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
 [node name="Fists" parent="CameraController/Camera3D" unique_id=1203948571 instance=ExtResource("4_fists")]
 
+[node name="Claws" parent="CameraController/Camera3D" unique_id=1472093856 instance=ExtResource("7_claws")]
+visible = false
+
 [node name="InteractionController" parent="." unique_id=32777604 instance=ExtResource("3_lvxji")]
 unique_name_in_owner = true
 
@@ -83,6 +92,9 @@ unique_name_in_owner = true
 item_holder = NodePath("../CameraController/Camera3D")
 fists = NodePath("../CameraController/Camera3D/Fists")
 unique_name_in_owner = true
+
+[node name="WerewolfComponent" parent="." unique_id=1123847569 node_paths=PackedStringArray("claws") instance=ExtResource("8_werewolf")]
+claws = NodePath("../CameraController/Camera3D/Claws")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=240302807]
 replication_config = SubResource("SceneReplicationConfig_dovo2")

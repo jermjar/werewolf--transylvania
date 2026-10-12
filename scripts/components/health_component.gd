@@ -34,6 +34,15 @@ func apply_damage(amount: int) -> void:
 	else:
 		sync_health.rpc(current_health)
 
+# Changes max health but keeps the same percentage, e.g. 50/100 becomes 100/200.
+# Called on every machine. Only the owner converts the current health and shares it.
+func set_max_health(new_max_health: int) -> void:
+	var percentage: float = float(current_health) / max_health
+	max_health = new_max_health
+	if is_multiplayer_authority() and current_health > 0:
+		# Never let rounding drop someone to 0 just by changing form
+		sync_health.rpc(maxi(1, roundi(percentage * new_max_health)))
+
 func heal(amount: int) -> void:
 	Log.debug("heal()")
 	if is_multiplayer_authority():

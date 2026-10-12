@@ -25,4 +25,4 @@ func _refresh() -> void:
 		var item: Item = inventory.items[slot]
 		var label: Label = slot_labels[slot]
 		label.text = "[%d] %s" % [slot + 1, item.data.display_name if item else "-"]
-		label.add_theme_color_override("font_color", EQUIPPED_COLOR if slot == inventory.equipped_slot else NORMAL_COLOR)
+		label.add_theme_color_override("font_color", EQUIPPED_COLOR if slot == inventory.equipped_slot and not inventory.override_item else NORMAL_COLOR)

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/components/werewolf_component.gd" id="1_werewolf"]
+
+[node name="WerewolfComponent" type="Node" unique_id=1123847569]
+script = ExtResource("1_werewolf")
