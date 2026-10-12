@@ -143,4 +143,5 @@ func die():
 	# Players are spawned by the host's PlayerSpawner, so only the host removes
 	# them. The spawner then removes the player for everyone else.
 	if multiplayer.is_server():
+		inventory_component.drop_all()
 		queue_free()

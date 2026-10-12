@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_pickup.gd" id="1_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/components/interaction_component.tscn" id="2_interaction"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pickup"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="ItemPickup" type="RigidBody3D" unique_id=1376204958]
+script = ExtResource("1_pickup")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1938475620]
+
+[node name="InteractionComponent" parent="." unique_id=541744532 node_paths=PackedStringArray("object_reference") instance=ExtResource("2_interaction")]
+object_reference = NodePath("..")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1508372946]
+replication_config = SubResource("SceneReplicationConfig_pickup")

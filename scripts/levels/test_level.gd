@@ -4,6 +4,7 @@ extends Node3D
 @onready var players: Node3D = $Players
 @onready var spawn_points: Node3D = $SpawnPoints
 @onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
+@onready var item_spawner: ItemSpawner = $ItemSpawner
 @onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
 
@@ -42,10 +43,7 @@ func _on_all_peers_loaded() -> void:
 		})
 		spawn_index += 1
 
-	# TEMPORARY - Starting items for testing the inventory until pickups exist
-	for player: Player in players.get_children():
-		player.inventory_component.set_slot(0, load("res://scenes/items/bat.tres"))
-		player.inventory_component.set_slot(1, load("res://scenes/items/flashlight.tres"))
+	item_spawner.spawn_level_items()
 
 	game_loaded.rpc()
 	round_manager.start_round()

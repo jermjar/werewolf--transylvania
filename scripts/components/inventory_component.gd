@@ -35,6 +35,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cycle_slot(1)
 	elif event.is_action_pressed("previous_item"):
 		_cycle_slot(-1)
+	elif event.is_action_pressed("drop_item"):
+		if equipped_slot != NO_SLOT:
+			_request_drop.rpc_id(HOST_ID, equipped_slot)
 	else:
 		for slot in SLOT_COUNT:
 			if event.is_action_pressed("slot_%d" % (slot + 1)):
@@ -64,6 +67,49 @@ func _cycle_slot(direction: int) -> void:
 # Host only. Puts an item in a slot on every machine, or empties it with null.
 func set_slot(slot: int, item_data: ItemData) -> void:
 	_set_slot.rpc(slot, item_data.resource_path if item_data else "")
+
+#region Picking up and dropping
+# The host decides these, since two players could take the same item at the
+# same moment. The requests are "any_peer", but are only accepted from this
+# inventory's own player.
+
+# Called by the InteractionController when we tap interact on a pickup
+func request_pickup(pickup: ItemPickup) -> void:
+	_request_pickup.rpc_id(HOST_ID, pickup.get_path())
+
+# Player -> Host
+@rpc("any_peer", "call_local", "reliable")
+func _request_pickup(pickup_path: NodePath) -> void:
+	if multiplayer.get_remote_sender_id() != get_multiplayer_authority(): return
+
+	var pickup: ItemPickup = get_node_or_null(pickup_path)
+	if pickup == null or pickup.is_queued_for_deletion(): return # Someone else already took it
+	var free_slot: int = items.find(null)
+	if free_slot == -1: return # Inventory is full
+
+	set_slot(free_slot, pickup.item_data)
+	pickup.queue_free() # The ItemSpawner removes it for everyone
+
+# Player -> Host
+@rpc("any_peer", "call_local", "reliable")
+func _request_drop(slot: int) -> void:
+	if multiplayer.get_remote_sender_id() != get_multiplayer_authority(): return
+	if items[slot] == null: return
+
+	# 1m in front of the player. It then falls to the floor.
+	var player: Node3D = get_parent()
+	var drop_position: Vector3 = player.global_position - player.global_basis.z
+	ItemSpawner.instance.spawn_pickup(items[slot].data, drop_position)
+	set_slot(slot, null)
+
+# Host only - called when the player dies, so everything they carried falls around them
+func drop_all() -> void:
+	var player: Node3D = get_parent()
+	for item in items:
+		if item:
+			var scatter: Vector3 = Vector3(randf_range(-0.5, 0.5), 0, randf_range(-0.5, 0.5))
+			ItemSpawner.instance.spawn_pickup(item.data, player.global_position + scatter)
+#endregion
 
 # Host -> Everyone
 # NOTE - "any_peer" because this node is owned by its player, not the host,
