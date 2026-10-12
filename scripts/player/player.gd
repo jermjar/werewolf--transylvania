@@ -2,6 +2,7 @@ class_name Player extends CharacterBody3D
 
 @onready var health_label: Label = $HUD/HealthLabel
 @onready var crosshair: Label = $HUD/Crosshair
+@onready var hotbar: HBoxContainer = $HUD/Hotbar
 @onready var health_label_3d: Label3D = $HealthLabel3D
 @onready var steam_name_label: Label3D = $SteamName
 @onready var camera_controller: CameraController = $CameraController
@@ -9,14 +10,13 @@ class_name Player extends CharacterBody3D
 @onready var head: MeshInstance3D = $HeadMesh
 @onready var body: MeshInstance3D = $BodyMesh
 
-# Whatever the player is holding. Fists for now, the inventory will change this later.
-@onready var equipped_item: Item = $CameraController/Camera3D/Fists
-
 @export var steam_id: int = 0
 @export var steam_name: String
 
 # Components
 @export var health_component: HealthComponent
+# Also handles using items and switching slots
+@export var inventory_component: InventoryComponent
 
 # True while a dead player is watching through this player's camera
 var is_spectated: bool = false
@@ -60,6 +60,7 @@ func _ready() -> void:
 		body.hide()
 		health_label.show()
 		crosshair.show()
+		hotbar.show()
 
 		set_process_unhandled_input(is_multiplayer_authority())
 		set_process(is_multiplayer_authority())
@@ -78,9 +79,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		mouse_input.x += -event.screen_relative.x * mouse_sensitivity
 		mouse_input.y += -event.screen_relative.y * mouse_sensitivity
 		camera_controller.update_camera_rotation(mouse_input)
-
-	if event.is_action_pressed("use_item"):
-		equipped_item.use()
 
 func _process(_delta: float) -> void:
 	mouse_input = Vector2.ZERO

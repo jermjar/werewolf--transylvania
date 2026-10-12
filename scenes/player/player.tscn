@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://ch1s0xi13c0sa" path="res://scenes/components/health_component.tscn" id="3_gmlin"]
 [ext_resource type="PackedScene" uid="uid://7lf2jbylc6bl" path="res://scenes/interaction/interaction_controller.tscn" id="3_lvxji"]
 [ext_resource type="PackedScene" path="res://scenes/items/fists.tscn" id="4_fists"]
+[ext_resource type="PackedScene" path="res://scenes/components/inventory_component.tscn" id="5_inventory"]
+[ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="6_hotbar"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
 
@@ -23,10 +25,14 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath("CameraController:rotation")
 properties/2/spawn = true
 properties/2/replication_mode = 1
+properties/3/path = NodePath("InventoryComponent:equipped_slot")
+properties/3/spawn = true
+properties/3/replication_mode = 2
 
-[node name="Player" type="CharacterBody3D" unique_id=1592071486 node_paths=PackedStringArray("health_component")]
+[node name="Player" type="CharacterBody3D" unique_id=1592071486 node_paths=PackedStringArray("health_component", "inventory_component")]
 script = ExtResource("1_8afob")
 health_component = NodePath("HealthComponent")
+inventory_component = NodePath("InventoryComponent")
 
 [node name="SteamName" type="Label3D" parent="." unique_id=1495183007]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1941276, 0)
@@ -73,6 +79,11 @@ unique_name_in_owner = true
 [node name="HealthComponent" parent="." unique_id=390150431 instance=ExtResource("3_gmlin")]
 unique_name_in_owner = true
 
+[node name="InventoryComponent" parent="." unique_id=1593827461 node_paths=PackedStringArray("item_holder", "fists") instance=ExtResource("5_inventory")]
+item_holder = NodePath("../CameraController/Camera3D")
+fists = NodePath("../CameraController/Camera3D/Fists")
+unique_name_in_owner = true
+
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=240302807]
 replication_config = SubResource("SceneReplicationConfig_dovo2")
 
@@ -108,3 +119,19 @@ theme_override_font_sizes/font_size = 28
 text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Hotbar" type="HBoxContainer" parent="HUD" unique_id=1172635948 node_paths=PackedStringArray("inventory")]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 40
+alignment = 1
+script = ExtResource("6_hotbar")
+inventory = NodePath("../../InventoryComponent")

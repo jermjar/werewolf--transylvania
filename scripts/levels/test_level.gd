@@ -42,6 +42,11 @@ func _on_all_peers_loaded() -> void:
 		})
 		spawn_index += 1
 
+	# TEMPORARY - Starting items for testing the inventory until pickups exist
+	for player: Player in players.get_children():
+		player.inventory_component.set_slot(0, load("res://scenes/items/bat.tres"))
+		player.inventory_component.set_slot(1, load("res://scenes/items/flashlight.tres"))
+
 	game_loaded.rpc()
 	round_manager.start_round()
 
