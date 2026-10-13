@@ -1,10 +1,12 @@
-extends Control
+class_name Spectator extends Control
 
-# Lets dead players watch living players through their eyes.
+# Lets dead players, and people who joined during a match, watch living
+# players through their eyes.
 #
 # Entirely local, nothing here is sent over the network. It only changes which
 # camera this machine looks through. It starts when our own player is removed
-# from Players, and moves on when the player we're watching is removed too.
+# from Players (or when we joined late, see TestLevel.game_loaded()), and moves
+# on when the player we're watching is removed too.
 
 @export var players: Node3D
 @export var level_camera: Camera3D
@@ -39,10 +41,16 @@ func _on_player_exiting(player: Player) -> void:
 	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED: return
 
 	if player.peer_id == my_peer_id:
-		is_spectating = true
-		_watch_anyone(player)
+		start_spectating(player)
 	elif player == target:
 		_watch_anyone(player)
+
+# Called when our own player died or left, and by the level when we joined a
+# match late and have no player
+func start_spectating(leaving_player: Node = null) -> void:
+	Log.debug("Spectator.start_spectating()")
+	is_spectating = true
+	_watch_anyone(leaving_player)
 
 # Watch the first living player, or the level camera if nobody is left
 func _watch_anyone(leaving: Node) -> void:

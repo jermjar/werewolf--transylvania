@@ -11,6 +11,12 @@ const UNIQUE_LOBBY_ID: String = "54832791483712409738190"
 const DEFAULT_PORT: int = 8080
 const HOST_ID: int = 1 # Godot always gives the host peer ID 1
 
+# Messages sent while someone is joining (see the "Joining" region)
+const JOIN_LOBBY: String = "lobby" # Host -> New peer: we're in the lobby, come straight in
+const JOIN_MATCH: String = "match" # Host -> New peer: a match is being played, load the level first
+const JOIN_LOADED: String = "loaded" # New peer -> Host: I've loaded the level, let me in
+const JOIN_TIMEOUT: float = 60.0 # Seconds a new peer has to load the level before they're dropped
+
 enum MultiplayerBackend { 
 	ENET, 
 	STEAM 
@@ -30,8 +36,17 @@ var lobby_type: int = LobbyType.PUBLIC
 var lobby_name: String = "Lobby Name"
 var lobby_members := {}
 var lobby_members_ready := []
+# Host only - peers that were sent the level and must load it before the round
+# starts. Empty when no level is loading.
+var loading_peers: Array[int] = []
 # Host only - peers that have finished loading the level
 var loaded_peers: Array[int] = []
+# True from the moment a match starts until we leave it. Only the host's value is used.
+var is_in_match: bool = false
+# New peer only - true while loading a match we joined late, until we tell the host we're ready
+var is_joining_late: bool = false
+
+@onready var scene_multiplayer: SceneMultiplayer = multiplayer as SceneMultiplayer
 
 var peer: SteamMultiplayerPeer = null
 var enet_peer: ENetMultiplayerPeer = null
@@ -43,7 +58,12 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_connected_to_server)
 	multiplayer.connection_failed.connect(_connection_failed)
 	multiplayer.server_disconnected.connect(_server_disconnected)
-	
+
+	# New peers must be let in before they count as connected (see the "Joining" region)
+	scene_multiplayer.auth_callback = _on_join_message
+	scene_multiplayer.auth_timeout = JOIN_TIMEOUT
+	scene_multiplayer.peer_authenticating.connect(_on_peer_joining)
+
 	if backend == MultiplayerBackend.STEAM:
 		Steam.join_requested.connect(_on_lobby_join_requested)
 		Steam.lobby_joined.connect(_on_lobby_joined)
@@ -69,11 +89,15 @@ func get_display_name(peer_id: int) -> String:
 func start_game() -> void:
 	assert(multiplayer.is_server())
 	Log.debug("start_game()")
+	# Only the peers in the game right now have to load before the round starts.
+	# Anyone who joins while it loads is let in afterwards (see the "Joining" region).
+	loading_peers.assign(lobby_members.keys())
 	load_world.rpc()
 
 @rpc("call_local", "reliable")
 func load_world() -> void:
 	Log.debug("load_world()")
+	is_in_match = true
 	get_tree().change_scene_to_file("uid://cy05oxvdhtff6")
 	#SceneManager.change_scene("uid://cy05oxvdhtff6")
 
@@ -85,7 +109,13 @@ func load_world() -> void:
 #        receive the message. This autoload always exists.
 func report_level_loaded() -> void:
 	Log.debug("report_level_loaded()")
-	_peer_loaded.rpc_id(HOST_ID)
+	if is_joining_late:
+		# We're not let in yet, so RPCs can't be sent. Tell the host with a join message instead.
+		is_joining_late = false
+		_send_join_message(HOST_ID, JOIN_LOADED)
+		scene_multiplayer.complete_auth(HOST_ID)
+	else:
+		_peer_loaded.rpc_id(HOST_ID)
 
 # Peer -> Host
 @rpc("any_peer", "call_local", "reliable")
@@ -96,12 +126,57 @@ func _peer_loaded() -> void:
 
 func _check_all_loaded() -> void:
 	Log.debug("_check_all_loaded()")
-	if loaded_peers.is_empty(): return # Nobody is loading a level right now
-	for id in lobby_members:
+	if loading_peers.is_empty(): return # Nobody is loading a level right now
+	for id in loading_peers:
 		if not loaded_peers.has(id): return
 
+	loading_peers.clear()
 	loaded_peers.clear()
 	all_peers_loaded.emit()
+#endregion
+
+#region Joining
+# The lobby stays open during matches, so someone can connect while one is
+# being played. Godot would immediately send them every spawned player and
+# item, but they haven't loaded the level yet, so all of that would be lost.
+#
+# So new peers go through Godot's "authentication" step first. Until both sides
+# call complete_auth(), the new peer is "pending": it gets no RPCs, spawns or
+# syncs, but it and the host can send each other short join messages (send_auth()).
+#   Host -> New peer: JOIN_LOBBY (come straight in) or JOIN_MATCH (load the level first)
+#   New peer -> Host: JOIN_LOADED, from report_level_loaded()
+# Once both sides complete, Godot sends them every spawned node and peer_connected
+# fires. Nodes then send the newcomer anything they missed (see the
+# _on_peer_connected() functions in RoundManager, InventoryComponent, etc.).
+
+# Runs on both sides when someone starts joining, before they count as connected
+func _on_peer_joining(id: int) -> void:
+	Log.debug("_on_peer_joining()")
+	if not multiplayer.is_server(): return # The new peer waits for the host's message
+
+	if is_in_match:
+		_send_join_message(id, JOIN_MATCH)
+	else:
+		_send_join_message(id, JOIN_LOBBY)
+		scene_multiplayer.complete_auth(id)
+
+func _send_join_message(id: int, message: String) -> void:
+	Log.debug("_send_join_message()")
+	scene_multiplayer.send_auth(id, message.to_utf8_buffer())
+
+# Runs when the other side sends us a join message
+func _on_join_message(id: int, data: PackedByteArray) -> void:
+	Log.debug("_on_join_message()")
+	var message: String = data.get_string_from_utf8()
+	Log.info("Join message from %s: %s" % [id, message])
+	match message:
+		JOIN_LOBBY: # New peer - nothing to load, we're in
+			scene_multiplayer.complete_auth(id)
+		JOIN_MATCH: # New peer - load the level. The level calls report_level_loaded() when it's ready.
+			is_joining_late = true
+			load_world()
+		JOIN_LOADED: # Host - they have the level now, let them in
+			scene_multiplayer.complete_auth(id)
 #endregion
 
 func host_with_lobby():
@@ -195,6 +270,7 @@ func _player_disconnected(id):
 	player_list_changed.emit()
 
 	# If someone leaves while loading, don't keep waiting for them
+	loading_peers.erase(id)
 	loaded_peers.erase(id)
 	if multiplayer.is_server():
 		_check_all_loaded()
@@ -223,7 +299,10 @@ func reset_network():
 	lobby_name = "Lobby Name"
 	lobby_members = {}
 	lobby_members_ready = []
+	loading_peers = []
 	loaded_peers = []
+	is_in_match = false
+	is_joining_late = false
 	peer = null
 	enet_peer = null
 

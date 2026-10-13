@@ -67,6 +67,7 @@ func _ready() -> void:
 		phase_timer.timeout.connect(_on_phase_timer_timeout)
 		round_timer.timeout.connect(_on_round_timer_timeout)
 		players.child_exiting_tree.connect(_on_player_removed)
+		multiplayer.peer_connected.connect(_on_peer_connected)
 
 func get_time_left() -> float:
 	return phase_timer.time_left
@@ -171,6 +172,27 @@ func _set_werewolf(id: int) -> void:
 	werewolf_id = id
 	Log.info("_set_werewolf() -> %s" % id)
 	werewolf_chosen.emit(id)
+
+#region Late joiners
+# Host only - someone joined during the match. They missed every announcement
+# so far, so send them where the round is at right now.
+func _on_peer_connected(id: int) -> void:
+	Log.debug("RoundManager._on_peer_connected()")
+	if phase == Phase.WAITING: return # The round hasn't started, they'll get the normal announcements
+	_receive_round_state.rpc_id(id, phase, phase_timer.time_left, round_timer.time_left, werewolf_id, winner)
+
+# Host -> Late joiner
+@rpc("reliable")
+func _receive_round_state(current_phase: Phase, phase_time_left: float, round_time_left: float, current_werewolf_id: int, current_winner: Winner) -> void:
+	Log.debug("RoundManager._receive_round_state()")
+	werewolf_id = current_werewolf_id
+	winner = current_winner
+	# The round timer is stopped once the round has ended
+	if round_time_left > 0.0:
+		round_timer.start(round_time_left)
+	# Also tells everything that reacts to the phase (werewolf form, name tags, lighting, HUD)
+	_start_phase(current_phase, phase_time_left)
+#endregion
 
 # Host -> Everyone
 @rpc("call_local", "reliable")

@@ -34,6 +34,9 @@ func _ready() -> void:
 	set_process_unhandled_input(is_multiplayer_authority())
 	_update_equipped_item()
 
+	if multiplayer.is_server():
+		multiplayer.peer_connected.connect(_on_peer_connected)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("use_item"):
 		equipped_item.use()
@@ -78,6 +81,15 @@ func _cycle_slot(direction: int) -> void:
 func set_slot(slot: int, item_data: ItemData) -> void:
 	Log.debug("InventoryComponent.set_slot()")
 	_set_slot.rpc(slot, item_data.resource_path if item_data else "")
+
+# Host only - someone joined during the match and missed every _set_slot() so far,
+# so send them what's in each of our slots. (Which slot is equipped already
+# reaches them through the player's MultiplayerSynchronizer.)
+func _on_peer_connected(id: int) -> void:
+	Log.debug("InventoryComponent._on_peer_connected()")
+	for slot in SLOT_COUNT:
+		if items[slot]:
+			_set_slot.rpc_id(id, slot, items[slot].data.resource_path)
 
 #region Picking up and dropping
 # The host decides these, since two players could take the same item at the

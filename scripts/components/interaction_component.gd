@@ -18,6 +18,7 @@ func _ready() -> void:
 	_update_freeze()
 
 	if multiplayer.is_server():
+		multiplayer.peer_connected.connect(_on_peer_connected)
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
 # Runs once when the Player first clicks on an object
@@ -91,6 +92,13 @@ func _update_freeze() -> void:
 	if rb3d:
 		rb3d.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
 		rb3d.freeze = not object_reference.is_multiplayer_authority()
+
+# Host only - someone joined during the match. Objects keep the owner of whoever
+# grabbed them last, so tell the newcomer who that is. Otherwise they'd think
+# the host owns it, ignore the real owner's position updates, and see it frozen.
+func _on_peer_connected(id: int) -> void:
+	Log.debug("InteractionComponent._on_peer_connected()")
+	_set_owner.rpc_id(id, object_reference.get_multiplayer_authority())
 
 # Host only - if the owner leaves the game, the host takes the object back
 func _on_peer_disconnected(id: int) -> void:

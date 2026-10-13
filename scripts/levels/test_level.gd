@@ -7,6 +7,7 @@ extends Node3D
 @onready var item_spawner: ItemSpawner = $ItemSpawner
 @onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
+@onready var spectator: Spectator = $UI/Spectator
 
 # Everyone stays paused until the host has spawned all players and calls
 # game_loaded(), so nobody can move before the round starts
@@ -28,6 +29,7 @@ func _ready() -> void:
 
 	if multiplayer.is_server():
 		Networking.all_peers_loaded.connect(_on_all_peers_loaded, CONNECT_ONE_SHOT)
+		multiplayer.peer_connected.connect(_on_peer_connected)
 	Networking.report_level_loaded()
 
 # Host only - runs once every peer has finished loading the level
@@ -61,6 +63,20 @@ func game_loaded() -> void:
 		synchronizer.public_visibility = true
 
 	get_tree().paused = false
+
+	# We joined during the match (see Networking's "Joining" region), so we have
+	# no player this round. We play from the next one.
+	if not players.has_node(str(multiplayer.get_unique_id())):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		spectator.start_spectating()
+
+# Host only - someone joined during the match. By now they've loaded the level
+# and Godot has sent them every player and item, so let them start watching.
+func _on_peer_connected(id: int) -> void:
+	Log.debug("TestLevel._on_peer_connected()")
+	# If the round hasn't started yet, they get a player and the normal game_loaded() with everyone else
+	if round_manager.phase == RoundManager.Phase.WAITING: return
+	game_loaded.rpc_id(id)
 
 # Runs on every peer. When the host calls player_spawner.spawn(data), the
 # spawner runs this with the same data on everyone, then adds the returned

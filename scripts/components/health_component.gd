@@ -18,6 +18,14 @@ var current_health: int = 0
 func _ready() -> void:
 	Log.debug("HealthComponent._ready()")
 	current_health = max_health
+	multiplayer.peer_connected.connect(_on_peer_connected)
+
+# Owner only - someone joined during the match and missed every sync_health()
+# so far, so send them our current health
+func _on_peer_connected(id: int) -> void:
+	Log.debug("HealthComponent._on_peer_connected()")
+	if is_multiplayer_authority():
+		sync_health.rpc_id(id, current_health)
 
 # The HealthComponent of a node (like whatever a weapon hit), or null if it can't be hurt
 static func find_on(node: Node) -> HealthComponent:
