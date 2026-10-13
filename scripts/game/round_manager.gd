@@ -81,6 +81,11 @@ func is_night() -> bool:
 func is_werewolf(peer_id: int) -> bool:
 	return peer_id == werewolf_id
 
+# Dead players (and people who joined late) have no player in Players
+func is_alive(peer_id: int) -> bool:
+	Log.debug("RoundManager.is_alive()")
+	return players.has_node(str(peer_id))
+
 # Dead players are removed from Players, so everyone in it is alive
 func get_alive_players() -> Array[Player]:
 	Log.debug("RoundManager.get_alive_players()")

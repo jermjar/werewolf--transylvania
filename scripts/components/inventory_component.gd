@@ -38,6 +38,9 @@ func _ready() -> void:
 		multiplayer.peer_connected.connect(_on_peer_connected)
 
 func _unhandled_input(event: InputEvent) -> void:
+	# The chat box already keeps the keys we type, but not mouse clicks
+	if Chat.is_typing: return
+
 	if event.is_action_pressed("use_item"):
 		equipped_item.use()
 	elif override_item:

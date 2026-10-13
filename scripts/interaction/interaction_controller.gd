@@ -19,12 +19,15 @@ func _ready() -> void:
 	set_physics_process(is_multiplayer_authority())
 
 func _physics_process(delta: float) -> void:
+	# Typing an "e" in the chat shouldn't pick things up
+	var interact_held: bool = Input.is_action_pressed("interact") and not Chat.is_typing
+
 	# If we are interacting with something
 	if current_object:
 		# Someone else picked up the item we were holding
 		if not is_instance_valid(current_object):
 			current_object = null
-		elif Input.is_action_pressed("interact"):
+		elif interact_held:
 			interaction_component.interact()
 		else:
 			interaction_component.post_interact()
@@ -34,7 +37,7 @@ func _physics_process(delta: float) -> void:
 	# If we are looking to interact with something
 	var potential_object: Object = interaction_raycast.get_collider()
 
-	if not Input.is_action_pressed("interact"):
+	if not interact_held:
 		# A quick tap on an item picks it up
 		if hold_time > 0.0 and hold_time < HOLD_TO_GRAB_TIME and potential_object is ItemPickup:
 			inventory.request_pickup(potential_object)

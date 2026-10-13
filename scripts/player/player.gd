@@ -85,10 +85,12 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	# Movement keys are read straight from the keyboard, so they'd also fire
+	# while typing in the chat. Ignore them until the message is sent.
+	if Input.is_action_just_pressed("jump") and is_on_floor() and not Chat.is_typing:
 		velocity.y = jump_velocity
 
-	input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	input_dir = Vector2.ZERO if Chat.is_typing else Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var current_velocity = Vector2(movement_velocity.x, movement_velocity.z)
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	

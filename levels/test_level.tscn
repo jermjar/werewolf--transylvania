@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/items/item_spawn_point.gd" id="13_point"]
 [ext_resource type="Resource" path="res://scenes/items/bat.tres" id="14_bat"]
 [ext_resource type="Resource" path="res://scenes/items/flashlight.tres" id="15_light"]
+[ext_resource type="PackedScene" path="res://scenes/ui/chat.tscn" id="16_chat"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_paa45"]
 albedo_texture = ExtResource("1_ur00s")
@@ -234,6 +235,8 @@ one_shot = true
 [node name="Spectator" parent="UI" unique_id=1418520367 node_paths=PackedStringArray("players", "level_camera") instance=ExtResource("11_spec")]
 players = NodePath("../../Players")
 level_camera = NodePath("../../LevelCamera")
+
+[node name="Chat" parent="UI" instance=ExtResource("16_chat")]
 
 [node name="GameMenu" parent="UI" unique_id=700127644 instance=ExtResource("8_wndkh")]
 visible = false
