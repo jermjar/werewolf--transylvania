@@ -89,10 +89,26 @@ func get_display_name(peer_id: int) -> String:
 func start_game() -> void:
 	assert(multiplayer.is_server())
 	Log.debug("start_game()")
+	_despawn_all()
 	# Only the peers in the game right now have to load before the round starts.
 	# Anyone who joins while it loads is let in afterwards (see the "Joining" region).
 	loading_peers.assign(lobby_members.keys())
 	load_world.rpc()
+
+# Host only - when a round restarts, removes everything the spawners created
+# (players, pickups) before the level is reloaded.
+# Removing a spawned node makes Godot tell every client to remove their copy.
+# If that only happened when the host unloads the old level, those messages
+# would arrive after the clients had already unloaded it too, and each one
+# would log an error ("recv_nodes.has(net_id)"). Doing it here sends them
+# before load_world(), while everyone still has the old level.
+func _despawn_all() -> void:
+	Log.debug("_despawn_all()")
+	for spawner: MultiplayerSpawner in get_tree().root.find_children("*", "MultiplayerSpawner", true, false):
+		var spawn_parent: Node = spawner.get_node(spawner.spawn_path)
+		for node in spawn_parent.get_children():
+			spawn_parent.remove_child(node) # Right away, so the message goes out now
+			node.queue_free()
 
 @rpc("call_local", "reliable")
 func load_world() -> void:

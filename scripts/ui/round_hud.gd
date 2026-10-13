@@ -50,6 +50,11 @@ func _on_phase_changed(phase: RoundManager.Phase) -> void:
 	if phase != RoundManager.Phase.ENDED: return
 
 	var round_manager: RoundManager = RoundManager.instance
-	var title: String = "VILLAGERS WIN" if round_manager.winner == RoundManager.Winner.VILLAGERS else "WEREWOLF WINS"
-	result_label.text = "%s\nThe werewolf was %s" % [title, Networking.get_display_name(round_manager.werewolf_id)]
+	match round_manager.winner:
+		RoundManager.Winner.VILLAGERS: result_label.text = "VILLAGERS WIN"
+		RoundManager.Winner.WEREWOLF: result_label.text = "WEREWOLF WINS"
+		RoundManager.Winner.NOBODY: result_label.text = "NOBODY WINS"
+	# There's no werewolf to reveal if the round ended before one was chosen
+	if round_manager.werewolf_id != RoundManager.NO_WEREWOLF:
+		result_label.text += "\nThe werewolf was %s" % Networking.get_display_name(round_manager.werewolf_id)
 	result_label.show()

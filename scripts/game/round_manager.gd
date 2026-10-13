@@ -21,7 +21,8 @@ enum Phase {
 
 enum Winner {
 	VILLAGERS,
-	WEREWOLF
+	WEREWOLF,
+	NOBODY # Too few players were left to choose a werewolf from
 }
 
 const NO_WEREWOLF: int = 0
@@ -106,6 +107,8 @@ func _on_phase_timer_timeout() -> void:
 		Phase.DAY:
 			if werewolf_id == NO_WEREWOLF:
 				_choose_werewolf()
+			# Choosing the werewolf can end the round, and the night must not replace that
+			if phase == Phase.ENDED: return
 			_start_phase.rpc(Phase.NIGHT, night_length)
 		Phase.NIGHT:
 			_start_phase.rpc(Phase.DAY, day_length)
@@ -116,12 +119,15 @@ func _on_phase_timer_timeout() -> void:
 func _choose_werewolf() -> void:
 	Log.debug("RoundManager._choose_werewolf()")
 	var alive_players: Array[Player] = get_alive_players()
-	if alive_players.is_empty(): return
+	# Needs a werewolf and someone for them to hunt. Deaths during the day end
+	# the round before it gets this far (see _check_for_winner()), so this only
+	# happens when a round starts with a single player.
+	if alive_players.size() < 2:
+		_end_round.rpc(Winner.NOBODY)
+		return
 
 	var werewolf: Player = alive_players.pick_random()
 	_set_werewolf.rpc(werewolf.peer_id)
-	# In case the werewolf is already the only one left
-	_check_for_winner()
 
 #region Winning
 # Host only
@@ -139,10 +145,18 @@ func _on_player_removed(player: Node) -> void:
 # Host only
 func _check_for_winner(leaving_player: Node = null) -> void:
 	Log.debug("RoundManager._check_for_winner()")
-	if phase == Phase.ENDED or werewolf_id == NO_WEREWOLF: return
+	if phase == Phase.ENDED: return
 
 	var alive_players: Array[Player] = get_alive_players()
 	alive_players.erase(leaving_player) # It's still a child while it's being removed
+
+	# Before the first night there's no werewolf yet. The round only ends if
+	# too few players are left to choose one from.
+	if werewolf_id == NO_WEREWOLF:
+		if alive_players.size() < 2:
+			_end_round.rpc(Winner.NOBODY)
+		return
+
 	var werewolf_alive: bool = alive_players.any(func(player: Player) -> bool: return is_werewolf(player.peer_id))
 
 	if not werewolf_alive:

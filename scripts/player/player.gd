@@ -10,6 +10,7 @@ class_name Player extends CharacterBody3D
 @onready var model: Node3D = $Model # At the player's feet, so scaling it keeps the body on the floor
 @onready var head: MeshInstance3D = $Model/HeadMesh
 @onready var body: MeshInstance3D = $Model/BodyMesh
+@onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
 
 # Components
 @export var health_component: HealthComponent
@@ -147,6 +148,14 @@ func die():
 	if is_multiplayer_authority():
 		var level_camera: Camera3D = get_tree().get_first_node_in_group("level_camera")
 		level_camera.current = true
+
+		# Stop sending our position. The host is about to remove this player, and
+		# an update still on its way would arrive for a player that's already
+		# gone (an error: Node not found ".../MultiplayerSynchronizer").
+		# This runs after die() was sent, so updates sent before it arrive first.
+		# The host doesn't need it: it removes its own player with no delay.
+		if not multiplayer.is_server():
+			synchronizer.public_visibility = false
 	# Players are spawned by the host's PlayerSpawner, so only the host removes
 	# them. The spawner then removes the player for everyone else.
 	if multiplayer.is_server():
