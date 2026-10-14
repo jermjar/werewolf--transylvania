@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://jwx4m7nyd3ex"]
 
 [ext_resource type="PackedScene" uid="uid://bejepgjbevc3o" path="res://scenes/components/interaction_component.tscn" id="1_wjq3j"]
+[ext_resource type="PackedScene" path="res://scenes/components/impact_damage_component.tscn" id="9_impact"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r81w6"]
 albedo_color = Color(0.5882353, 0.45882353, 1, 1)
@@ -28,6 +29,10 @@ shape = SubResource("BoxShape3D_nup64")
 
 [node name="InteractionComponent" parent="." unique_id=541744532 node_paths=PackedStringArray("object_reference") instance=ExtResource("1_wjq3j")]
 object_reference = NodePath("..")
+
+[node name="ImpactDamageComponent" parent="." node_paths=PackedStringArray("rigid_body", "interaction_component") instance=ExtResource("9_impact")]
+rigid_body = NodePath("..")
+interaction_component = NodePath("../InteractionComponent")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1267318658]
 replication_config = SubResource("SceneReplicationConfig_wjq3j")

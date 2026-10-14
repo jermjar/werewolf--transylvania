@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/items/item_pickup.gd" id="1_pickup"]
 [ext_resource type="PackedScene" path="res://scenes/components/interaction_component.tscn" id="2_interaction"]
+[ext_resource type="PackedScene" path="res://scenes/components/impact_damage_component.tscn" id="9_impact"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pickup"]
 properties/0/path = NodePath(".:position")
@@ -18,6 +19,10 @@ script = ExtResource("1_pickup")
 
 [node name="InteractionComponent" parent="." unique_id=541744532 node_paths=PackedStringArray("object_reference") instance=ExtResource("2_interaction")]
 object_reference = NodePath("..")
+
+[node name="ImpactDamageComponent" parent="." node_paths=PackedStringArray("rigid_body", "interaction_component") instance=ExtResource("9_impact")]
+rigid_body = NodePath("..")
+interaction_component = NodePath("../InteractionComponent")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1508372946]
 replication_config = SubResource("SceneReplicationConfig_pickup")

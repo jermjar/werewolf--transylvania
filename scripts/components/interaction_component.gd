@@ -1,6 +1,10 @@
 class_name InteractionComponent extends Node
 
 const SPEED: float = 5.0
+# Fastest a 1 kg object can be thrown, in m/s. Heavier objects are slower (see _throw()).
+const MAX_THROW_SPEED: float = 20.0
+# How much each new frame changes the tracked hand speed (0-1). Lower is smoother.
+const HAND_SMOOTHING: float = 0.5
 
 enum InteractionType {
 	DEFAULT
@@ -10,8 +14,14 @@ enum InteractionType {
 @export var interaction_type: InteractionType = InteractionType.DEFAULT
 
 var can_interact: bool = true
+# True while someone holds this object. Only set on the holder's machine,
+# which is also the owner that checks for impact damage.
+var is_held: bool = false
 
 var player_hand: Marker3D
+# How fast the hand is moving, so letting go can throw the object (see _throw())
+var hand_velocity: Vector3
+var last_hand_position: Vector3
 
 func _ready() -> void:
 	Log.debug("InteractionComponent._ready()")
@@ -24,9 +34,12 @@ func _ready() -> void:
 # Runs once when the Player first clicks on an object
 func pre_interact(hand: Marker3D) -> void:
 	Log.debug("InteractionComponent.pre_interact()")
+	is_held = true
 	match interaction_type:
 		InteractionType.DEFAULT:
 			player_hand = hand
+			hand_velocity = Vector3.ZERO
+			last_hand_position = hand.global_position
 
 	# Ask the host to make us the owner of this object
 	_request_ownership.rpc_id(Networking.HOST_ID)
@@ -34,6 +47,9 @@ func pre_interact(hand: Marker3D) -> void:
 # Runs every physics frame when the Player is interacting with the object
 func interact() -> void:
 	if not can_interact: return
+	# Tracked even before we're the owner, so the speed is right from the start
+	if interaction_type == InteractionType.DEFAULT:
+		_track_hand_velocity()
 	# Only the owner moves the object. Right after grabbing, this waits
 	# until the host's reply makes us the owner.
 	if not object_reference.is_multiplayer_authority(): return
@@ -45,9 +61,28 @@ func interact() -> void:
 # Runs once when the Player stops interacting with an object
 func post_interact() -> void:
 	Log.debug("InteractionComponent.post_interact()")
+	is_held = false
 	match interaction_type:
 		InteractionType.DEFAULT:
-			pass
+			_throw()
+
+# Every physics frame while held. Averages the last few frames so one jittery
+# frame doesn't decide the throw.
+func _track_hand_velocity() -> void:
+	var hand_position: Vector3 = player_hand.global_position
+	var velocity_this_frame: Vector3 = (hand_position - last_hand_position) / get_physics_process_delta_time()
+	hand_velocity = hand_velocity.lerp(velocity_this_frame, HAND_SMOOTHING)
+	last_hand_position = hand_position
+
+# Letting go sends the object off at the speed and direction the hand was
+# moving: whip the mouse and let go to throw it, or let go while still to drop it.
+# Heavier objects can't be thrown as fast: 1 kg -> 20 m/s, 4 kg -> 10 m/s, 9 kg -> ~6.7 m/s.
+func _throw() -> void:
+	Log.debug("InteractionComponent._throw()")
+	var rb3d: RigidBody3D = object_reference as RigidBody3D
+	if rb3d == null or not rb3d.is_multiplayer_authority(): return
+	var max_speed: float = MAX_THROW_SPEED / sqrt(maxf(rb3d.mass, 1.0))
+	rb3d.linear_velocity = hand_velocity.limit_length(max_speed)
 
 func _default_interact() -> void:
 	var object_current_position: Vector3 = object_reference.global_transform.origin
