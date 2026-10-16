@@ -33,6 +33,7 @@ object_reference = NodePath("..")
 [node name="ImpactDamageComponent" parent="." node_paths=PackedStringArray("rigid_body", "interaction_component") instance=ExtResource("9_impact")]
 rigid_body = NodePath("..")
 interaction_component = NodePath("../InteractionComponent")
+max_damage = 50
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1267318658]
 replication_config = SubResource("SceneReplicationConfig_wjq3j")

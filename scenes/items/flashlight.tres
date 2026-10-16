@@ -7,3 +7,4 @@
 script = ExtResource("1_data")
 display_name = "Flashlight"
 held_scene = ExtResource("2_held")
+max_throw_damage = 10

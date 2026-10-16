@@ -11,6 +11,7 @@ class_name ItemPickup extends RigidBody3D
 var item_data: ItemData # Set by the ItemSpawner before this is added
 
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var impact_damage_component: ImpactDamageComponent = $ImpactDamageComponent
 
 func _ready() -> void:
 	Log.debug("ItemPickup._ready()")
@@ -25,3 +26,6 @@ func _ready() -> void:
 	box.size = mesh.mesh.get_aabb().size
 	collision_shape.shape = box
 	collision_shape.basis = mesh.basis
+
+	# Every pickup uses this same scene, so each item's throw damage comes from its ItemData
+	impact_damage_component.max_damage = item_data.max_throw_damage

@@ -11,6 +11,7 @@ class_name Player extends CharacterBody3D
 @onready var head: MeshInstance3D = $Model/HeadMesh
 @onready var body: MeshInstance3D = $Model/BodyMesh
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
+@onready var interaction_controller: InteractionController = $InteractionController
 
 # Components
 @export var health_component: HealthComponent

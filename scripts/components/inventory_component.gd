@@ -15,6 +15,8 @@ const NO_SLOT: int = -1 # Nothing equipped, so the fists are out
 @export var item_holder: Node3D
 @export var fists: Item
 
+@onready var interaction_controller: InteractionController = $"../InteractionController"
+
 var items: Array[Item] = [null, null, null, null] # null means the slot is empty
 var equipped_slot: int = NO_SLOT:
 	set(value):
@@ -42,7 +44,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Chat.is_typing: return
 
 	if event.is_action_pressed("use_item"):
-		equipped_item.use()
+		# Hands are full while carrying a prop. (The werewolf's click throws it instead, see InteractionController.)
+		if not interaction_controller.is_holding():
+			equipped_item.use()
 	elif override_item:
 		return # No switching or dropping while something else is in our hands
 	elif event.is_action_pressed("next_item"):
@@ -113,6 +117,8 @@ func _request_pickup(pickup_path: NodePath) -> void:
 
 	var pickup: ItemPickup = get_node_or_null(pickup_path)
 	if pickup == null or pickup.is_queued_for_deletion(): return # Someone else already took it
+	var interaction_component: InteractionComponent = pickup.get_node("InteractionComponent")
+	if interaction_component.is_held_by_other(get_multiplayer_authority()): return # Someone is carrying it
 	var free_slot: int = items.find(null)
 	if free_slot == -1: return # Inventory is full
 

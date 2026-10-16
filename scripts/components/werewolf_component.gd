@@ -51,4 +51,5 @@ func _set_transformed(transformed: bool) -> void:
 	player.body.material_override = _material if transformed else null
 	player.head.material_override = _material if transformed else null
 	player.inventory_component.override_item = claws if transformed else null
+	player.interaction_controller.can_throw = transformed # Only at night, a daytime throw would give them away
 	player.health_component.set_max_health(MAX_HEALTH if transformed else _human_max_health)

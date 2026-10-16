@@ -65,6 +65,8 @@ func post_interact() -> void:
 	match interaction_type:
 		InteractionType.DEFAULT:
 			_throw()
+	# Tell the host our hands are free, so someone else can grab it
+	_release.rpc_id(Networking.HOST_ID)
 
 # Every physics frame while held. Averages the last few frames so one jittery
 # frame doesn't decide the throw.
@@ -81,8 +83,24 @@ func _throw() -> void:
 	Log.debug("InteractionComponent._throw()")
 	var rb3d: RigidBody3D = object_reference as RigidBody3D
 	if rb3d == null or not rb3d.is_multiplayer_authority(): return
-	var max_speed: float = MAX_THROW_SPEED / sqrt(maxf(rb3d.mass, 1.0))
-	rb3d.linear_velocity = hand_velocity.limit_length(max_speed)
+	rb3d.linear_velocity = hand_velocity.limit_length(get_max_throw_speed())
+
+# Lets go and throws the object in a direction at full speed.
+# Used by the werewolf's left click (see InteractionController).
+func throw_forward(direction: Vector3) -> void:
+	Log.debug("InteractionComponent.throw_forward()")
+	post_interact()
+	var rb3d: RigidBody3D = object_reference as RigidBody3D
+	if rb3d == null or not rb3d.is_multiplayer_authority(): return
+	rb3d.linear_velocity = direction.normalized() * get_max_throw_speed()
+
+# How fast this object can be thrown. Heavier objects are slower.
+# Also used by the ImpactDamageComponent: a throw this fast does its max damage.
+func get_max_throw_speed() -> float:
+	Log.debug("InteractionComponent.get_max_throw_speed()")
+	var rb3d: RigidBody3D = object_reference as RigidBody3D
+	var mass: float = rb3d.mass if rb3d else 1.0
+	return MAX_THROW_SPEED / sqrt(maxf(mass, 1.0))
 
 func _default_interact() -> void:
 	var object_current_position: Vector3 = object_reference.global_transform.origin
@@ -98,14 +116,46 @@ func _default_interact() -> void:
 # The owner (multiplayer authority) of an object runs its physics, and its
 # MultiplayerSynchronizer sends the position to everyone else.
 # Grabbing an object makes you its owner. The host makes that decision so
-# two players grabbing at the same time can't both win.
+# two players grabbing at the same time can't both win, and nobody can grab
+# an object out of someone else's hands.
+#
+# The owner stays the last person who grabbed it, even after they let go, so
+# the host keeps track of who is holding it right now separately (holder_id).
+
+const NO_HOLDER: int = 0
+
+# Host only - the peer holding this object right now, or NO_HOLDER
+var holder_id: int = NO_HOLDER
 
 # Grabbing player -> Host
 @rpc("any_peer", "call_local", "reliable")
 func _request_ownership() -> void:
 	Log.debug("InteractionComponent._request_ownership()")
 	if not multiplayer.is_server(): return
-	_set_owner.rpc(multiplayer.get_remote_sender_id())
+	var grabber_id: int = multiplayer.get_remote_sender_id()
+
+	# Someone else is holding it. The grabber is told who owns it, which makes
+	# them let go again (see _set_owner()).
+	if is_held_by_other(grabber_id):
+		_set_owner.rpc_id(grabber_id, object_reference.get_multiplayer_authority())
+		return
+
+	holder_id = grabber_id
+	_set_owner.rpc(grabber_id)
+
+# Host only - whether someone other than peer_id is holding this right now.
+# A holder who died or left doesn't count, so the object can't get stuck.
+func is_held_by_other(peer_id: int) -> bool:
+	Log.debug("InteractionComponent.is_held_by_other()")
+	return holder_id != NO_HOLDER and holder_id != peer_id and RoundManager.instance.is_alive(holder_id)
+
+# Holding player -> Host
+@rpc("any_peer", "call_local", "reliable")
+func _release() -> void:
+	Log.debug("InteractionComponent._release()")
+	if not multiplayer.is_server(): return
+	if multiplayer.get_remote_sender_id() == holder_id:
+		holder_id = NO_HOLDER
 
 # Host -> Everyone
 # NOTE - "any_peer" because the default "authority" mode only accepts calls from
@@ -118,6 +168,11 @@ func _set_owner(peer_id: int) -> void:
 	# Recursive so the MultiplayerSynchronizer child changes owner too
 	object_reference.set_multiplayer_authority(peer_id, true)
 	_update_freeze()
+
+	# We tried to grab it, but the host gave it to someone else (they were already
+	# holding it). Let go, so the InteractionController frees our hands.
+	if is_held and peer_id != multiplayer.get_unique_id():
+		is_held = false
 
 # Freeze the object for everyone except its owner, so their physics doesn't
 # fight the positions coming in from the MultiplayerSynchronizer
