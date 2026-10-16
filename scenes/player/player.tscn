@@ -32,6 +32,7 @@ properties/3/spawn = true
 properties/3/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D" unique_id=1592071486 node_paths=PackedStringArray("health_component", "inventory_component")]
+platform_floor_layers = 0
 script = ExtResource("1_8afob")
 health_component = NodePath("HealthComponent")
 inventory_component = NodePath("InventoryComponent")
