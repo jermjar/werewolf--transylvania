@@ -17,6 +17,9 @@ size = Vector3(0.5, 0.25, 0.5)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_crouch"]
+height = 1.2
+
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dovo2"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
@@ -30,6 +33,9 @@ properties/2/replication_mode = 1
 properties/3/path = NodePath("InventoryComponent:equipped_slot")
 properties/3/spawn = true
 properties/3/replication_mode = 2
+properties/4/path = NodePath(".:is_crouching")
+properties/4/spawn = true
+properties/4/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D" unique_id=1592071486 node_paths=PackedStringArray("health_component", "inventory_component")]
 platform_floor_layers = 0
@@ -50,17 +56,25 @@ text = "NULL"
 [node name="Model" type="Node3D" parent="." unique_id=1650284937]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Model" unique_id=62681335]
+[node name="Pose" type="Node3D" parent="Model"]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Model/Pose" unique_id=62681335]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_8afob")
 
-[node name="HeadMesh" type="MeshInstance3D" parent="Model" unique_id=1892059129]
+[node name="HeadMesh" type="MeshInstance3D" parent="Model/Pose" unique_id=1892059129]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4890456, -0.5133159)
 mesh = SubResource("BoxMesh_dovo2")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=188188067]
+[node name="StandingShape" type="CollisionShape3D" parent="." unique_id=188188067]
 shape = SubResource("CapsuleShape3D_8afob")
 debug_color = Color(0, 1, 1, 1)
+
+[node name="CrouchingShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
+shape = SubResource("CapsuleShape3D_crouch")
+disabled = true
+debug_color = Color(1, 0.5, 0, 1)
 
 [node name="CameraController" type="Node3D" parent="." unique_id=1241507797 node_paths=PackedStringArray("player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

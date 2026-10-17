@@ -8,8 +8,11 @@ class_name Player extends CharacterBody3D
 @onready var camera_controller: CameraController = $CameraController
 @onready var camera: Camera3D = $CameraController/Camera3D
 @onready var model: Node3D = $Model # At the player's feet, so scaling it keeps the body on the floor
-@onready var head: MeshInstance3D = $Model/HeadMesh
-@onready var body: MeshInstance3D = $Model/BodyMesh
+@onready var pose: Node3D = $Model/Pose # Squashed while crouching. Separate from model, which the werewolf scales.
+@onready var head: MeshInstance3D = $Model/Pose/HeadMesh
+@onready var body: MeshInstance3D = $Model/Pose/BodyMesh
+@onready var standing_shape: CollisionShape3D = $StandingShape
+@onready var crouching_shape: CollisionShape3D = $CrouchingShape
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
 @onready var interaction_controller: InteractionController = $InteractionController
 
@@ -36,6 +39,22 @@ var jump_velocity: float = 4.5
 var acceleration: float = 0.2
 var deceleration: float = 0.5
 
+# Crouching works like in Source games. On the ground your head comes down.
+# In the air your feet come up instead (a crouch jump), which lets you reach
+# higher ledges. You only stand back up if there's room.
+const STANDING_HEIGHT: float = 2.0 # Must match the StandingShape capsule
+const CROUCHING_HEIGHT: float = 1.2 # Must match the CrouchingShape capsule
+const CROUCH_DIFFERENCE: float = STANDING_HEIGHT - CROUCHING_HEIGHT
+const STANDING_CAMERA_HEIGHT: float = 0.5
+const CROUCHING_CAMERA_HEIGHT: float = STANDING_CAMERA_HEIGHT - CROUCH_DIFFERENCE
+var crouch_speed_multiplier: float = 0.5 # Used instead of changing speed, which the werewolf changes
+var camera_crouch_speed: float = 4.0 # How fast the camera moves down/up when crouching on the ground, in m/s
+
+# Synced to everyone by the MultiplayerSynchronizer, so our hitbox and model
+# shrink on their machines too
+var is_crouching: bool = false:
+	set = set_crouching
+
 func _enter_tree():
 	Log.debug("Player._enter_tree()")
 	peer_id = name.to_int()
@@ -47,6 +66,8 @@ func _ready() -> void:
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
 	_on_health_changed(health_component.current_health, health_component.max_health)
+	# The spawn may have set is_crouching before the nodes above were ready
+	set_crouching(is_crouching)
 
 	if RoundManager.instance:
 		RoundManager.instance.phase_changed.connect(_on_phase_changed)
@@ -92,12 +113,16 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("jump") and is_on_floor() and not Chat.is_typing:
 		velocity.y = jump_velocity
 
+	if not Chat.is_typing:
+		_update_crouch(Input.is_action_pressed("crouch"))
+
 	input_dir = Vector2.ZERO if Chat.is_typing else Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var current_velocity = Vector2(movement_velocity.x, movement_velocity.z)
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
+	var current_speed: float = speed * crouch_speed_multiplier if is_crouching and is_on_floor() else speed
+
 	if direction:
-		current_velocity = lerp(current_velocity, Vector2(direction.x, direction.z) * speed, acceleration)
+		current_velocity = lerp(current_velocity, Vector2(direction.x, direction.z) * current_speed, acceleration)
 	else:
 		current_velocity = current_velocity.move_toward(Vector2.ZERO, deceleration)
 	
@@ -105,6 +130,45 @@ func _physics_process(delta: float) -> void:
 	velocity = movement_velocity
 	
 	move_and_slide()
+
+	# Slide the camera towards the height for our stance
+	var camera_height: float = CROUCHING_CAMERA_HEIGHT if is_crouching else STANDING_CAMERA_HEIGHT
+	camera_controller.position.y = move_toward(camera_controller.position.y, camera_height, camera_crouch_speed * delta)
+
+# Every physics frame. Crouches or stands up to match the crouch key.
+func _update_crouch(wants_to_crouch: bool) -> void:
+	if wants_to_crouch == is_crouching: return
+	var on_floor: bool = is_on_floor()
+
+	# Standing up needs room for the taller body: above us on the ground,
+	# below us in the air (where the feet come back down). Otherwise stay crouched.
+	if not wants_to_crouch:
+		var direction: Vector3 = Vector3.UP if on_floor else Vector3.DOWN
+		if test_move(global_transform, direction * CROUCH_DIFFERENCE): return
+
+	# In the air the body moves instead of the head: up when crouching (the
+	# feet pull up), down when standing. The camera moves the other way by the
+	# same amount, so the view stays exactly where it was.
+	if not on_floor:
+		var shift: float = CROUCH_DIFFERENCE if wants_to_crouch else -CROUCH_DIFFERENCE
+		global_position.y += shift
+		camera_controller.position.y = clampf(camera_controller.position.y - shift, CROUCHING_CAMERA_HEIGHT, STANDING_CAMERA_HEIGHT)
+
+	is_crouching = wants_to_crouch
+
+# Runs on every machine: on ours from _update_crouch(), on everyone else's
+# when the MultiplayerSynchronizer delivers the new value
+func set_crouching(crouching: bool) -> void:
+	Log.debug("Player.set_crouching()")
+	is_crouching = crouching
+	if not is_node_ready(): return # _ready() calls this again
+	standing_shape.disabled = crouching
+	crouching_shape.disabled = not crouching
+	pose.scale.y = CROUCHING_HEIGHT / STANDING_HEIGHT if crouching else 1.0
+	# Our own camera slides in _physics_process(). Other players' cameras
+	# (seen by spectators) just jump to the new height.
+	if not is_multiplayer_authority():
+		camera_controller.position.y = CROUCHING_CAMERA_HEIGHT if crouching else STANDING_CAMERA_HEIGHT
 
 func update_rotation(rotation_input) -> void:
 	global_transform.basis = Basis.from_euler(rotation_input)
