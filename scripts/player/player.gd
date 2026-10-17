@@ -33,11 +33,29 @@ var capture_mouse: bool
 var mouse_input: Vector2
 
 var input_dir: Vector2 = Vector2.ZERO
-var movement_velocity: Vector3 = Vector3.ZERO
-var speed: float = 5.0
-var jump_velocity: float = 4.5
-var acceleration: float = 0.2
-var deceleration: float = 0.5
+
+# Movement works like Garry's Mod, with the settings of Trouble in Terrorist Town:
+# - velocity carries over between frames
+# - friction slows you down on the ground
+# - pressing a direction accelerates you towards it, until your speed in that direction reaches the max
+# - in the air that max is tiny (air_speed_cap) but the push isn't. That's what makes
+#   air strafing work: turning while holding A or D curves your path and can build speed.
+#   Chaining that between jumps is bunny hopping.
+# Values are written in Source units (1 unit = 1 inch) so they match GMod, then turned into meters.
+const SOURCE_UNIT: float = 0.0254 # Meters in one Source unit
+var speed: float = 220 * SOURCE_UNIT # Top running speed on the ground, ~5.6 m/s. The werewolf changes this.
+var jump_velocity: float = 160 * SOURCE_UNIT # A ~0.5 m jump. Crouch jumping adds 0.8 m.
+var gravity: float = 600 * SOURCE_UNIT # Only for players. Props use the project's gravity.
+var friction: float = 8.0
+var stop_speed: float = 10 * SOURCE_UNIT # Friction treats anything slower as this fast, so you come to a full stop
+var ground_acceleration: float = 10.0
+var air_acceleration: float = 10.0
+var air_speed_cap: float = 30 * SOURCE_UNIT
+
+# Fall damage, using TTT's formula (in Source units):
+#   damage = (0.05 * (fall speed - 420)) ^ 1.75 * 2/3, for falls faster than 450
+# 450 is a fall of about 4.3 m. 7.6 m does ~31 damage, ~13 m kills.
+var safe_fall_speed: float = 450 * SOURCE_UNIT
 
 # Crouching works like in Source games. On the ground your head comes down.
 # In the air your feet come up instead (a crouch jump), which lets you reach
@@ -47,7 +65,7 @@ const CROUCHING_HEIGHT: float = 1.2 # Must match the CrouchingShape capsule
 const CROUCH_DIFFERENCE: float = STANDING_HEIGHT - CROUCHING_HEIGHT
 const STANDING_CAMERA_HEIGHT: float = 0.5
 const CROUCHING_CAMERA_HEIGHT: float = STANDING_CAMERA_HEIGHT - CROUCH_DIFFERENCE
-var crouch_speed_multiplier: float = 0.5 # Used instead of changing speed, which the werewolf changes
+var crouch_speed_multiplier: float = 0.3 # Like GMod. Used instead of changing speed, which the werewolf changes.
 var camera_crouch_speed: float = 4.0 # How fast the camera moves down/up when crouching on the ground, in m/s
 
 # Synced to everyone by the MultiplayerSynchronizer, so our hitbox and model
@@ -105,35 +123,73 @@ func _process(_delta: float) -> void:
 	mouse_input = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
-	if not is_on_floor():
-		velocity += get_gravity() * delta
+	var on_ground: bool = is_on_floor()
 
 	# Movement keys are read straight from the keyboard, so they'd also fire
 	# while typing in the chat. Ignore them until the message is sent.
-	if Input.is_action_just_pressed("jump") and is_on_floor() and not Chat.is_typing:
+	# Jumping needs a fresh press each time, like in Source.
+	if Input.is_action_just_pressed("jump") and on_ground and not Chat.is_typing:
 		velocity.y = jump_velocity
+		# Leaving the ground now skips this frame's friction. Jumping again the
+		# moment you land is how bunny hopping keeps its speed.
+		on_ground = false
+
+	# After the jump, so the jump's first frame falls a little too, as in Source
+	if not on_ground:
+		velocity.y -= gravity * delta
 
 	if not Chat.is_typing:
 		_update_crouch(Input.is_action_pressed("crouch"))
 
 	input_dir = Vector2.ZERO if Chat.is_typing else Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var current_velocity = Vector2(movement_velocity.x, movement_velocity.z)
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var current_speed: float = speed * crouch_speed_multiplier if is_crouching and is_on_floor() else speed
+	var wish_direction: Vector3 = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var wish_speed: float = speed * crouch_speed_multiplier if is_crouching and on_ground else speed
 
-	if direction:
-		current_velocity = lerp(current_velocity, Vector2(direction.x, direction.z) * current_speed, acceleration)
+	if on_ground:
+		_apply_friction(delta)
+		_accelerate(wish_direction, wish_speed, wish_speed, ground_acceleration, delta)
 	else:
-		current_velocity = current_velocity.move_toward(Vector2.ZERO, deceleration)
-	
-	movement_velocity = Vector3(current_velocity.x, velocity.y, current_velocity.y)
-	velocity = movement_velocity
-	
+		_accelerate(wish_direction, wish_speed, air_speed_cap, air_acceleration, delta)
+
+	var was_on_floor: bool = is_on_floor()
+	var fall_speed: float = -velocity.y
 	move_and_slide()
+	if not was_on_floor and is_on_floor():
+		_take_fall_damage(fall_speed)
 
 	# Slide the camera towards the height for our stance
 	var camera_height: float = CROUCHING_CAMERA_HEIGHT if is_crouching else STANDING_CAMERA_HEIGHT
 	camera_controller.position.y = move_toward(camera_controller.position.y, camera_height, camera_crouch_speed * delta)
+
+# Every physics frame on the ground. Slows us down, by at least stop_speed's
+# worth of friction so slow movement still comes to a stop.
+func _apply_friction(delta: float) -> void:
+	var current_speed: float = Vector2(velocity.x, velocity.z).length()
+	if current_speed < 0.001: return
+	var control: float = maxf(current_speed, stop_speed)
+	var new_speed: float = maxf(current_speed - control * friction * delta, 0.0)
+	velocity.x *= new_speed / current_speed
+	velocity.z *= new_speed / current_speed
+
+# Every physics frame. Pushes us towards wish_direction, but only until our speed
+# in that direction reaches speed_cap. Other directions are left alone, which
+# is why turning in the air lets you go faster (see the comment at the top).
+func _accelerate(wish_direction: Vector3, wish_speed: float, speed_cap: float, acceleration: float, delta: float) -> void:
+	var speed_in_direction: float = velocity.dot(wish_direction)
+	var missing_speed: float = minf(wish_speed, speed_cap) - speed_in_direction
+	if missing_speed <= 0.0: return
+	var added_speed: float = minf(acceleration * wish_speed * delta, missing_speed)
+	velocity += wish_direction * added_speed
+
+# Called when we land. Damages us if we fell fast enough (see safe_fall_speed).
+func _take_fall_damage(fall_speed: float) -> void:
+	Log.debug("Player._take_fall_damage()")
+	if fall_speed <= safe_fall_speed: return
+	var fall_speed_units: float = fall_speed / SOURCE_UNIT
+	var damage: int = floori(pow(0.05 * (fall_speed_units - 420.0), 1.75) * 2.0 / 3.0)
+	if damage <= 0: return
+	Log.info("%s fell at %.1f m/s for %d damage" % [name, fall_speed, damage])
+	health_component.damage(damage)
 
 # Every physics frame. Crouches or stands up to match the crouch key.
 func _update_crouch(wants_to_crouch: bool) -> void:
