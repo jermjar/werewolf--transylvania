@@ -35,6 +35,10 @@ file_logging/enable_file_logging=true
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/func_godot/plugin.cfg")
+
 [file_customization]
 
 folder_colors={
