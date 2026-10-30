@@ -1,8 +1,0 @@
-[gd_resource type="StandardMaterial3D" format=3 uid="uid://c2l3wifsbaj46"]
-
-[ext_resource type="Texture2D" uid="uid://cjvl23vg42en3" path="res://trenchbroom/textures/hl_office_complex_style_tile_floor_1.png" id="1_4us81"]
-
-[resource]
-albedo_texture = ExtResource("1_4us81")
-metallic_specular = 0.0
-texture_filter = 2

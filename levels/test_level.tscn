@@ -10,11 +10,12 @@
 [ext_resource type="Script" uid="uid://ctqiifh8ioyn5" path="res://scripts/test_damage_heal_box.gd" id="7_ly3hx"]
 [ext_resource type="PackedScene" uid="uid://jwx4m7nyd3ex" path="res://scenes/interaction/test_cube_1kg.tscn" id="8_4n8tn"]
 [ext_resource type="PackedScene" uid="uid://ba4l440wfmfi7" path="res://scenes/ui/game_menu.tscn" id="8_wndkh"]
+[ext_resource type="PackedScene" uid="uid://cubapo0vrqcqw" path="res://levels/trench_broom_test_map.tscn" id="9_pgbyh"]
 [ext_resource type="Script" uid="uid://cwxoe3malifll" path="res://scripts/game/round_manager.gd" id="9_round"]
 [ext_resource type="PackedScene" path="res://scenes/ui/round_hud.tscn" id="10_hud"]
 [ext_resource type="PackedScene" path="res://scenes/game/spectator.tscn" id="11_spec"]
-[ext_resource type="Script" path="res://scripts/items/item_spawner.gd" id="12_items"]
-[ext_resource type="Script" path="res://scripts/items/item_spawn_point.gd" id="13_point"]
+[ext_resource type="Script" uid="uid://djyhop5s25rim" path="res://scripts/items/item_spawner.gd" id="12_items"]
+[ext_resource type="Script" uid="uid://cnkkxvj6c0rft" path="res://scripts/items/item_spawn_point.gd" id="13_point"]
 [ext_resource type="Resource" path="res://scenes/items/bat.tres" id="14_bat"]
 [ext_resource type="Resource" path="res://scenes/items/flashlight.tres" id="15_light"]
 [ext_resource type="PackedScene" path="res://scenes/ui/chat.tscn" id="16_chat"]
@@ -153,6 +154,9 @@ shape = SubResource("BoxShape3D_wndkh")
 [node name="Cube_1kg" parent="Geometry" unique_id=1441000957 instance=ExtResource("8_4n8tn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.879501, 0, 0)
 
+[node name="TrenchBroomTestMap" parent="Geometry" unique_id=415414696 instance=ExtResource("9_pgbyh")]
+transform = Transform3D(0.91570866, 0, -0.4018428, 0, 1, 0, 0.4018428, 0, 0.91570866, 1.317141, -0.5980388, 20.829391)
+
 [node name="Players" type="Node3D" parent="." unique_id=1364935372]
 
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1730255811]
@@ -236,7 +240,7 @@ one_shot = true
 players = NodePath("../../Players")
 level_camera = NodePath("../../LevelCamera")
 
-[node name="Chat" parent="UI" instance=ExtResource("16_chat")]
+[node name="Chat" parent="UI" unique_id=1249162481 instance=ExtResource("16_chat")]
 
 [node name="GameMenu" parent="UI" unique_id=700127644 instance=ExtResource("8_wndkh")]
 visible = false
