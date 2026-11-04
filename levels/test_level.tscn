@@ -155,7 +155,7 @@ shape = SubResource("BoxShape3D_wndkh")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.879501, 0, 0)
 
 [node name="TrenchBroomTestMap" parent="Geometry" unique_id=415414696 instance=ExtResource("9_pgbyh")]
-transform = Transform3D(0.91570866, 0, -0.4018428, 0, 1, 0, 0.4018428, 0, 0.91570866, 1.317141, -0.5980388, 20.829391)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -12, -2.8653917)
 
 [node name="Players" type="Node3D" parent="." unique_id=1364935372]
 
