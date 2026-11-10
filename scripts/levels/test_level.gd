@@ -2,12 +2,14 @@ extends Node3D
 
 @onready var player_scene = preload("res://scenes/player/player.tscn")
 @onready var players: Node3D = $Players
-@onready var spawn_points: Node3D = $SpawnPoints
 @onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
 @onready var item_spawner: ItemSpawner = $ItemSpawner
 @onready var round_manager: RoundManager = $RoundManager
 @onready var game_menu: Control = $UI/GameMenu
 @onready var spectator: Spectator = $UI/Spectator
+
+# The level's TrenchBroom map. Players start at the PlayerSpawnPoints in it.
+@export var map: Node3D
 
 # Everyone stays paused until the host has spawned all players and calls
 # game_loaded(), so nobody can move before the round starts
@@ -35,10 +37,15 @@ func _ready() -> void:
 # Host only - runs once every peer has finished loading the level
 func _on_all_peers_loaded() -> void:
 	Log.debug("TestLevel._on_all_peers_loaded()")
+	var spawn_points: Array[PlayerSpawnPoint] = _get_player_spawn_points()
+	if spawn_points.is_empty():
+		Log.error("The map has no player spawns. Place info_player_spawn entities in TrenchBroom, then rebuild the map.")
+		return
+
 	var spawn_index: int = 0
 	for id in Networking.lobby_members:
 		# Wraps around if there are more players than spawn points
-		var spawn_point: Marker3D = spawn_points.get_child(spawn_index % spawn_points.get_child_count())
+		var spawn_point: PlayerSpawnPoint = spawn_points[spawn_index % spawn_points.size()]
 		player_spawner.spawn({
 			"id": id,
 			"position": spawn_point.global_position,
@@ -49,6 +56,15 @@ func _on_all_peers_loaded() -> void:
 
 	game_loaded.rpc()
 	round_manager.start_round()
+
+# The info_player_spawn entities placed in the map, which the map build turned into PlayerSpawnPoints
+func _get_player_spawn_points() -> Array[PlayerSpawnPoint]:
+	Log.debug("TestLevel._get_player_spawn_points()")
+	var spawn_points: Array[PlayerSpawnPoint] = []
+	for node in map.find_children("*", "", true, false):
+		if node is PlayerSpawnPoint:
+			spawn_points.append(node)
+	return spawn_points
 
 @rpc("call_local", "reliable")
 func game_loaded() -> void:

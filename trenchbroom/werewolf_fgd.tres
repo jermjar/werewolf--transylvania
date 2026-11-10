@@ -2,9 +2,12 @@
 
 [ext_resource type="Resource" uid="uid://crgpdahjaj" path="res://addons/func_godot/fgd/func_godot_fgd.tres" id="1_per7a"]
 [ext_resource type="Script" uid="uid://drlmgulwbjwqu" path="res://addons/func_godot/src/fgd/func_godot_fgd_file.gd" id="1_vt2wf"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/info_player_spawn.tres" id="2_player"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/info_item_spawn.tres" id="3_item"]
 
 [resource]
 script = ExtResource("1_vt2wf")
 fgd_name = "Werewolf"
 base_fgd_files = Array[Resource]([ExtResource("1_per7a")])
+entity_definitions = Array[Resource]([ExtResource("2_player"), ExtResource("3_item")])
 metadata/_custom_type_script = "uid://drlmgulwbjwqu"

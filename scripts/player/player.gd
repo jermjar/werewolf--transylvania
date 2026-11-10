@@ -44,7 +44,7 @@ var input_dir: Vector2 = Vector2.ZERO
 # Values are written in Source units (1 unit = 1 inch) so they match GMod, then turned into meters.
 const SOURCE_UNIT: float = 0.0254 # Meters in one Source unit
 var speed: float = 220 * SOURCE_UNIT # Top running speed on the ground, ~5.6 m/s. The werewolf changes this.
-var jump_velocity: float = 160 * SOURCE_UNIT # A ~0.5 m jump. Crouch jumping adds 0.8 m.
+var jump_velocity: float = 160 * SOURCE_UNIT # A ~0.5 m jump. Crouch jumping adds ~0.9 m.
 var gravity: float = 600 * SOURCE_UNIT # Only for players. Props use the project's gravity.
 var friction: float = 8.0
 var stop_speed: float = 10 * SOURCE_UNIT # Friction treats anything slower as this fast, so you come to a full stop
@@ -60,10 +60,13 @@ var safe_fall_speed: float = 450 * SOURCE_UNIT
 # Crouching works like in Source games. On the ground your head comes down.
 # In the air your feet come up instead (a crouch jump), which lets you reach
 # higher ledges. You only stand back up if there's room.
-const STANDING_HEIGHT: float = 2.0 # Must match the StandingShape capsule
-const CROUCHING_HEIGHT: float = 1.2 # Must match the CrouchingShape capsule
+# The body is the size of a Source player: 72 units tall, 36 crouched, 32 wide
+# (the capsules have a 16 unit radius), so maps built in Source units fit.
+const STANDING_HEIGHT: float = 72 * SOURCE_UNIT # ~1.83 m. Must match the StandingShape capsule
+const CROUCHING_HEIGHT: float = 36 * SOURCE_UNIT # ~0.91 m. Must match the CrouchingShape capsule
 const CROUCH_DIFFERENCE: float = STANDING_HEIGHT - CROUCHING_HEIGHT
-const STANDING_CAMERA_HEIGHT: float = 0.5
+# Measured from the middle of the body. Puts the eyes 64 units above the feet (28 when crouched), like Source.
+const STANDING_CAMERA_HEIGHT: float = 28 * SOURCE_UNIT
 const CROUCHING_CAMERA_HEIGHT: float = STANDING_CAMERA_HEIGHT - CROUCH_DIFFERENCE
 var crouch_speed_multiplier: float = 0.3 # Like GMod. Used instead of changing speed, which the werewolf changes.
 var camera_crouch_speed: float = 4.0 # How fast the camera moves down/up when crouching on the ground, in m/s

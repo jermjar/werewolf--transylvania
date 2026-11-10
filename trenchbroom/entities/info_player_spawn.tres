@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3]
+
+[ext_resource type="Script" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="Script" path="res://scripts/levels/player_spawn_point.gd" id="2_spawn"]
+
+[resource]
+script = ExtResource("1_point")
+classname = "info_player_spawn"
+description = "Where a player can start the round. Place one per player (8). The box is the size of a player, so rest it on the floor."
+meta_properties = Dictionary[String, Variant]({
+"color": Color(0.2, 0.8, 0.2, 1),
+"size": AABB(-16, -16, -36, 16, 16, 36)
+})
+node_class = "Marker3D"
+script_class = ExtResource("2_spawn")

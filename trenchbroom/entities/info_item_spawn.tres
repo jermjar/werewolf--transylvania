@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3 uid="uid://beyrbxlmvm2w6"]
+
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="Script" uid="uid://d1nwwgcrner8b" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class_display_descriptor.gd" id="1_r770x"]
+[ext_resource type="Script" uid="uid://cnkkxvj6c0rft" path="res://scripts/items/item_spawn_point.gd" id="2_spawn"]
+
+[resource]
+script = ExtResource("1_point")
+script_class = ExtResource("2_spawn")
+classname = "info_item_spawn"
+description = "Where an item starts the round. Choose which one with the item property. It falls to the floor when it spawns."
+class_properties = Dictionary[String, Variant]({
+"item": {
+"Bat": "bat",
+"Flashlight": "flashlight"
+}
+})
+class_property_descriptions = Dictionary[String, Variant]({
+"item": ["Item", "bat"]
+})
+meta_properties = Dictionary[String, Variant]({
+"color": Color(1, 0.6, 0.1, 1),
+"size": AABB(-8, -8, -8, 8, 8, 8)
+})
+node_class = "Marker3D"

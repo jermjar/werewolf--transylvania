@@ -8,8 +8,8 @@ const PICKUP_SCENE: PackedScene = preload("res://scenes/items/item_pickup.tscn")
 # The ItemSpawner of the current match, or null when no match is loaded
 static var instance: ItemSpawner
 
-# Parent of the level's ItemSpawnPoint markers
-@export var spawn_points: Node3D
+# The level's TrenchBroom map. Every ItemSpawnPoint in it gets an item.
+@export var map: Node3D
 
 func _enter_tree() -> void:
 	Log.debug("ItemSpawner._enter_tree()")
@@ -27,8 +27,10 @@ func _ready() -> void:
 # Host only - called once every peer has loaded the level
 func spawn_level_items() -> void:
 	Log.debug("ItemSpawner.spawn_level_items()")
-	for spawn_point: ItemSpawnPoint in spawn_points.get_children():
-		spawn_pickup(spawn_point.item, spawn_point.global_position)
+	# The info_item_spawn entities placed in the map, which the map build turned into ItemSpawnPoints
+	for node in map.find_children("*", "", true, false):
+		if node is ItemSpawnPoint:
+			spawn_pickup(node.item, node.global_position)
 
 # Host only
 func spawn_pickup(item_data: ItemData, at_position: Vector3) -> void:

@@ -412,3 +412,67 @@
 ( 144 -448.167966855156 16 ) ( 144 -448.167966855156 17 ) ( 144 -447.167966855156 16 ) Box/Box_21-512x512 [ 2.3037127760972e-15 0.9999999999999999 0 256.83984 ] [ 0 0 -1 0 ] 270 0.2 0.2
 }
 }
+// entity 1
+{
+"classname" "info_player_spawn"
+"origin" "832 -688 36"
+}
+// entity 2
+{
+"classname" "info_player_spawn"
+"origin" "848 -64 36"
+}
+// entity 3
+{
+"classname" "info_player_spawn"
+"origin" "-144 -704 36"
+}
+// entity 4
+{
+"classname" "info_player_spawn"
+"origin" "-144 -32 36"
+}
+// entity 5
+{
+"classname" "info_player_spawn"
+"origin" "-720 -736 36"
+}
+// entity 6
+{
+"classname" "info_player_spawn"
+"origin" "-720 736 36"
+}
+// entity 7
+{
+"classname" "info_player_spawn"
+"origin" "1136 -720 36"
+}
+// entity 8
+{
+"classname" "info_player_spawn"
+"origin" "1120 720 36"
+}
+// entity 9
+{
+"classname" "info_item_spawn"
+"origin" "616 600 8"
+"item" "bat"
+}
+// entity 10
+{
+"classname" "info_item_spawn"
+"origin" "424 584 8"
+"item" "flashlight"
+}
+// entity 11
+{
+"classname" "info_item_spawn"
+"origin" "392 408 8"
+"item" "bat"
+}
+// entity 12
+{
+"classname" "info_item_spawn"
+"origin" "600 408 8"
+"item" "flashlight"
+}
