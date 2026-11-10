@@ -18,7 +18,7 @@ map = NodePath("Geometry/TrenchBroomTestMap")
 [node name="Geometry" type="Node3D" parent="." unique_id=1427316424]
 
 [node name="Cube_1kg" parent="Geometry" unique_id=1441000957 instance=ExtResource("8_4n8tn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 1, 5.15625)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.767269, 0.6814275, 5.301935)
 
 [node name="TrenchBroomTestMap" parent="Geometry" unique_id=415414696 instance=ExtResource("9_pgbyh")]
 
