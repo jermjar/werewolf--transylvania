@@ -41,10 +41,13 @@ var input_dir: Vector2 = Vector2.ZERO
 # - in the air that max is tiny (air_speed_cap) but the push isn't. That's what makes
 #   air strafing work: turning while holding A or D curves your path and can build speed.
 #   Chaining that between jumps is bunny hopping.
-# Values are written in Source units (1 unit = 1 inch) so they match GMod, then turned into meters.
-const SOURCE_UNIT: float = 0.0254 # Meters in one Source unit
-var speed: float = 220 * SOURCE_UNIT # Top running speed on the ground, ~5.6 m/s. The werewolf changes this.
-var jump_velocity: float = 160 * SOURCE_UNIT # A ~0.5 m jump. Crouch jumping adds ~0.9 m.
+# Values are written in Source units so they match GMod, then turned into meters.
+# A real Source unit is an inch (0.0254 m). We use 0.025 m (40 units per meter)
+# instead, so Source's numbers come out round: 72 units = 1.8 m. TrenchBroom maps
+# use the same 40 units per meter (inverse_scale_factor in werewolf_settings.tres).
+const SOURCE_UNIT: float = 0.025 # Meters in one unit
+var speed: float = 220 * SOURCE_UNIT # Top running speed on the ground, 5.5 m/s. The werewolf changes this.
+var jump_velocity: float = 190 * SOURCE_UNIT # A ~0.72 m jump. Crouch jumping adds 0.9 m.
 var gravity: float = 600 * SOURCE_UNIT # Only for players. Props use the project's gravity.
 var friction: float = 8.0
 var stop_speed: float = 10 * SOURCE_UNIT # Friction treats anything slower as this fast, so you come to a full stop
@@ -54,7 +57,7 @@ var air_speed_cap: float = 30 * SOURCE_UNIT
 
 # Fall damage, using TTT's formula (in Source units):
 #   damage = (0.05 * (fall speed - 420)) ^ 1.75 * 2/3, for falls faster than 450
-# 450 is a fall of about 4.3 m. 7.6 m does ~31 damage, ~13 m kills.
+# 450 is a fall of about 4.2 m. 7.5 m does ~31 damage, ~12.8 m kills.
 var safe_fall_speed: float = 450 * SOURCE_UNIT
 
 # Crouching works like in Source games. On the ground your head comes down.
@@ -62,11 +65,11 @@ var safe_fall_speed: float = 450 * SOURCE_UNIT
 # higher ledges. You only stand back up if there's room.
 # The body is the size of a Source player: 72 units tall, 36 crouched, 32 wide
 # (the capsules have a 16 unit radius), so maps built in Source units fit.
-const STANDING_HEIGHT: float = 72 * SOURCE_UNIT # ~1.83 m. Must match the StandingShape capsule
-const CROUCHING_HEIGHT: float = 36 * SOURCE_UNIT # ~0.91 m. Must match the CrouchingShape capsule
+const STANDING_HEIGHT: float = 72 * SOURCE_UNIT # 1.8 m. Must match the StandingShape capsule
+const CROUCHING_HEIGHT: float = 36 * SOURCE_UNIT # 0.9 m. Must match the CrouchingShape capsule
 const CROUCH_DIFFERENCE: float = STANDING_HEIGHT - CROUCHING_HEIGHT
-# Measured from the middle of the body. Puts the eyes 64 units above the feet (28 when crouched), like Source.
-const STANDING_CAMERA_HEIGHT: float = 28 * SOURCE_UNIT
+# Measured from the middle of the body. Puts the eyes 64 units (1.6 m) above the feet (28 / 0.7 m when crouched), like Source.
+const STANDING_CAMERA_HEIGHT: float = 28 * SOURCE_UNIT # 0.7 m
 const CROUCHING_CAMERA_HEIGHT: float = STANDING_CAMERA_HEIGHT - CROUCH_DIFFERENCE
 var crouch_speed_multiplier: float = 0.3 # Like GMod. Used instead of changing speed, which the werewolf changes.
 var camera_crouch_speed: float = 4.0 # How fast the camera moves down/up when crouching on the ground, in m/s

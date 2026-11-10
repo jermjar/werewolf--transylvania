@@ -11,5 +11,5 @@
 script = ExtResource("6_lhd7s")
 game_name = "Werewolf"
 fgd_file = ExtResource("4_xdkvf")
-entity_scale = "39.37"
+entity_scale = "40"
 metadata/_custom_type_script = "uid://cx44c4vnq8bt5"

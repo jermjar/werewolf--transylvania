@@ -46,25 +46,98 @@ from the definition resources, so you never edit the FGD by hand.
 
 ## 2. Units and scale (read this first)
 
-- **1 TrenchBroom unit = 1 Source unit = 1 inch = 0.0254 m.**
-  Set by `inverse_scale_factor = 39.37` in `trenchbroom/werewolf_settings.tres`
+- **1 TrenchBroom unit = 0.025 m (40 units per metre).**
+  Set by `inverse_scale_factor = 40` in `trenchbroom/werewolf_settings.tres`
   (func_godot divides map coordinates by it).
-- The player's movement code uses the same units (`SOURCE_UNIT` in `player.gd`),
-  and the player is a Source-sized player:
+- The player's movement code uses the same units (`SOURCE_UNIT = 0.025` in
+  `player.gd`), and the player has Source's proportions:
 
   | | Units | Metres |
   |---|---|---|
-  | Standing height | 72 | 1.83 |
-  | Crouched height | 36 | 0.91 |
-  | Width (capsule radius 16) | 32 | 0.81 |
-  | Eye height standing / crouched | 64 / 28 | 1.63 / 0.71 |
-  | Normal jump (feet) | ~21 | ~0.54 |
-  | Crouch jump (feet) | ~57 | ~1.45 |
+  | Standing height | 72 | 1.8 |
+  | Crouched height | 36 | 0.9 |
+  | Width (capsule radius 16) | 32 | 0.8 |
+  | Eye height standing / crouched | 64 / 28 | 1.6 / 0.7 |
+  | Run speed | 220 per second | 5.5 m/s |
+  | Jump speed | 190 per second | 4.75 m/s |
+  | Gravity | 600 per second² | 15 m/s² |
 
-  So any measurement you take from a Source map works 1:1 in TrenchBroom.
+- **Why 40 and not 39.37?** A real Source unit is an inch (0.0254 m, 39.37 per
+  metre). 40 is 1.6% off, which nobody notices, but it makes Source's numbers
+  round in metres (72 units = 1.8 m instead of 1.8288 m). Units are what matter
+  in TrenchBroom, and the map and the player use the same ones, so any
+  measurement in Source units still works 1:1 in TrenchBroom.
+  For jump heights and what the player can climb, see the next section.
 - **Axes:** TrenchBroom is Z-up, Godot is Y-up. func_godot converts a
-  TrenchBroom position `(x, y, z)` to Godot `(y, z, x) / 39.37`. You never need
+  TrenchBroom position `(x, y, z)` to Godot `(y, z, x) / 40`. You never need
   to do this yourself, but it explains why coordinates look shuffled in Godot.
+
+### 2a. What the player can reach (measured)
+
+Measured by running the real player scene in a test world with simulated
+key presses: walking, jumping and crouch jumping at ledges of different heights.
+These are for `jump_velocity = 190`. If you change it, measure again.
+All heights are in TrenchBroom units above the floor the player starts on.
+
+| What | Height (units) | Metres | Notes |
+|---|---|---|---|
+| Standing | **72** | 1.8 | |
+| Crouching | **36** | 0.9 | |
+| Eye level | **64** standing, **28** crouched | 1.6 / 0.7 | Use for sightlines and cover: a wall over 64 hides a standing player's view, over 28 a crouching one |
+| Highest step you can **walk** onto | **4** | 0.1 | 6 already blocks you (5 not tested) |
+| Feet at the top of a plain jump | 28.5 | 0.71 | Jumping straight up |
+| Highest ledge for a **running plain jump** | **32** | 0.8 | 34 fails (33 not tested) |
+| Feet at the top of a crouch jump | 64.5 | 1.61 | |
+| Highest ledge for a **running crouch jump** | **68** | 1.7 | 70 fails (69 not tested) |
+
+**Design to the safe numbers.** A running jump gets onto ledges a few units
+higher than the feet ever go, because the capsule's rounded bottom scrambles
+over the edge. That depends on run-up and timing. For routes every player
+should manage, keep plain-jump ledges at **28 or lower** and crouch-jump ledges
+at **64 or lower**. Treat 32 and 68 as the absolute limits.
+
+**Crate sizes that work with this:**
+
+| Box height | What players can do |
+|---|---|
+| ≤ 4 | Walk onto it |
+| 16–28 | Plain jump onto it |
+| 32 | Plain jump only with a good run-up |
+| 36–64 | Crouch jump onto it. **64 is reliable** |
+| 68 | Crouch jump only with a good run-up |
+| 72+ | Can't be climbed alone. Needs a lower box next to it as a step |
+
+Keep box tops at least 32 units deep so players have room to land.
+
+For comparison, with the old TTT jump of 160: plain jump 20 (ledge 24),
+crouch jump 56 (ledge 61).
+
+**How to crouch jump:** press jump, *then* crouch. Holding crouch before
+jumping gives a normal plain jump, because a crouch started on the ground
+just lowers your head. Pressing both in the exact same physics tick (1/60 s)
+also gives only a normal jump (`_update_crouch()` still sees the player on the
+floor that tick).
+
+#### Stairs and steps
+
+The player **can't walk up steps taller than 4 units**, so normal Source-style
+stairs (8-unit risers) block players completely. Godot's `CharacterBody3D`
+has no step-up / stair-climbing property: checked in the Godot 4.7.2 source,
+it only has `floor_max_angle` (steepest walkable slope), `floor_snap_length`
+(stay glued to the ground going *down* slopes and steps), `floor_stop_on_slope`,
+`floor_constant_speed`, `floor_block_on_wall`, `safe_margin` and the moving
+platform settings. The Jolt physics module doesn't add one either. So for now:
+
+- **Use ramps for stairs.** Build the steps for looks, then cover them with a
+  sloped brush textured with **`clip`** on every face. `clip.png` is in
+  `trenchbroom/textures`. func_godot leaves `clip` faces out of the visible mesh
+  but keeps them in the collision (`clip_texture` in
+  `werewolf_settings.tres`, applied in `geometry_generator.gd`), so players walk
+  on an invisible ramp. This is the usual Source trick.
+- Ramps up to `floor_max_angle` (Godot's default is 45°) are walkable. Not yet
+  tested in-game with this player, so walk your first clip ramp to make sure.
+- Real step-up (walking up stairs like in Source) needs movement code in
+  `player.gd`. It's on the deferred list.
 
 ---
 
@@ -174,7 +247,7 @@ Only entities in this list get exported to TrenchBroom and recognised when build
 This writes three files to the folder set in func_godot's local config
 (`D:/TrenchBroom/games/Werewolf`):
 
-- `GameConfig.cfg`: game settings (`entity_scale` is now `39.37` to match)
+- `GameConfig.cfg`: game settings (`entity_scale` is `40` to match)
 - `Werewolf.fgd`: all entity definitions
 - `icon.png`
 
@@ -282,5 +355,5 @@ Example: a `prop_physics` entity that places a throwable prop scene.
 | "no item at res://scenes/items/....tres" in Output when building | The entity's `item` value isn't an item file name. Re-pick it from the dropdown in TrenchBroom, save, rebuild |
 | Item spawn has no item / crash on `resource_path` at round start | Same as above (check Output for the build error), or the item script lost `@tool`, or the map wasn't rebuilt after placing |
 | "The map has no player spawns" error | No `info_player_spawn` in the map, or the map wasn't rebuilt |
-| Everything is the wrong size | `inverse_scale_factor` isn't 39.37, or the map wasn't rebuilt after changing it |
+| Everything is the wrong size | `inverse_scale_factor` isn't 40, or the map wasn't rebuilt after changing it |
 | Player spawns inside the floor | The spawn box is sunk into the floor in TrenchBroom: lift it so its bottom touches the floor |

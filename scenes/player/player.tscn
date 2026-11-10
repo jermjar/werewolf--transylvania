@@ -11,19 +11,19 @@
 [ext_resource type="PackedScene" path="res://scenes/components/werewolf_component.tscn" id="8_werewolf"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_8afob"]
-radius = 0.4064
-height = 1.8288
+radius = 0.4
+height = 1.8
 
 [sub_resource type="BoxMesh" id="BoxMesh_dovo2"]
 size = Vector3(0.4, 0.2, 0.4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8afob"]
-radius = 0.4064
-height = 1.8288
+radius = 0.4
+height = 1.8
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_crouch"]
-radius = 0.4064
-height = 0.9144
+radius = 0.4
+height = 0.9
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dovo2"]
 properties/0/path = NodePath(".:position")
@@ -49,40 +49,40 @@ health_component = NodePath("HealthComponent")
 inventory_component = NodePath("InventoryComponent")
 
 [node name="SteamName" type="Label3D" parent="." unique_id=1495183007]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1085, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 billboard = 1
 text = "NULL"
 
 [node name="HealthLabel3D" type="Label3D" parent="." unique_id=1676162842]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3549, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 billboard = 1
 text = "NULL"
 
 [node name="Model" type="Node3D" parent="." unique_id=1650284937]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9144, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, 0)
 
-[node name="Pose" type="Node3D" parent="Model"]
+[node name="Pose" type="Node3D" parent="Model" unique_id=1206125196]
 
 [node name="BodyMesh" type="MeshInstance3D" parent="Model/Pose" unique_id=62681335]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9144, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("CapsuleMesh_8afob")
 
 [node name="HeadMesh" type="MeshInstance3D" parent="Model/Pose" unique_id=1892059129]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3616, -0.417)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -0.42)
 mesh = SubResource("BoxMesh_dovo2")
 
 [node name="StandingShape" type="CollisionShape3D" parent="." unique_id=188188067]
 shape = SubResource("CapsuleShape3D_8afob")
 debug_color = Color(0, 1, 1, 1)
 
-[node name="CrouchingShape" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4572, 0)
+[node name="CrouchingShape" type="CollisionShape3D" parent="." unique_id=1196115360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, 0)
 shape = SubResource("CapsuleShape3D_crouch")
 disabled = true
 debug_color = Color(1, 0.5, 0, 1)
 
 [node name="CameraController" type="Node3D" parent="." unique_id=1241507797 node_paths=PackedStringArray("player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7112, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
 script = ExtResource("2_dovo2")
 player = NodePath("..")
 
