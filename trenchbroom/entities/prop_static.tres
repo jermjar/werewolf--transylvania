@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3 uid="uid://dtsxx71c2hrdj"]
+
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="Script" uid="uid://d1nwwgcrner8b" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class_display_descriptor.gd" id="2_display"]
+[ext_resource type="Script" uid="uid://dbook5aq3lj50" path="res://scripts/levels/prop_static.gd" id="3_prop"]
+[ext_resource type="Script" uid="uid://dwbuos5wny7nb" path="res://scripts/levels/prop_static_model_list.gd" id="4_list"]
+
+[sub_resource type="Resource" id="Resource_model"]
+script = ExtResource("2_display")
+display_asset_path = "model"
+
+[resource]
+script = ExtResource("1_point")
+script_class = ExtResource("3_prop")
+display_descriptors = Array[ExtResource("2_display")]([SubResource("Resource_model")])
+classname = "prop_static"
+description = "A model that never moves (crates, furniture), with collision. Pick the model from the model dropdown. The entity's origin is the bottom of the model, so rest it on the floor."
+class_properties = Dictionary[String, Variant]({
+"angles": "0 0 0",
+"model": {
+"Boxes/wooden_crate_2": "assets/models/props/Boxes/wooden_crate_2.glb"
+}
+})
+class_property_descriptions = Dictionary[String, Variant]({
+"angles": "Pitch Yaw Roll in degrees. Set by TrenchBroom's rotate tools; having this property is what lets the prop tip over, not just turn.",
+"model": ["Model", "assets/models/props/Boxes/wooden_crate_2.glb"]
+})
+meta_properties = Dictionary[String, Variant]({
+"color": Color(0.6, 0.4, 0.2, 1),
+"size": AABB(-16, -16, 0, 16, 16, 32)
+})
+node_class = "StaticBody3D"
+entity_extension_script = ExtResource("4_list")

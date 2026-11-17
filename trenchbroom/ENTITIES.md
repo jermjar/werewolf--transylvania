@@ -225,10 +225,22 @@ class_property_descriptions = {
   To add a knife, you'd add `"Knife": "knife"` for `scenes/items/knife.tres`.
   If you rename or move an item's file, update the dropdown and re-pick the
   item on entities you've already placed.
-- **Keep dropdown values simple: letters, numbers and underscores.** The first
-  version used full paths (`res://scenes/items/bat.tres`) as values, and
-  TrenchBroom saved them in the `.map` as just `"re"`. Every item spawn came
-  out empty and the game crashed when the round started.
+- **Dropdown values must not contain a colon (`:`).** The first version used
+  full paths (`res://scenes/items/bat.tres`) as values, and TrenchBroom saved
+  them in the `.map` as just `"re"`. Every item spawn came out empty and the
+  game crashed when the round started. The cause is in TrenchBroom
+  (`SmartChoiceEditor.cpp`, v2026.2): each dropdown entry is shown as
+  `value : label`, and when you pick one, TrenchBroom keeps everything before
+  the **first** `:`, minus one character. With `res://...` that's `re`.
+  Plain paths like `assets/models/props/...` have no colon, so they're fine.
+- **A harmless "Failed to load entity model" error when picking from a
+  dropdown.** Picking an entry from the `prop_static` model dropdown logs
+  something like *"Failed to load entity model 'wooden_crate_2_b':
+  assets\models\props\Boxes\wooden_crate_2_b.glb : Boxes\wooden_crate_2_b not found"*.
+  Also a TrenchBroom quirk: for a moment it sets the property to the whole
+  `value : label` text and tries to load that as a model, then replaces it
+  with the correct value. The saved `.map` has the right path and the model
+  shows up. Safe to ignore.
 
 ### 3c. Registering them
 
@@ -236,7 +248,7 @@ class_property_descriptions = {
 **Entity Definitions**:
 
 ```
-entity_definitions = [info_player_spawn.tres, info_item_spawn.tres]
+entity_definitions = [info_player_spawn.tres, info_item_spawn.tres, prop_static.tres]
 ```
 
 Only entities in this list get exported to TrenchBroom and recognised when building.
@@ -247,7 +259,10 @@ Only entities in this list get exported to TrenchBroom and recognised when build
 This writes three files to the folder set in func_godot's local config
 (`D:/TrenchBroom/games/Werewolf`):
 
-- `GameConfig.cfg`: game settings (`entity_scale` is `40` to match)
+- `GameConfig.cfg`: game settings. `entity_scale` is `40`, so models (made in
+  metres) show at the right size. `set_default_properties` is on, so a newly
+  placed entity starts with its default values filled in (for example
+  `item` = `bat`, or `model` = the crate).
 - `Werewolf.fgd`: all entity definitions
 - `icon.png`
 
@@ -281,6 +296,169 @@ from `test_level.tscn`. Instead, both scripts search the map for the generated n
 They search the whole map recursively (`find_children`), so entities still work
 if you put them inside TrenchBroom groups or layers.
 
+### 3f. `prop_static`: models from asset packs
+
+Brushes are the blocks you draw in TrenchBroom. **Models** are ready-made 3D
+objects (crates, barrels, furniture) from an asset pack. TrenchBroom can't turn a
+model into a brush, so models are placed as a point entity, `prop_static`, which
+says "put this model here".
+
+**What each file does:**
+
+| File | Job |
+|---|---|
+| `assets/models/props/` | The models, copied from the Pizza Doggy packs and organized in subfolders (see the table below). Each model's texture is inside its `.glb`; Godot unpacks it into a `.png` next to it when importing. |
+| `scripts/levels/prop_static.gd` | `PropStatic extends StaticBody3D`. During the build it loads the model named in the `model` property, adds it as a child, and wraps each mesh in a **convex** collision shape (like shrink wrap), so players can stand on it and can't walk through it. `@tool`, no `Log`, same reasons as `ItemSpawnPoint`. |
+| `scripts/levels/prop_static_model_list.gd` | Fills the `model` **dropdown**. When the TrenchBroom config is exported, it finds every `.glb` in `assets/models/props/` and its subfolders and lists them as e.g. `Boxes/wooden_crate_2`. `@tool`, no `Log`. |
+| `trenchbroom/entities/prop_static.tres` | The definition. Its `model` property is a dropdown (a Dictionary, like `info_item_spawn`'s `item`) that defaults to `Boxes/wooden_crate_2`. **Entity Extension Script** is set to `prop_static_model_list.gd`, a func_godot hook that runs during export and can change the definition before it's written. Its **display descriptor** is set to `model`, which exports as `model(model)` in the FGD: "draw the file named in this entity's `model` property". |
+
+**Model paths are written without `res://`**, e.g.
+`assets/models/props/Boxes/wooden_crate_2.glb`. TrenchBroom finds the file relative to
+its game path, which is set to the project folder. The script adds `res://`
+during the build. (Dropdown values containing a `:`, like `res://`, get cut off
+in TrenchBroom, see 3b. Picking from the dropdown also logs a harmless
+"Failed to load entity model" error, also explained in 3b.)
+
+**The entity's origin is the bottom of the model** (the pack's models have their
+origin at the base), so rest it on the floor like the spawns.
+
+**Tested** by building a test map in memory:
+- a crate with the model set built with the model and a convex collision shape;
+- a test ray from above hit its top at 1.08 m;
+- an entity with no `model` value used the default crate;
+- after moving the crates into `Boxes/`, the exported FGD listed all 30 in
+  the dropdown and a crate picked from `Boxes/` built with its texture and collision;
+- a bad path printed an error naming the entity:
+  *"entity_3_prop_static: no model at res://...glb. Check the model property of
+  this prop_static in TrenchBroom."*
+
+**Adding more models from the pack:**
+
+1. Copy only the `.glb` you want (not the `.fbx` / `.obj` copies) into a
+   subfolder of `assets/models/props/` (e.g. `Barrels/`). If a file with that
+   name is already there (different packs reuse names), rename the new one.
+2. Let Godot import it: open or focus the Godot editor.
+3. Re-export: select `trenchbroom/trenchbroom_config.tres` and click
+   **Export File**. This rebuilds the dropdown.
+4. In TrenchBroom, reload the entity definitions (or restart TrenchBroom), place
+   a `prop_static`, and pick the model from its **model** dropdown.
+
+**Moving or renaming a model** changes its path, so any `prop_static` already
+using it can't find it any more (the build prints the "no model at ..." error).
+Move files inside the Godot editor's FileSystem dock so Godot keeps track of
+them, re-export, then re-pick the model on those entities in TrenchBroom.
+
+**Wooden crates in `assets/models/props/Boxes/`** (measured in Godot, in map
+units, width × height × depth). All of them have their origin at the bottom.
+"Climb" uses the reach table in 2a.
+
+| Model file | Size (w × h × d) | Climb | From the pack |
+|---|---|---|---|
+| `wooden_crate_1_1.glb` | 29 × 7 × 20 | Plain jump | Mega Pack |
+| `wooden_crate_1.glb` | 29 × 14 × 20 | Plain jump | Mega Pack |
+| `wooden_crate_2_a.glb`, `_2_b` | 38 × 20 × 21 | Plain jump | Mega Pack II |
+| `wooden_crate_ii_3.glb` | 27 × 26 × 19 | Plain jump | Mega Pack II (renamed from `wooden_crate_3`) |
+| `wooden_crate_6.glb` | 30 × 30 × 30 | Plain jump with a run-up | Mega Pack |
+| `wooden_crate_2_c.glb` | 38 × 34 × 31 | Crouch jump | Mega Pack II |
+| `wooden_crate_ii_1.glb` | 59 × 37 × 46 | Crouch jump | Mega Pack II (renamed from `wooden_crate_1`) |
+| `wooden_crate_hx_6.glb`, `_6_1`, `_6_2` | 56 × 40 × 56 | Crouch jump | Mega Pack II |
+| `wooden_crate_3.glb`, `_3_1` | 43 × 43 × 43 | Crouch jump | Mega Pack |
+| `wooden_crate_2.glb`, `_4`, `_5` | 44 × 43 × 43 | Crouch jump | Mega Pack |
+| `wooden_crate_8.glb`, `_9` | 44 × 44 × 44 | Crouch jump | PSX Bunkers |
+| `wooden_crate_hx_5.glb`, `_5_1`, `_5_2` | 60 × 58 × 60 | Crouch jump | Mega Pack II |
+| `wooden_crate_hx_2.glb`, `_2_1`, `_2_2` | 56 × 72 × 56 | Too tall alone, needs a step | Mega Pack II |
+| `wooden_crate_hx_3.glb`, `_3_1`, `_3_2` | 60 × 73 × 60 | Too tall alone, needs a step | Mega Pack II |
+| `wooden_crate_hx_4.glb`, `_4_1`, `_4_2` | 76 × 74 × 76 | Too tall alone, needs a step | Mega Pack II |
+
+Files listed together are the same size but different versions; compare them
+in TrenchBroom to pick the look you want. Crates less than 32 units deep are
+narrow to land on (see 2a). Mega Pack and Mega Pack II both had a
+`wooden_crate_1` and a `wooden_crate_3`, so the Mega Pack II ones were
+renamed `wooden_crate_ii_1` and `wooden_crate_ii_3`.
+
+**The other model folders** (props only; the packs' weapons/items, decals,
+masks, modular walls and buildings were left out). Pack category folders with
+similar contents were merged:
+
+| Folder | Models | Copied from |
+|---|---|---|
+| `Boxes/` | 30 | All the wooden crates (see above) |
+| `Debris/` | 34 | Mega Pack II *Debris & Misc* |
+| `Doors/` | 6 | Mega Pack II *Doors & Gates* |
+| `Electronics/` | 43 | Mega Pack *Electronics & Misc* |
+| `Furniture/` | 151 | Mega Pack *Furniture* |
+| `Large Props/` | 80 | Mega Pack *Large Props* + Mega Pack II *Large Props & Machinery* |
+| `Lighting/` | 54 | Mega Pack *Lighting* + Mega Pack II *Light Sources* (just the models; they don't give off light) |
+| `Modular Props/` | 27 | Mega Pack II *Modular Props* |
+| `Props/` | 117 | Mega Pack II *Props* |
+| `Small Props/` | 60 | Mega Pack *Small Props* |
+
+Wooden crates were skipped when copying, since they're already in `Boxes/`.
+
+**Limits to know about:**
+- **Convex collision fills in gaps.** It's perfect for crates and barrels, but a
+  table or an arch becomes a solid block. Hollow models would need a different
+  collision option, which can be added later.
+- **Rotation** (fixed, see "Rotating props" below).
+- **Static only.** These never move. Throwable props (with `InteractionComponent`
+  and network sync) would be a separate `prop_physics` entity.
+
+**Rotating props** (turning *and* tipping over):
+
+- **Keys** (TrenchBroom defaults, 90° about the selection's center):
+  **Alt+Left / Alt+Right** turn (yaw), **Alt+PgUp / Alt+PgDn** tip forward
+  or back (pitch), **Alt+Up / Alt+Down** tip sideways (roll). With the
+  rotate tool on, they use the tool's angle and center instead. Rotating
+  about the center also moves the entity's origin, so check it still rests
+  on the floor afterwards.
+- **Why `prop_static` has an `angles` property:** TrenchBroom picks how to
+  store a point entity's rotation from its definition
+  (`EntityRotation.cpp`, v2026.2). With an `angles` property it stores all
+  three (`"pitch yaw roll"`). Without one it falls back to `angle`, which is
+  yaw only, so the prop could turn but never tip over. Props placed before
+  `angles` existed still work. If one has an `angle` property, delete it so
+  TrenchBroom switches to `angles`.
+- **The 180° fix in `prop_static.gd`:** func_godot turns every point entity an
+  extra 180° when building (`entity_assembler.gd`, the `angles.y += 180`
+  line). That's right for marker entities like spawns, but it made models
+  face the opposite way from TrenchBroom. `prop_static.gd` turns the model
+  back by 180°.
+- **Tested:** props built with `angles` of `0 0 0`, `0 90 0`, `90 0 0`,
+  `0 0 90` and `30 45 60` ended up rotated exactly as TrenchBroom's
+  formula draws them, with collision lined up. Without the 180° fix none of
+  them matched.
+
+### 3g. Map textures (for brushes)
+
+Brush textures live in `trenchbroom/textures/` (`base_texture_dir` in
+`werewolf_settings.tres`). TrenchBroom's texture browser shows one group per
+subfolder. The old texture set was replaced with the Pizza Doggy PSX textures:
+
+| Folder | Textures | Copied from |
+|---|---|---|
+| `PSX_I/` | 219 | *PSX Textures/256*: Color Maps + Normal Maps |
+| `PSX_II/` | 232 | *PSX Textures II/Textures/256*: Color Maps + Normal Maps |
+| (top level) | `clip`, `skip` | Kept from before. func_godot treats these names specially: `clip` is invisible but solid, `skip` faces are removed. |
+
+- **Folder names have no spaces.** A face's texture name is written into the
+  `.map` file as plain text separated by spaces (e.g. `PSX_I/brick_1`), so a
+  space in a folder or file name would break the map.
+- **Normal maps** sit next to their texture with `_normal` on the end (e.g.
+  `brick_1_normal.png`). func_godot finds them automatically when building
+  (`normal_map_pattern` = `%s_normal` in the map settings), so lighting picks up
+  the bumps. TrenchBroom hides them from the texture browser (the `excludes`
+  list in the game config).
+- One stray file from the pack, `concrete_wall_21_ambient.png`, was left out:
+  it isn't a texture or a normal map and would have shown up in TrenchBroom.
+- **Size on the wall:** in TrenchBroom, one texture pixel covers one unit at
+  scale 1. A 256 px texture is 256 units (6.4 m) wide at scale 1, 128 units
+  (3.2 m) at scale 0.5, and 64 units (1.6 m) at scale 0.25. Set the scale per
+  face in the face inspector, or change the default for new brushes with
+  `default_uv_scale` in `trenchbroom_config.tres` (then re-export).
+- **Adding textures:** copy the `.png` (and its `_normal.png`, if any) into a
+  folder under `trenchbroom/textures/`, let Godot import it, and restart
+  TrenchBroom.
+
 ---
 
 ## 4. Everyday workflow: placing entities
@@ -295,10 +473,12 @@ if you put them inside TrenchBroom groups or layers.
    **item** from the dropdown.
 6. Place **8 player spawns** (one per player). With fewer, players get stacked
    on the same spot.
-7. Save (Ctrl+S).
-8. In Godot: open `levels/trench_broom_test_map.tscn`, select the
+7. For props: place a `prop_static`. It shows the crate by default. To use a
+   different model, pick it from the **model** dropdown (see 3f).
+8. Save (Ctrl+S).
+9. In Godot: open `levels/trench_broom_test_map.tscn`, select the
    **FuncGodotMap** node, click **Build Map** in the Inspector, then save the scene.
-9. Play. You should see green-box spawns become `entity_N_info_player_spawn`
+10. Play. You should see green-box spawns become `entity_N_info_player_spawn`
    nodes under FuncGodotMap.
 
 > ⚠️ **Rebuilding replaces everything under FuncGodotMap.** Never edit the

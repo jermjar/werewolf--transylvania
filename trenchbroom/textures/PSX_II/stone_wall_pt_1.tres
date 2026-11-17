@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cu6t8uppvo354"]
+
+[ext_resource type="Texture2D" uid="uid://bknrt86qskqmj" path="res://trenchbroom/textures/PSX_II/stone_wall_pt_1.png" id="1_ak7ub"]
+[ext_resource type="Texture2D" uid="uid://08rqygarwp1c" path="res://trenchbroom/textures/PSX_II/stone_wall_pt_1_normal.png" id="2_fmjbx"]
+
+[resource]
+albedo_texture = ExtResource("1_ak7ub")
+metallic_specular = 0.0
+normal_enabled = true
+normal_texture = ExtResource("2_fmjbx")
+texture_filter = 2
